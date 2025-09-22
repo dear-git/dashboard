@@ -1,19 +1,4 @@
-            function updateFilteredStats(area, model) {
-                // Update statistics cards based on real data and filters
-                const statCards = document.querySelectorAll('.stat-number');
-                
-                if (area === 'all' && model === 'all') {
-                    // Use real totals from Excel data
-                    statCards[0].textContent = '146'; // Real circuits
-                    statCards[1].textContent = '35';  // Real substations
-                    statCards[2].textContent = '8';   // Real areas
-                    statCards[3].textContent = '177'; // Real equipment
-                } else {
-                    // Calculate filtered values based on real data
-                    let filteredCircuits = 146;
-                    let filteredEquipment = 177;
-                    let filteredSubstations = document.querySelectorAll('.substation-card').length;
-                    let filteredAreas = area === 'all<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
