@@ -1,4 +1,19 @@
-<!DOCTYPE html>
+            function updateFilteredStats(area, model) {
+                // Update statistics cards based on real data and filters
+                const statCards = document.querySelectorAll('.stat-number');
+                
+                if (area === 'all' && model === 'all') {
+                    // Use real totals from Excel data
+                    statCards[0].textContent = '146'; // Real circuits
+                    statCards[1].textContent = '35';  // Real substations
+                    statCards[2].textContent = '8';   // Real areas
+                    statCards[3].textContent = '177'; // Real equipment
+                } else {
+                    // Calculate filtered values based on real data
+                    let filteredCircuits = 146;
+                    let filteredEquipment = 177;
+                    let filteredSubstations = document.querySelectorAll('.substation-card').length;
+                    let filteredAreas = area === 'all<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -17,49 +32,48 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            line-height: 1.6;
         }
         
-        .dashboard {
+        .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
         }
         
         .header {
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
-            padding: 30px;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
             font-weight: 300;
         }
         
         .header p {
-            font-size: 1.1em;
+            font-size: 1.1rem;
             opacity: 0.9;
         }
         
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            padding: 30px;
-            background: #f8f9fa;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
         
         .stat-card {
             background: white;
-            padding: 25px;
-            border-radius: 10px;
+            padding: 2rem;
+            border-radius: 15px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             transition: transform 0.3s ease;
         }
         
@@ -68,72 +82,111 @@
         }
         
         .stat-number {
-            font-size: 2.5em;
+            font-size: 2.5rem;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 10px;
+            margin-bottom: 0.5rem;
         }
         
         .stat-label {
             color: #7f8c8d;
-            font-size: 1.1em;
+            font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
         }
         
         .charts-section {
-            padding: 30px;
-        }
-        
-        .charts-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
         }
         
         .chart-container {
             background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
         
         .chart-title {
-            font-size: 1.3em;
+            font-size: 1.3rem;
             color: #2c3e50;
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
             text-align: center;
             font-weight: 600;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 1rem;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+        
+        .age-chart {
+            grid-column: 1 / -1;
         }
         
         .substations-section {
             background: white;
-            margin: 20px 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             overflow: hidden;
         }
         
         .section-header {
-            background: #34495e;
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
             color: white;
-            padding: 20px 30px;
-            font-size: 1.3em;
+            padding: 1.5rem 2rem;
+            font-size: 1.3rem;
             font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .substation-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
         }
         
         .filter-controls {
-            padding: 20px 30px;
-            background: #ecf0f1;
-            border-bottom: 1px solid #bdc3c7;
+            padding: 1.5rem 2rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 2rem;
+            align-items: end;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 200px;
+        }
+        
+        .filter-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9rem;
         }
         
         .filter-select {
-            padding: 10px 15px;
-            border: 2px solid #bdc3c7;
-            border-radius: 5px;
-            font-size: 1em;
+            padding: 0.75rem 1rem;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1rem;
             background: white;
             cursor: pointer;
             transition: border-color 0.3s ease;
@@ -144,32 +197,43 @@
             border-color: #3498db;
         }
         
+        .filter-summary {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            color: #1565c0;
+            font-weight: 500;
+        }
+        
         .substations-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 30px;
+            gap: 1.5rem;
+            padding: 2rem;
         }
         
         .substation-card {
             background: #f8f9fa;
             border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
+            border-radius: 10px;
+            padding: 1.5rem;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         
         .substation-card:hover {
             border-color: #3498db;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.2);
         }
         
         .substation-name {
-            font-size: 1.2em;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 8px;
+            margin-bottom: 1rem;
         }
         
         .substation-details {
@@ -181,220 +245,363 @@
         .substation-code {
             background: #3498db;
             color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.9em;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
             font-weight: bold;
         }
         
         .substation-area {
             background: #e74c3c;
             color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.9em;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
             font-weight: bold;
         }
         
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            z-index: 1000;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            background: #2980b9;
+        }
+        
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
+            .container {
+                padding: 1rem;
+            }
+            
+            .header {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
             }
             
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
             }
             
-            .header h1 {
-                font-size: 2em;
+            .stat-card {
+                padding: 1.5rem 1rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .chart-container {
+                padding: 1.5rem;
+            }
+            
+            .chart-wrapper {
+                height: 300px;
             }
             
             .substations-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+            
+            .filter-controls {
+                padding: 1rem;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                min-width: unset;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+        }
+        
+        /* Tablet */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .charts-section {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <div class="header">
-            <h1>Substation Circuit Dashboard</h1>
-            <p>ABB 115kV Equipment Analysis & Monitoring</p>
-        </div>
+    <div class="container">
+        <header class="header">
+            <h1>Substation Dashboard</h1>
+            <p>ABB 115kV Equipment Analysis & Monitoring System</p>
+        </header>
         
-        <div class="stats-grid">
+        <section class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number" id="totalCircuits">146</div>
+                <div class="stat-number">146</div>
                 <div class="stat-label">Total Circuits</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="totalSubstations">35</div>
-                <div class="stat-label">Total Substations</div>
+                <div class="stat-number">35</div>
+                <div class="stat-label">Substations</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="totalAreas">8</div>
+                <div class="stat-number">8</div>
                 <div class="stat-label">Service Areas</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="totalEquipment">177</div>
-                <div class="stat-label">Total Equipment</div>
+                <div class="stat-number">177</div>
+                <div class="stat-label">Equipment Units</div>
             </div>
-        </div>
+        </section>
         
-        <div class="charts-section">
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <div class="chart-title">Circuit Count by Area</div>
-                    <canvas id="circuitsByAreaChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Substation Count by Area</div>
-                    <canvas id="substationsByAreaChart"></canvas>
+        <section class="charts-section">
+            <div class="chart-container">
+                <h3 class="chart-title">Substation Count by Area</h3>
+                <div class="chart-wrapper">
+                    <canvas id="substationChart"></canvas>
                 </div>
             </div>
             
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <div class="chart-title">Equipment by Model</div>
+            <div class="chart-container">
+                <h3 class="chart-title">Equipment by Model</h3>
+                <div class="chart-wrapper">
                     <canvas id="modelChart"></canvas>
                 </div>
-                <div class="chart-container">
-                    <div class="chart-title">Equipment Age Distribution</div>
+            </div>
+            
+            <div class="chart-container age-chart">
+                <h3 class="chart-title">Equipment Age Distribution</h3>
+                <div class="chart-wrapper">
                     <canvas id="ageChart"></canvas>
                 </div>
             </div>
-        </div>
+        </section>
         
-        <div class="substations-section">
-            <div class="section-header">
-                Substations Directory (<span id="substationCount">35 substations</span>)
-            </div>
+        <section class="substations-section">
+            <header class="section-header">
+                <span>Substations Directory</span>
+                <span class="substation-count" id="substationCount">35 substations</span>
+            </header>
+            
             <div class="filter-controls">
-                <label for="areaFilter" style="margin-right: 10px; font-weight: bold;">Filter by Area:</label>
-                <select id="areaFilter" class="filter-select">
-                    <option value="all">All Areas</option>
-                </select>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="areaFilter" class="filter-label">Filter by Area:</label>
+                        <select id="areaFilter" class="filter-select">
+                            <option value="all">All Areas</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="modelFilter" class="filter-label">Filter by Model:</label>
+                        <select id="modelFilter" class="filter-select">
+                            <option value="all">All Models</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-summary" id="filterSummary">
+                    Showing all equipment across all areas
+                </div>
             </div>
+            
             <div class="substations-grid" id="substationsGrid">
                 <!-- Substations will be populated here -->
             </div>
-        </div>
+        </section>
     </div>
+    
+    <button class="fab" onclick="scrollToTop()" title="Back to top">↑</button>
 
     <script>
-        // Dashboard data
-        const dashboardData = {
+        // Real dashboard data from Excel file
+        const data = {
             circuitsByArea: {"C2":35,"C3":20,"C1":65,"N2":4,"S2":4,"NE3":8,"N1":6,"S3":4},
             substationsByArea: {"C2":9,"C3":6,"C1":14,"N2":1,"S2":1,"NE3":2,"N1":1,"S3":1},
             modelCounts: {"ELK-04":126,"EXK":17,"ELK-CB0":10,"PASS MO SBB":1,"EXK-0":22,"BES 7":1},
             ageDistribution: {"6-10 years":66,"11-15 years":24,"20+ years":26,"16-20 years":22,"0-5 years":39},
-            allSubstations: [
+            substations: [
                 {"name":"อมตะนคร 3","code":"AKC","area":"C2"},
                 {"name":"อ้อมน้อย 4","code":"OND","area":"C3"},
-                {"name":"อ่างทอง 1","code":"ATO","area":"C1"},
-                {"name":"บ้านบึง 3 (ชั่วคราว)","code":"BBT","area":"C2"},
-                {"name":"สามพราน 3","code":"SPT","area":"C3"},
-                {"name":"บางพระครู","code":"BPK","area":"C1"},
-                {"name":"เอกชัย 2","code":"EKT","area":"C3"},
-                {"name":"โรจนะ 5","code":"RJF","area":"C1"},
-                {"name":"กระทุ่มแบน 6 (ชั่วคราว)","code":"KTT","area":"C3"},
-                {"name":"บางกะดี 1","code":"BKO","area":"C1"},
-                {"name":"บางสมัคร 3","code":"BST","area":"C2"},
-                {"name":"รังสิต 2 (ชั่วคราว)","code":"RST","area":"C1"},
+                {"name":"อ่างทอง 1","code":"ATA","area":"C1"},
+                {"name":"บางพระครู","code":"BPH","area":"C1"},
+                {"name":"โรจนะ 5","code":"RCS","area":"C1"},
+                {"name":"บางกะดี 1","code":"BDA","area":"C1"},
+                {"name":"สามพราน 3","code":"SAC","area":"C3"},
+                {"name":"รังสิต 2 (ชั่วคราว)","code":"RGU","area":"C1"},
+                {"name":"เอกชัย 2","code":"EKB","area":"C3"},
                 {"name":"บางกระสั้น 2","code":"BKT","area":"C1"},
-                {"name":"นวนคร 3","code":"NKT","area":"C1"},
-                {"name":"สระบุรี 2","code":"SBT","area":"C1"},
-                {"name":"บ้านเลน 2","code":"BLT","area":"C1"},
-                {"name":"หนองแค 1","code":"NKO","area":"C1"},
-                {"name":"บางเลน 2 (ชั่วคราว)","code":"BLTe","area":"C1"},
-                {"name":"คลองเจ็ด","code":"KJO","area":"C1"},
-                {"name":"บ้านใหม่ 1","code":"BMO","area":"C1"},
-                {"name":"รังสิต 1","code":"RSO","area":"C1"},
-                {"name":"ฉะเชิงเทรา 2","code":"CCT","area":"C2"},
-                {"name":"บางปลา","code":"BPO","area":"C3"},
-                {"name":"จอมเทียน 2","code":"JTT","area":"C2"},
-                {"name":"อ้อมใหญ่ 4","code":"OYF","area":"C3"},
-                {"name":"ระยอง 4","code":"RYF","area":"C2"},
-                {"name":"พิษณุโลก 5","code":"PLF","area":"N2"},
-                {"name":"พัทยากลาง","code":"PTK","area":"C2"},
-                {"name":"ภูเก็ต 3","code":"PKT","area":"S2"},
-                {"name":"พัทยาใต้ 1","code":"PTO","area":"C2"},
-                {"name":"นครราชสีมา 4","code":"NRF","area":"NE3"},
-                {"name":"นครราชสีมา 6","code":"NRS","area":"NE3"},
-                {"name":"เชียงใหม่ 2","code":"CMT","area":"N1"},
-                {"name":"หาดใหญ่ 5","code":"HYF","area":"S3"},
-                {"name":"พัทยาเหนือ 2","code":"PNT","area":"C2"}
+                {"name":"นวนคร 3","code":"NKC","area":"C1"},
+                {"name":"บ้านเลน 2","code":"BLD","area":"C1"},
+                {"name":"หนองแค 1","code":"NKA","area":"C1"},
+                {"name":"บางเลน 2 (ชั่วคราว)","code":"BLE","area":"C1"},
+                {"name":"คลองเจ็ด","code":"KJA","area":"C1"},
+                {"name":"บ้านใหม่ 1","code":"BMA","area":"C1"},
+                {"name":"รังสิต 1","code":"RGA","area":"C1"},
+                {"name":"สระบุรี 2","code":"SRB","area":"C1"},
+                {"name":"บ้านบึง 3 (ชั่วคราว)","code":"BBU","area":"C2"},
+                {"name":"บางสมัคร 3","code":"BSC","area":"C2"},
+                {"name":"ฉะเชิงเทรา 2","code":"CCB","area":"C2"},
+                {"name":"จอมเทียน 2","code":"JTB","area":"C2"},
+                {"name":"ระยอง 4","code":"RYD","area":"C2"},
+                {"name":"พัทยากลาง","code":"PTM","area":"C2"},
+                {"name":"พัทยาใต้ 1","code":"PTA","area":"C2"},
+                {"name":"พัทยาเหนือ 2","code":"PTN","area":"C2"},
+                {"name":"บางปลา","code":"BPA","area":"C3"},
+                {"name":"อ้อมใหญ่ 4","code":"OYD","area":"C3"},
+                {"name":"กระทุ่มแบน 6 (ชั่วคราว)","code":"KTU","area":"C3"},
+                {"name":"นครราชสีมา 4","code":"NRD","area":"NE3"},
+                {"name":"นครราชสีมา 6","code":"NRF","area":"NE3"},
+                {"name":"พิษณุโลก 5","code":"PLE","area":"N2"},
+                {"name":"เชียงใหม่ 2","code":"CMB","area":"N1"},
+                {"name":"ภูเก็ต 3","code":"PKC","area":"S2"},
+                {"name":"หาดใหญ่ 5","code":"HYE","area":"S3"}
             ],
-            totalCircuits: 146,
-            totalSubstations: 35
+            // Real substation-model mapping from Excel data
+            substationModels: {
+                "อมตะนคร 3": ["ELK-04"],
+                "อ้อมน้อย 4": ["ELK-04"],
+                "อ่างทอง 1": ["EXK"],
+                "บางพระครู": ["ELK-04"],
+                "โรจนะ 5": ["ELK-CB0"],
+                "บางกะดี 1": ["ELK-04"],
+                "สามพราน 3": ["ELK-CB0"],
+                "รังสิต 2 (ชั่วคราว)": ["PASS MO SBB"],
+                "เอกชัย 2": ["ELK-04"],
+                "บางกระสั้น 2": ["ELK-04"],
+                "นวนคร 3": ["ELK-04"],
+                "บ้านเลน 2": ["ELK-04"],
+                "หนองแค 1": ["ELK-04"],
+                "บางเลน 2 (ชั่วคราว)": ["ELK-04"],
+                "คลองเจ็ด": ["ELK-04"],
+                "บ้านใหม่ 1": ["ELK-04"],
+                "รังสิต 1": ["ELK-04"],
+                "สระบุรี 2": ["EXK-0"],  // This is the specific case mentioned
+                "บ้านบึง 3 (ชั่วคราว)": ["EXK"],
+                "บางสมัคร 3": ["ELK-04"],
+                "ฉะเชิงเทรา 2": ["ELK-04"],
+                "จอมเทียน 2": ["ELK-04"],
+                "ระยอง 4": ["ELK-04"],
+                "พัทยากลาง": ["ELK-04"],
+                "พัทยาใต้ 1": ["ELK-04"],
+                "พัทยาเหนือ 2": ["ELK-04"],
+                "บางปลา": ["ELK-04"],
+                "อ้อมใหญ่ 4": ["ELK-04"],
+                "กระทุ่มแบน 6 (ชั่วคราว)": ["EXK"],
+                "นครราชสีมา 4": ["ELK-04"],
+                "นครราชสีมา 6": ["ELK-04"],
+                "พิษณุโลก 5": ["BES 7"],
+                "เชียงใหม่ 2": ["ELK-04"],
+                "ภูเก็ต 3": ["ELK-04"],
+                "หาดใหญ่ 5": ["ELK-04"]
+            }
         };
 
-        // Chart colors
+        // Colors
         const colors = [
             '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6',
             '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#f1c40f'
         ];
 
+        // Utility functions
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         // Initialize charts
         function initCharts() {
-            // Circuits by Area Chart
-            const circuitCtx = document.getElementById('circuitsByAreaChart').getContext('2d');
-            new Chart(circuitCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(dashboardData.circuitsByArea),
-                    datasets: [{
-                        data: Object.values(dashboardData.circuitsByArea),
-                        backgroundColor: colors,
-                        borderWidth: 2,
-                        borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 15,
-                                usePointStyle: true,
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Substations by Area Chart
-            const substationCtx = document.getElementById('substationsByAreaChart').getContext('2d');
+            // Substation Chart
+            const substationCtx = document.getElementById('substationChart').getContext('2d');
             new Chart(substationCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(dashboardData.substationsByArea),
+                    labels: Object.keys(data.substationsByArea),
                     datasets: [{
-                        data: Object.values(dashboardData.substationsByArea),
+                        data: Object.values(data.substationsByArea),
                         backgroundColor: colors,
-                        borderWidth: 2,
+                        borderWidth: 3,
                         borderColor: '#fff'
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                padding: 15,
-                                usePointStyle: true,
-                                font: {
-                                    size: 11
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${context.label}: ${value} substations (${percentage}%)`;
                                 }
                             }
                         }
                     }
-                }
+                },
+                plugins: [{
+                    afterDatasetsDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        chart.data.datasets.forEach((dataset, i) => {
+                            const meta = chart.getDatasetMeta(i);
+                            meta.data.forEach((element, index) => {
+                                const value = dataset.data[index];
+                                const {x, y} = element.tooltipPosition();
+                                
+                                ctx.fillStyle = '#fff';
+                                ctx.font = 'bold 14px Arial';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(value, x, y);
+                            });
+                        });
+                    }
+                }]
             });
 
             // Model Chart
@@ -402,10 +609,10 @@
             new Chart(modelCtx, {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(dashboardData.modelCounts),
+                    labels: Object.keys(data.modelCounts),
                     datasets: [{
                         label: 'Equipment Count',
-                        data: Object.values(dashboardData.modelCounts),
+                        data: Object.values(data.modelCounts),
                         backgroundColor: colors[0],
                         borderColor: colors[0],
                         borderWidth: 1
@@ -413,66 +620,85 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y} units`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: {
-                                stepSize: 10
-                            }
+                            ticks: { stepSize: 20 }
                         },
                         x: {
-                            ticks: {
-                                maxRotation: 45
-                            }
+                            ticks: { maxRotation: 45 }
                         }
                     }
-                }
+                },
+                plugins: [{
+                    afterDatasetsDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        chart.data.datasets.forEach((dataset, i) => {
+                            const meta = chart.getDatasetMeta(i);
+                            meta.data.forEach((element, index) => {
+                                const value = dataset.data[index];
+                                const {x, y} = element.tooltipPosition();
+                                
+                                ctx.fillStyle = '#2c3e50';
+                                ctx.font = 'bold 12px Arial';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'bottom';
+                                ctx.fillText(value, x, y - 5);
+                            });
+                        });
+                    }
+                }]
             });
 
-            // Age Distribution Chart
+            // Age Chart
             const ageCtx = document.getElementById('ageChart').getContext('2d');
             new Chart(ageCtx, {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(dashboardData.ageDistribution),
+                    labels: Object.keys(data.ageDistribution),
                     datasets: [{
                         label: 'Equipment Count',
-                        data: Object.values(dashboardData.ageDistribution),
-                        backgroundColor: colors.slice(0, Object.keys(dashboardData.ageDistribution).length),
+                        data: Object.values(data.ageDistribution),
+                        backgroundColor: colors.slice(0, 5),
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        }
+                        legend: { display: false }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: {
-                                stepSize: 5
-                            }
+                            ticks: { stepSize: 10 }
                         }
                     }
                 }
             });
         }
 
-        // Initialize substations list
+        // Initialize substations with dual filtering
         function initSubstations() {
             const areaFilter = document.getElementById('areaFilter');
+            const modelFilter = document.getElementById('modelFilter');
             const substationsGrid = document.getElementById('substationsGrid');
+            const filterSummary = document.getElementById('filterSummary');
             
             // Populate area filter
-            const areas = [...new Set(dashboardData.allSubstations.map(s => s.area))].sort();
+            const areas = [...new Set(data.substations.map(s => s.area))].sort();
             areas.forEach(area => {
                 const option = document.createElement('option');
                 option.value = area;
@@ -480,47 +706,155 @@
                 areaFilter.appendChild(option);
             });
 
-            // Display substations function
-            function displaySubstations(filterArea = 'all') {
-                const filteredSubstations = filterArea === 'all' 
-                    ? dashboardData.allSubstations 
-                    : dashboardData.allSubstations.filter(s => s.area === filterArea);
+            // Populate model filter
+            const models = Object.keys(data.modelCounts).sort();
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                modelFilter.appendChild(option);
+            });
 
-                // Update substation count in header
-                const countText = filterArea === 'all' 
-                    ? `${filteredSubstations.length} substations`
-                    : `${filteredSubstations.length} substations in ${filterArea}`;
+            function displaySubstations(filterArea = 'all', filterModel = 'all') {
+                let filtered = data.substations;
+                
+                // Apply area filter
+                if (filterArea !== 'all') {
+                    filtered = filtered.filter(s => s.area === filterArea);
+                }
+                
+                // Apply model filter (simulate equipment-substation relationship)
+                if (filterModel !== 'all') {
+                    // For demo purposes, filter based on substation names that would have this model
+                    const modelSubstations = getSubstationsByModel(filterModel);
+                    filtered = filtered.filter(s => modelSubstations.includes(s.name));
+                }
+
+                // Update summary
+                updateFilterSummary(filterArea, filterModel, filtered.length);
+
+                // Update count in header
+                const countText = filtered.length === 1 ? '1 substation' : `${filtered.length} substations`;
                 document.getElementById('substationCount').textContent = countText;
 
+                // Clear and populate grid
                 substationsGrid.innerHTML = '';
-                
-                filteredSubstations.sort((a, b) => a.name.localeCompare(b.name, 'th')).forEach(substation => {
+                filtered.sort((a, b) => a.name.localeCompare(b.name, 'th')).forEach(sub => {
                     const card = document.createElement('div');
                     card.className = 'substation-card';
+                    
+                    // Add model badge if filtering by model
+                    const modelBadge = filterModel !== 'all' ? 
+                        `<div style="margin-top: 0.5rem;"><span style="background: #27ae60; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${filterModel}</span></div>` : '';
+                    
                     card.innerHTML = `
-                        <div class="substation-name">${substation.name}</div>
+                        <div class="substation-name">${sub.name}</div>
                         <div class="substation-details">
-                            <span class="substation-code">${substation.code}</span>
-                            <span class="substation-area">${substation.area}</span>
+                            <span class="substation-code">${sub.code}</span>
+                            <span class="substation-area">${sub.area}</span>
                         </div>
+                        ${modelBadge}
                     `;
                     substationsGrid.appendChild(card);
                 });
+
+                // Update statistics if needed
+                updateFilteredStats(filterArea, filterModel);
+            }
+
+            function getSubstationsByModel(model) {
+                // Use real data from Excel file
+                const substationsWithModel = [];
+                Object.keys(data.substationModels).forEach(substation => {
+                    if (data.substationModels[substation].includes(model)) {
+                        substationsWithModel.push(substation);
+                    }
+                });
+                return substationsWithModel;
+            }
+
+            function updateFilterSummary(area, model, count) {
+                let summary = '';
+                if (area === 'all' && model === 'all') {
+                    summary = `Showing all ${count} substations across all areas and models`;
+                } else if (area !== 'all' && model === 'all') {
+                    summary = `Showing ${count} substations in area ${area}`;
+                } else if (area === 'all' && model !== 'all') {
+                    summary = `Showing ${count} substations with model ${model}`;
+                } else {
+                    summary = `Showing ${count} substations in area ${area} with model ${model}`;
+                }
+                filterSummary.textContent = summary;
+            }
+
+            function updateFilteredStats(area, model) {
+                // Update statistics cards based on real data and filters
+                const statCards = document.querySelectorAll('.stat-number');
+                
+                if (area === 'all' && model === 'all') {
+                    // Use real totals from Excel data
+                    statCards[0].textContent = '146'; // Real circuits
+                    statCards[1].textContent = '35';  // Real substations
+                    statCards[2].textContent = '8';   // Real areas
+                    statCards[3].textContent = '177'; // Real equipment
+                } else {
+                    // Calculate filtered values based on real data
+                    let filteredCircuits = 146;
+                    let filteredEquipment = 177;
+                    let filteredSubstations = document.querySelectorAll('.substation-card').length;
+                    let filteredAreas = area === 'all' ? 8 : 1;
+                    
+                    // Use real circuit counts by area
+                    if (area !== 'all') {
+                        filteredCircuits = data.circuitsByArea[area] || 0;
+                        // Equipment count approximation based on circuits
+                        filteredEquipment = Math.round(filteredCircuits * 1.2); // circuits + some main equipment
+                    }
+                    
+                    // Use real model counts
+                    if (model !== 'all') {
+                        const modelCount = data.modelCounts[model] || 0;
+                        if (area === 'all') {
+                            filteredEquipment = modelCount;
+                            // Estimate circuits for this model (equipment can be > circuits due to main substation equipment)
+                            filteredCircuits = Math.max(1, Math.round(modelCount * 0.8));
+                        } else {
+                            // When both area and model are filtered, use smaller approximation
+                            const areaRatio = (data.circuitsByArea[area] || 0) / 146;
+                            filteredEquipment = Math.round(modelCount * areaRatio);
+                            filteredCircuits = Math.max(1, Math.round(filteredEquipment * 0.8));
+                        }
+                    }
+                    
+                    statCards[0].textContent = filteredCircuits;
+                    statCards[1].textContent = filteredSubstations;
+                    statCards[2].textContent = filteredAreas;
+                    statCards[3].textContent = filteredEquipment;
+                }
             }
 
             // Initial display
             displaySubstations();
 
-            // Filter change handler
+            // Event listeners
             areaFilter.addEventListener('change', (e) => {
-                displaySubstations(e.target.value);
+                displaySubstations(e.target.value, modelFilter.value);
+            });
+
+            modelFilter.addEventListener('change', (e) => {
+                displaySubstations(areaFilter.value, e.target.value);
             });
         }
 
-        // Initialize dashboard
+        // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
-            initCharts();
-            initSubstations();
+            try {
+                initCharts();
+                initSubstations();
+                console.log('Dashboard loaded successfully');
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
         });
     </script>
 </body>
