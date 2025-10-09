@@ -75,14 +75,17 @@
       z-index: -1;
     }
     
+    /* Thailand map background with both layers */
     .map-bg {
       position: absolute;
       inset: 0;
-      background-image: url('https://z-cdn-media.chatglm.cn/files/870aa00a-185a-40b6-8ffe-7906ee26926a_icon.jpg?auth_key=1791557113-d2bfbafb9e28420f8bebc9aba93f5448-0-e5f2330290aee6a6b42c57f592d73024');
-      background-size: 85%;
-      background-repeat: no-repeat;
-      background-position: center;
-      opacity: 0.9;
+      background-image: 
+        url('https://z-cdn-media.chatglm.cn/files/e8c5352a-861b-4543-ad74-a24593e4c845_flat-thailand-map-illustration_23-2151689342.jpg?auth_key=1791557113-b01e798a40ad4704b3e47bba21e4e4c8-0-2ff2b07e72ca781b56a8293563e102e8'),
+        url('https://z-cdn-media.chatglm.cn/files/870aa00a-185a-40b6-8ffe-7906ee26926a_icon.jpg?auth_key=1791557113-d2bfbafb9e28420f8bebc9aba93f5448-0-e5f2330290aee6a6b42c57f592d73024');
+      background-size: 100% 100%, 100% 100%;
+      background-repeat: no-repeat, no-repeat;
+      background-position: center, center;
+      opacity: 0.95;
       filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.3));
     }
     
@@ -90,11 +93,11 @@
       position: absolute;
       inset: 0;
       background: linear-gradient(135deg, 
-        rgba(15, 23, 42, 0.1) 0%, 
-        rgba(15, 23, 42, 0.2) 25%, 
-        rgba(15, 23, 42, 0.3) 50%, 
-        rgba(15, 23, 42, 0.2) 75%, 
-        rgba(15, 23, 42, 0.1) 100%);
+        rgba(15, 23, 42, 0.05) 0%, 
+        rgba(15, 23, 42, 0.1) 25%, 
+        rgba(15, 23, 42, 0.15) 50%, 
+        rgba(15, 23, 42, 0.1) 75%, 
+        rgba(15, 23, 42, 0.05) 100%);
     }
     
     .battery-pin {
@@ -239,36 +242,44 @@
   <div id="app"></div>
 
   <script>
-    // Site data
+    // Site data with accurate province capital locations in Thailand
     const sites = [
-      { id: 1, name: 'Bangkok Central', lat: 13.7563, lng: 100.5018, status: 'good', battery: 95, temp: 28, voltage: 48.2, current: 12.5, power: 603 },
-      { id: 2, name: 'Chiang Mai North', lat: 18.7883, lng: 98.9853, status: 'good', battery: 92, temp: 26, voltage: 48.0, current: 11.8, power: 566 },
-      { id: 3, name: 'Phuket West', lat: 7.8804, lng: 98.3923, status: 'warning', battery: 78, temp: 32, voltage: 47.5, current: 10.2, power: 485 },
-      { id: 4, name: 'Pattaya East', lat: 12.9236, lng: 100.8825, status: 'good', battery: 88, temp: 29, voltage: 48.1, current: 12.0, power: 577 },
-      { id: 5, name: 'Khon Kaen', lat: 16.4322, lng: 102.8236, status: 'critical', battery: 45, temp: 38, voltage: 46.8, current: 8.5, power: 398 },
-      { id: 6, name: 'Hat Yai South', lat: 7.0087, lng: 100.4653, status: 'good', battery: 91, temp: 30, voltage: 48.3, current: 11.5, power: 555 },
-      { id: 7, name: 'Nakhon Ratchasima', lat: 14.9799, lng: 102.0977, status: 'good', battery: 89, temp: 27, voltage: 48.0, current: 12.2, power: 586 },
-      { id: 8, name: 'Udon Thani', lat: 17.4138, lng: 102.7872, status: 'warning', battery: 72, temp: 33, voltage: 47.7, current: 9.8, power: 467 },
-      { id: 9, name: 'Surat Thani', lat: 9.1382, lng: 99.3331, status: 'good', battery: 94, temp: 28, voltage: 48.2, current: 12.8, power: 617 },
-      { id: 10, name: 'Chonburi', lat: 13.3611, lng: 100.9847, status: 'good', battery: 87, temp: 29, voltage: 48.1, current: 11.9, power: 572 },
-      { id: 11, name: 'Rayong Industrial', lat: 12.6814, lng: 101.2816, status: 'good', battery: 93, temp: 27, voltage: 48.3, current: 12.6, power: 609 },
-      { id: 12, name: 'Ayutthaya', lat: 14.3692, lng: 100.5877, status: 'warning', battery: 68, temp: 35, voltage: 47.4, current: 9.2, power: 436 },
-      { id: 13, name: 'Krabi', lat: 8.0863, lng: 98.9063, status: 'good', battery: 90, temp: 29, voltage: 48.0, current: 11.7, power: 562 },
-      { id: 14, name: 'Nakhon Si Thammarat', lat: 8.4304, lng: 99.9631, status: 'good', battery: 85, temp: 30, voltage: 47.9, current: 11.3, power: 541 },
-      { id: 15, name: 'Lampang', lat: 18.2888, lng: 99.4919, status: 'critical', battery: 42, temp: 39, voltage: 46.5, current: 7.8, power: 363 },
-      { id: 16, name: 'Saraburi', lat: 14.5289, lng: 100.9100, status: 'good', battery: 88, temp: 28, voltage: 48.1, current: 12.1, power: 582 },
-      { id: 17, name: 'Prachuap Khiri Khan', lat: 11.8123, lng: 99.7970, status: 'good', battery: 91, temp: 29, voltage: 48.2, current: 11.8, power: 569 },
-      { id: 18, name: 'Kanchanaburi', lat: 14.0227, lng: 99.5328, status: 'warning', battery: 75, temp: 31, voltage: 47.6, current: 10.5, power: 500 },
-      { id: 19, name: 'Phitsanulok', lat: 16.8214, lng: 100.2659, status: 'good', battery: 86, temp: 28, voltage: 48.0, current: 11.6, power: 557 },
-      { id: 20, name: 'Songkhla', lat: 7.1906, lng: 100.5960, status: 'good', battery: 89, temp: 30, voltage: 48.1, current: 12.0, power: 577 },
-      { id: 21, name: 'Nakhon Pathom', lat: 13.8199, lng: 100.0376, status: 'good', battery: 92, temp: 27, voltage: 48.2, current: 12.3, power: 593 },
-      { id: 22, name: 'Trang', lat: 7.5563, lng: 99.6114, status: 'warning', battery: 70, temp: 34, voltage: 47.5, current: 9.5, power: 451 },
-      { id: 23, name: 'Buriram', lat: 15.0000, lng: 103.1000, status: 'good', battery: 87, temp: 29, voltage: 48.0, current: 11.9, power: 571 },
-      { id: 24, name: 'Sukhothai', lat: 17.0078, lng: 99.8236, status: 'good', battery: 90, temp: 27, voltage: 48.1, current: 12.2, power: 587 }
+      { id: 1, name: 'Bangkok', lat: 13.7563, lng: 100.5018, status: 'good', battery: 95, temp: 28, voltage: 48.2, current: 12.5, power: 603, province: 'Bangkok' },
+      { id: 2, name: 'Chiang Mai', lat: 18.7883, lng: 98.9853, status: 'good', battery: 92, temp: 26, voltage: 48.0, current: 11.8, power: 566, province: 'Chiang Mai' },
+      { id: 3, name: 'Phuket', lat: 7.8804, lng: 98.3923, status: 'warning', battery: 78, temp: 32, voltage: 47.5, current: 10.2, power: 485, province: 'Phuket' },
+      { id: 4, name: 'Chonburi', lat: 13.3611, lng: 100.9847, status: 'good', battery: 88, temp: 29, voltage: 48.1, current: 12.0, power: 577, province: 'Chonburi' },
+      { id: 5, name: 'Khon Kaen', lat: 16.4322, lng: 102.8236, status: 'critical', battery: 45, temp: 38, voltage: 46.8, current: 8.5, power: 398, province: 'Khon Kaen' },
+      { id: 6, name: 'Hat Yai', lat: 7.0087, lng: 100.4653, status: 'good', battery: 91, temp: 30, voltage: 48.3, current: 11.5, power: 555, province: 'Songkhla' },
+      { id: 7, name: 'Nakhon Ratchasima', lat: 14.9799, lng: 102.0977, status: 'good', battery: 89, temp: 27, voltage: 48.0, current: 12.2, power: 586, province: 'Nakhon Ratchasima' },
+      { id: 8, name: 'Udon Thani', lat: 17.4138, lng: 102.7872, status: 'warning', battery: 72, temp: 33, voltage: 47.7, current: 9.8, power: 467, province: 'Udon Thani' },
+      { id: 9, name: 'Surat Thani', lat: 9.1382, lng: 99.3331, status: 'good', battery: 94, temp: 28, voltage: 48.2, current: 12.8, power: 617, province: 'Surat Thani' },
+      { id: 10, name: 'Chiang Rai', lat: 19.9105, lng: 99.8406, status: 'good', battery: 87, temp: 25, voltage: 48.1, current: 11.9, power: 572, province: 'Chiang Rai' },
+      { id: 11, name: 'Rayong', lat: 12.6814, lng: 101.2816, status: 'good', battery: 93, temp: 27, voltage: 48.3, current: 12.6, power: 609, province: 'Rayong' },
+      { id: 12, name: 'Ayutthaya', lat: 14.3692, lng: 100.5877, status: 'warning', battery: 68, temp: 35, voltage: 47.4, current: 9.2, power: 436, province: 'Ayutthaya' },
+      { id: 13, name: 'Krabi', lat: 8.0863, lng: 98.9063, status: 'good', battery: 90, temp: 29, voltage: 48.0, current: 11.7, power: 562, province: 'Krabi' },
+      { id: 14, name: 'Nakhon Si Thammarat', lat: 8.4304, lng: 99.9631, status: 'good', battery: 85, temp: 30, voltage: 47.9, current: 11.3, power: 541, province: 'Nakhon Si Thammarat' },
+      { id: 15, name: 'Lampang', lat: 18.2888, lng: 99.4919, status: 'critical', battery: 42, temp: 39, voltage: 46.5, current: 7.8, power: 363, province: 'Lampang' },
+      { id: 16, name: 'Nakhon Pathom', lat: 13.8199, lng: 100.0376, status: 'good', battery: 88, temp: 28, voltage: 48.1, current: 12.1, power: 582, province: 'Nakhon Pathom' },
+      { id: 17, name: 'Hua Hin', lat: 12.5683, lng: 99.9577, status: 'good', battery: 91, temp: 29, voltage: 48.2, current: 11.8, power: 569, province: 'Prachuap Khiri Khan' },
+      { id: 18, name: 'Kanchanaburi', lat: 14.0227, lng: 99.5328, status: 'warning', battery: 75, temp: 31, voltage: 47.6, current: 10.5, power: 500, province: 'Kanchanaburi' },
+      { id: 19, name: 'Phitsanulok', lat: 16.8214, lng: 100.2659, status: 'good', battery: 86, temp: 28, voltage: 48.0, current: 11.6, power: 557, province: 'Phitsanulok' },
+      { id: 20, name: 'Nakhon Sawan', lat: 15.6950, lng: 100.1378, status: 'good', battery: 89, temp: 30, voltage: 48.1, current: 12.0, power: 577, province: 'Nakhon Sawan' },
+      { id: 21, name: 'Ubon Ratchathani', lat: 15.2286, lng: 104.8564, status: 'good', battery: 92, temp: 27, voltage: 48.2, current: 12.3, power: 593, province: 'Ubon Ratchathani' },
+      { id: 22, name: 'Trang', lat: 7.5563, lng: 99.6114, status: 'warning', battery: 70, temp: 34, voltage: 47.5, current: 9.5, power: 451, province: 'Trang' },
+      { id: 23, name: 'Buriram', lat: 15.0000, lng: 103.1000, status: 'good', battery: 87, temp: 29, voltage: 48.0, current: 11.9, power: 571, province: 'Buriram' },
+      { id: 24, name: 'Sukhothai', lat: 17.0078, lng: 99.8236, status: 'good', battery: 90, temp: 27, voltage: 48.1, current: 12.2, power: 587, province: 'Sukhothai' }
     ];
 
     let currentPage = 'home';
     let selectedSite = null;
+
+    // Thailand coordinate bounds for accurate positioning
+    const THAILAND_BOUNDS = {
+      minLat: 5.61,
+      maxLat: 20.46,
+      minLng: 97.34,
+      maxLng: 105.64
+    };
 
     function getStatusColor(status) {
       switch(status) {
@@ -298,10 +309,10 @@
     }
 
     function exportToCSV() {
-      const headers = ['Site ID', 'Site Name', 'Status', 'Battery Level (%)', 'Temperature (°C)', 'Voltage (V)', 'Current (A)', 'Power (W)', 'Latitude', 'Longitude', 'Timestamp'];
+      const headers = ['Site ID', 'Site Name', 'Province', 'Status', 'Battery Level (%)', 'Temperature (°C)', 'Voltage (V)', 'Current (A)', 'Power (W)', 'Latitude', 'Longitude', 'Timestamp'];
       const timestamp = new Date().toISOString();
       const rows = sites.map(site => [
-        site.id, site.name, site.status, site.battery, site.temp, 
+        site.id, site.name, site.province, site.status, site.battery, site.temp, 
         site.voltage, site.current, site.power, site.lat, site.lng, timestamp
       ]);
       
@@ -312,7 +323,7 @@
       const dateStr = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
       
       link.setAttribute('href', url);
-      link.setAttribute('download', `battery_monitoring_data_${dateStr}.csv`);
+      link.setAttribute('download', `battery_monitoring_thailand_${dateStr}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -327,6 +338,13 @@
         <div class="pin-circle ${pinClass}"></div>
         <div class="pin-stem ${pinClass}"></div>
       `;
+    }
+
+    // Convert lat/lng to percentage position on map
+    function latLngToPosition(lat, lng) {
+      const x = ((lng - THAILAND_BOUNDS.minLng) / (THAILAND_BOUNDS.maxLng - THAILAND_BOUNDS.minLng)) * 100;
+      const y = ((THAILAND_BOUNDS.maxLat - lat) / (THAILAND_BOUNDS.maxLat - THAILAND_BOUNDS.minLat)) * 100;
+      return { x, y };
     }
 
     function renderHomePage() {
@@ -382,21 +400,19 @@
         <div class="max-w-7xl mx-auto p-6">
           <div class="mb-6">
             <h2 class="text-2xl font-bold mb-2">Thailand Sites Overview</h2>
-            <p class="text-gray-400">Click on any battery icon to view detailed information</p>
+            <p class="text-gray-400">Click on any battery pin to view detailed information</p>
           </div>
 
           <div class="glass-card rounded-xl p-6">
             <div class="map-container rounded-lg overflow-hidden relative" style="height: 700px;">
-              <!-- Map background -->
               <div class="map-bg"></div>
               <div class="map-overlay"></div>
               
               ${sites.map(site => {
-                const x = ((site.lng - 97) / (106 - 97)) * 100;
-                const y = ((20 - site.lat) / (20 - 5)) * 100;
+                const pos = latLngToPosition(site.lat, site.lng);
                 return `
                   <div class="battery-pin" 
-                       style="left: ${x}%; top: ${y}%;"
+                       style="left: ${pos.x}%; top: ${pos.y}%;"
                        onclick="showDetail(${site.id})">
                     ${renderBatteryPin(site)}
                     <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity pointer-events-none z-20">
@@ -443,8 +459,7 @@
     function renderDetailPage() {
       if (!selectedSite) return '';
       
-      const x = ((selectedSite.lng - 97) / (106 - 97)) * 100;
-      const y = ((20 - selectedSite.lat) / (20 - 5)) * 100;
+      const pos = latLngToPosition(selectedSite.lat, selectedSite.lng);
       const circumference = 2 * Math.PI * 112;
       const offset = circumference * (1 - selectedSite.battery / 100);
 
@@ -467,7 +482,7 @@
                 </div>
                 <div>
                   <h1 class="text-3xl font-bold">${selectedSite.name}</h1>
-                  <p class="text-gray-400">Site ID: ${selectedSite.id}</p>
+                  <p class="text-gray-400">Site ID: ${selectedSite.id} | ${selectedSite.province}</p>
                 </div>
               </div>
               <div class="${getStatusClass(selectedSite.status)} flex items-center gap-2 px-6 py-3 rounded-lg">
@@ -487,11 +502,10 @@
                 Site Location - Thailand
               </h2>
               <div class="map-container rounded-lg overflow-hidden relative" style="height: 400px;">
-                <!-- Thailand Map background -->
                 <div class="map-bg"></div>
                 <div class="map-overlay"></div>
                 
-                <div class="battery-pin" style="left: ${x}%; top: ${y}%; animation: float 2.5s ease-in-out infinite, ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;">
+                <div class="battery-pin" style="left: ${pos.x}%; top: ${pos.y}%; animation: float 2.5s ease-in-out infinite;">
                   <div class="relative">
                     ${renderBatteryPin(selectedSite)}
                     <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 whitespace-nowrap">
@@ -506,13 +520,12 @@
                 </div>
 
                 ${sites.filter(s => s.id !== selectedSite.id).map(site => {
-                  const siteX = ((site.lng - 97) / (106 - 97)) * 100;
-                  const siteY = ((20 - site.lat) / (20 - 5)) * 100;
+                  const sitePos = latLngToPosition(site.lat, site.lng);
                   const pinClass = site.status === 'good' ? 'pin-good' : 
                                    site.status === 'warning' ? 'pin-warning' : 'pin-critical';
                   return `
                     <div class="battery-pin" 
-                         style="left: ${siteX}%; top: ${siteY}%; opacity: 0.6;"
+                         style="left: ${sitePos.x}%; top: ${sitePos.y}%; opacity: 0.6;"
                          onclick="showDetail(${site.id})">
                       <div class="pin-circle ${pinClass}" style="width: 12px; height: 12px; border-width: 2px;"></div>
                       <div class="pin-stem ${pinClass}" style="width: 2px; height: 8px;"></div>
@@ -538,15 +551,30 @@
               <div class="flex items-center justify-center h-full">
                 <div class="relative">
                   <svg class="w-64 h-64 transform -rotate-90">
-                    <circle cx="128" cy="128" r="112" stroke="currentColor" stroke-width="16" fill="none" class="text-slate-700"/>
-                    <circle cx="128" cy="128" r="112" stroke="currentColor" stroke-width="16" fill="none" 
-                      stroke-dasharray="${circumference}" 
-                      stroke-dashoffset="${offset}" 
+                    <circle
+                      cx="128"
+                      cy="128"
+                      r="112"
+                      stroke="currentColor"
+                      stroke-width="16"
+                      fill="none"
+                      class="text-slate-700"
+                    />
+                    <circle
+                      cx="128"
+                      cy="128"
+                      r="112"
+                      stroke="currentColor"
+                      stroke-width="16"
+                      fill="none"
+                      stroke-dasharray="${circumference}"
+                      stroke-dashoffset="${offset}"
                       class="${selectedSite.battery >= 80 ? 'text-green-500' : selectedSite.battery >= 60 ? 'text-yellow-500' : 'text-red-500'}"
-                      stroke-linecap="round"/>
+                      stroke-linecap="round"
+                    />
                   </svg>
                   <div class="absolute inset-0 flex items-center justify-center flex-col">
-                    <div class="${getStatusBg(selectedSite.status)} p-3 rounded-full mb-3 shadow-lg">
+                    <div class="${getStatusBg(selectedSite.status)} p-3 rounded-full mb-3">
                       <svg class="w-12 h-12" fill="none" stroke="white" viewBox="0 0 24 24">
                         <rect x="5" y="6" width="14" height="12" rx="2" stroke-width="2"/>
                         <path d="M12 6V2M8 2h8" stroke-width="2"/>
@@ -611,6 +639,10 @@
               <h3 class="text-xl font-bold mb-4">System Information</h3>
               <div class="space-y-3">
                 <div class="flex justify-between py-2 border-b border-slate-700">
+                  <span class="text-gray-400">Province</span>
+                  <span class="font-semibold">${selectedSite.province}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-700">
                   <span class="text-gray-400">Location</span>
                   <span class="font-semibold">${selectedSite.lat.toFixed(4)}°N, ${selectedSite.lng.toFixed(4)}°E</span>
                 </div>
@@ -637,7 +669,7 @@
               <h3 class="text-xl font-bold mb-4">Recent Alerts</h3>
               <div class="space-y-3">
                 ${selectedSite.status === 'critical' ? `
-                  <div class="flex items-start gap-3 p-3 status-critical rounded-lg">
+                  <div class="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
                     <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
@@ -647,7 +679,7 @@
                       <div class="text-xs text-gray-500 mt-1">5 minutes ago</div>
                     </div>
                   </div>
-                  <div class="flex items-start gap-3 p-3 status-critical rounded-lg">
+                  <div class="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
                     <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
@@ -658,7 +690,7 @@
                     </div>
                   </div>
                 ` : selectedSite.status === 'warning' ? `
-                  <div class="flex items-start gap-3 p-3 status-warning rounded-lg">
+                  <div class="flex items-start gap-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                     <svg class="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
@@ -669,7 +701,7 @@
                     </div>
                   </div>
                 ` : `
-                  <div class="flex items-start gap-3 p-3 status-good rounded-lg">
+                  <div class="flex items-start gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
                     <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
