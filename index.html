@@ -2376,6 +2376,14 @@
           tooltip.style.display = 'none';
         }
       });
+      
+      // Hide tooltip when clicking on a pin to avoid interference
+      svg.addEventListener('click', (e) => {
+        const target = e.target.closest('.pin');
+        if (target) {
+          tooltip.style.display = 'none';
+        }
+      });
     }
 
     function parseSqlData(sql) {
