@@ -181,8 +181,9 @@
       background: linear-gradient(135deg, 
         rgba(15, 23, 42, 0.85) 0%,
         rgba(30, 41, 59, 0.75) 100%),
-        url(\'./file/thailand-map.png\'');
+        url('./file/thailand-map.png');
       background-size: contain;
+      background-repeat: no-repeat;
       background-position: center;
       position: relative;
       overflow: hidden;
@@ -197,6 +198,28 @@
       height: 200%;
       background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
       animation: rotate 30s linear infinite;
+      z-index: 1;
+    }
+    
+    /* Ensure map elements don't interfere with background */
+    .thailand-map {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+    
+    .thailand-shape {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('./file/thailand-map.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.9;
       z-index: 1;
     }
     
@@ -2071,9 +2094,22 @@
       return 'central'; // default
     }
 
-    // Map positioning for provinces
-    function getProvincePosition(province) {
-      return MAP_POSITIONS[province] || { x: 50, y: 50 };
+    function getMapPosition(lat, lng) {
+      // Thailand boundaries - adjusted for the specific map image
+      const lat_max = 21.5;
+      const lat_min = 5.0;
+      const lon_max = 106.0;
+      const lon_min = 96.0;
+
+      // Convert latitude/longitude to percentage position on map
+      let x = ((lng - lon_min) / (lon_max - lon_min)) * 100;
+      let y = ((lat_max - lat) / (lat_max - lat_min)) * 100;
+
+      // Fine-tune positioning to match the map image better
+      x = Math.max(5, Math.min(95, x)); // Keep within bounds
+      y = Math.max(5, Math.min(95, y)); // Keep within bounds
+
+      return { x, y };
     }
 
     function renderBatteryPins() {
@@ -2085,7 +2121,7 @@
       
       pinContainer.innerHTML = '';
       displaySites.forEach(site => {
-        const position = getProvincePosition(site.province);
+        const position = getMapPosition(site.lat, site.lng);
         const pin = document.createElement('div');
         pin.className = `battery-pin ${site.battery < 30 ? 'alerting' : ''}`;
         pin.setAttribute('data-site-id', site.id);
@@ -2509,7 +2545,7 @@ VALUES
               <div class="map-container rounded-lg overflow-hidden relative" style="height: 400px;">
                 <div class="thailand-map">
                   <div class="battery-pin-container">
-                    <div class="battery-pin" style="left: ${getProvincePosition(selectedSite.province).x}%; top: ${getProvincePosition(selectedSite.province).y}%;">
+                    <div class="battery-pin" style="left: ${getMapPosition(selectedSite.lat, selectedSite.lng).x}%; top: ${getMapPosition(selectedSite.lat, selectedSite.lng).y}%;\">
                       ${renderBatteryPin(selectedSite)}
                       <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap pointer-events-none z-20">
                         <div class="glass-card rounded-lg px-3 py-2 text-center shadow-lg">
