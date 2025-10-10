@@ -2354,20 +2354,31 @@
           const tooltip = document.getElementById('tooltip');
           if (tooltip) tooltip.style.display = 'none';
           
-          console.log('🔋 BATTERY CLICKED:', siteId, '-', site.name);
+          console.log('🔋 BATTERY CLICKED:', `${siteId} - ${site.name} (${selectedSite.stateOfCharge}%)`);
           
-          // Immediate visual feedback
-          pinGroup.style.transform = 'scale(0.9)';
-          pinGroup.style.filter = 'brightness(1.5)';
+          // Enhanced multi-stage visual feedback
+          pinGroup.style.filter = 'brightness(1.8) drop-shadow(0 0 15px rgba(255, 255, 255, 0.9))';
+          pinGroup.style.transform = 'scale(1.3) rotate(3deg)';
+          
+          setTimeout(() => {
+            pinGroup.style.transform = 'scale(1.1) rotate(0deg)';
+            pinGroup.style.filter = 'brightness(1.5) drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))';
+          }, 120);
+          
+          setTimeout(() => {
+            pinGroup.style.transform = 'scale(0.95)';
+            pinGroup.style.filter = 'brightness(1.3)';
+          }, 240);
           
           setTimeout(() => {
             pinGroup.style.transform = 'scale(1)';
             pinGroup.style.filter = 'brightness(1)';
+            pinGroup.style.boxShadow = '';
             
             // Navigate to detail page
-            console.log('📍 Going to detail page for:', site.name);
+            console.log('📍 Navigate to details:', site.name, '| SoC:', selectedSite.stateOfCharge + '%');
             showDetail(siteId);
-          }, 150);
+          }, 300);
         });
         
         // Add touch support for mobile
@@ -2402,17 +2413,23 @@
           element.addEventListener('click', (e) => {
             e.stopPropagation();
             e.preventDefault();
-            console.log('🔋 Battery element clicked - ID:', siteId, 'Name:', site.name);
+            console.log('🔋 ELEMENT CLICKED:', siteId, '-', site.name, '| Part:', ['outline', 'cap', 'fill', 'label'][superElement ? superElement.indexOf(element) : 0]);
             
-            // Same behavior as main click
             const tooltip = document.getElementById('tooltip');
             if (tooltip) tooltip.style.display = 'none';
             
-            element.style.filter = 'brightness(1.5)';
+            element.style.filter = 'brightness(2) drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))';
+            element.style.transform = 'scale(1.2)';
+            
             setTimeout(() => {
-              element.style.filter = 'brightness(1)';
-              showDetail(siteId);
-            }, 100);
+              element.style.filter = 'brightness(1.5)';
+              element.style.transform = 'scale(1)';
+              
+              setTimeout(() => {
+                element.style.filter = 'brightness(1)';
+                showDetail(siteId);
+              }, 50);
+            }, 150);
           });
         });
         
@@ -3100,6 +3117,14 @@ VALUES
                 <h3 class="text-xl font-bold mb-4">System Information</h3>
                 <div class="space-y-3">
                   <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Site ID</span>
+                    <span class="font-semibold">${selectedSite.id}</span>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Site Name</span>
+                    <span class="font-semibold">${selectedSite.name}</span>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Province</span>
                     <span class="font-semibold">${selectedSite.province}</span>
                   </div>
@@ -3114,6 +3139,38 @@ VALUES
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Capacity</span>
                     <span class="font-semibold">${getBatteryCapacityLabel()}</span>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Status</span>
+                    <span class="font-semibold capitalize">${selectedSite.status}</span>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Battery Level</span>
+                    <span class="font-semibold">${selectedSite.battery || selectedSite.stateOfCharge}%</span>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Temperature</span>
+                    <span class="font-semibold">${selectedSite.temp}°C</span>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">System Voltage</span>
+                    <span class="font-semibold">${selectedSite.voltage} V</span>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">System Current</span>
+                    <span class="font-semibold">${selectedSite.current} A</span>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">State of Charge</span>
+                    <span class="font-semibold">${selectedSite.stateOfCharge}%</span>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">State of Health</span>
+                    <span class="font-semibold">${selectedSite.stateOfHealth}%</span>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Ambient Temperature</span>
+                    <span class="font-semibold">${selectedSite.ambientTemp}°C</span>
                   </div>
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Last Updated</span>
