@@ -2180,6 +2180,12 @@
       const svgWidth = 1200;
       const svgHeight = 800;
 
+      // Validate inputs
+      if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+        console.error('Invalid lat/lng values:', lat, lng);
+        return { x: 0, y: 0 };
+      }
+
       // Direct conversion to pixels
       let x = ((lng - lon_min) / (lon_max - lon_min)) * svgWidth;
       let y = ((lat_max - lat) / (lat_max - lat_min)) * svgHeight;
@@ -2198,6 +2204,10 @@
       } else {                                // Other regions
         x = x * 0.88 + 95; y = y * 0.84 + 75;
       }
+
+      // Ensure values are valid numbers
+      x = isNaN(x) ? 0 : x;
+      y = isNaN(y) ? 0 : y;
 
       // Keep within SVG bounds
       x = Math.max(50, Math.min(1150, x));
@@ -2227,15 +2237,27 @@
       const displaySites = filteredSites.length ? filteredSites : sites;
       
       svgPins.innerHTML = '';
+      console.log('Rendering battery pins for sites:', displaySites);
       displaySites.forEach(site => {
+        // Ensure site.id is an integer
+        const siteId = parseInt(site.id);
+        
         const position = getMapPosition(site.lat, site.lng);
         const statusColor = site.status === 'good' ? '#22c55e' : 
                            site.status === 'warning' ? '#eab308' : '#ef4444';
         
+        console.log('Creating pin for site:', siteId, site.name, 'at position:', position);
+        
+        // Validate position values
+        if (isNaN(position.x) || isNaN(position.y)) {
+          console.error('Invalid position for site:', siteId, site.name, position);
+          return;
+        }
+        
         const pinGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         pinGroup.setAttribute('class', 'pin');
         pinGroup.setAttribute('data-title', `${site.name} - SoC: ${site.stateOfCharge}% - Status: ${site.status}`);
-        pinGroup.setAttribute('data-site-id', site.id);
+        pinGroup.setAttribute('data-site-id', siteId);
         pinGroup.setAttribute('transform', `translate(${position.x}, ${position.y})`);
         
         // Create pin circle
@@ -2268,16 +2290,16 @@
         // Add click handler
         pinGroup.addEventListener('click', (e) => {
           e.stopPropagation();
-          console.log('Clicked pin:', site.id, site.name); // Debug log
-          showDetail(site.id);
+          console.log('Clicked pin:', siteId, site.name); // Debug log
+          showDetail(siteId);
         });
 
         // Also add click handler to individual elements
         [circle, path, text].forEach(element => {
           element.addEventListener('click', (e) => {
             e.stopPropagation();
-            console.log('Clicked element:', site.id, site.name); // Debug log
-            showDetail(site.id);
+            console.log('Clicked element:', siteId, site.name); // Debug log
+            showDetail(siteId);
           });
         });
         
@@ -2986,7 +3008,9 @@ VALUES
 
     function showDetail(siteId) {
       console.log('showDetail called with siteId:', siteId);
-      selectedSite = sites.find(s => s.id === siteId);
+      // Ensure siteId is an integer for comparison
+      const id = parseInt(siteId);
+      selectedSite = sites.find(s => parseInt(s.id) === id);
       console.log('selectedSite:', selectedSite);
       if (!selectedSite) {
         console.error('Site not found with ID:', siteId);
