@@ -5,6 +5,7 @@
 This is a battery monitoring dashboard application that provides real-time visualization of battery status across 24 locations throughout Thailand. The dashboard features an interactive map with custom battery pin markers that indicate the status of each battery site and provides detailed monitoring metrics when selected.
 
 The application is built as a single-page application using HTML, CSS, and vanilla JavaScript with the following technologies:
+
 - Tailwind CSS (via CDN)
 - Google Maps JavaScript API
 - Custom animations and styling using CSS
@@ -39,6 +40,7 @@ This is a static HTML application that can be run directly in any modern web bro
 3. An internet connection is required to load external dependencies (Tailwind CSS CDN and Google Maps API)
 
 Alternatively, you can serve it via a local web server:
+
 - Using Python: `python -m http.server 8000`
 - Using Node.js: `npx serve .`
 - Using PHP: `php -S localhost:8000`
@@ -46,6 +48,7 @@ Alternatively, you can serve it via a local web server:
 ## Development Conventions
 
 The application follows these conventions:
+
 - All code is contained in a single HTML file for simplicity
 - Tailwind CSS is loaded via CDN for styling
 - Google Maps API is dynamically loaded via CDN
@@ -66,6 +69,7 @@ The application follows these conventions:
 ## Google Maps Integration
 
 The application uses Google Maps JavaScript API to display battery locations with:
+
 - Custom styling for the map to match the dark theme
 - Custom battery pin markers with animation effects
 - Automatic zoom and centering on Thailand
