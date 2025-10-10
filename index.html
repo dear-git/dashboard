@@ -1634,6 +1634,7 @@ function closeAlert(alertId) {
 
     // Initial render
     render();
+    fetchData();
 
     // Auto-check for battery failures every 30 seconds
     setInterval(checkBatteryFailures, 30000);
