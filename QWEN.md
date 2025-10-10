@@ -83,7 +83,7 @@ The application uses Google Maps JavaScript API to display battery locations wit
 - **Critical (Red)**: State of charge <60%
 
 The status is reflected in both the map pins and detailed views.
- site name substation
+ site name substation[
  เชียงราย 2
  ลำปาง 3
  พิษณุโลก 6
@@ -105,5 +105,4 @@ The status is reflected in both the map pins and detailed views.
  ถลาง 2
  ภูเก็ต 3
  กระบี่ 1
- หาดใหญ่ 2
- 
+ หาดใหญ่ 2]
