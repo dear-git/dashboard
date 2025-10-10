@@ -430,103 +430,98 @@
     let sites = [
       { 
         id: 1, 
-        name: 'สถานีไฟฟ้าเชียงราย 2', 
-        lat: 13.7563, 
-        lng: 100.5018, 
+        name: 'สถานีไฟฟ้า น่าน 1', 
+        lat: 17.01, 
+        lng: 99.82, 
         status: 'good', 
         battery: 95, 
         temp: 28, 
-        voltage: 48.2, 
-        current: 12.5, 
-        power: 603,
-        voltagePerCell: 3.2,
-        internalResistance: 150,
-        currentPerString: 12.5,
-        voltagePerString: 96.4,
+        voltage: 125.0, 
+        current: 332.5,
+        voltagePerCell: 2.50,
+        internalResistance: 2500,
+        currentPerString: 332.5,
+        voltagePerString: 125.0,
         stateOfCharge: 95,
         stateOfHealth: 98,
         ambientTemp: 28,
-        province: 'เชียงราย' 
+        province: 'น่าน' 
       },
       { 
         id: 2, 
-        name: 'สถานีไฟฟ้าลำปาง 3', 
-        lat: 18.7883, 
-        lng: 98.9853, 
+        name: 'สถานีไฟฟ้า เชียงราย 2', 
+        lat: 19.91, 
+        lng: 99.84, 
         status: 'good', 
-        battery: 92, 
-        temp: 26, 
-        voltage: 48.0, 
-        current: 11.8, 
-        power: 566,
-        voltagePerCell: 3.2,
-        internalResistance: 180,
-        currentPerString: 11.8,
-        voltagePerString: 96.0,
-        stateOfCharge: 92,
-        stateOfHealth: 95,
-        ambientTemp: 26,
-        province: 'ลำปาง' 
+        battery: 90, 
+        temp: 27, 
+        voltage: 125.0, 
+        current: 315.0,
+        voltagePerCell: 2.50,
+        internalResistance: 2200,
+        currentPerString: 315.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 90,
+        stateOfHealth: 96,
+        ambientTemp: 27,
+        province: 'เชียงราย' 
       },
       { 
         id: 3, 
-        name: 'พิษณุโลก', 
-        lat: 7.8804, 
-        lng: 98.3923, 
+        name: 'สถานีไฟฟ้า ลำปาง 3', 
+        lat: 18.29, 
+        lng: 99.49, 
+        status: 'critical', 
+        battery: 45, 
+        temp: 32, 
+        voltage: 125.0, 
+        current: 157.5,
+        voltagePerCell: 2.50,
+        internalResistance: 4800,
+        currentPerString: 157.5,
+        voltagePerString: 125.0,
+        stateOfCharge: 45,
+        stateOfHealth: 85,
+        ambientTemp: 32,
+        province: 'ลำปาง' 
+      },
+      { 
+        id: 4, 
+        name: 'สถานีไฟฟ้า พิษณุโลก 6', 
+        lat: 16.82, 
+        lng: 100.27, 
         status: 'warning', 
         battery: 78, 
         temp: 32, 
-        voltage: 47.5, 
-        current: 10.2, 
-        power: 485,
-        voltagePerCell: 2.9,
-        internalResistance: 450,
-        currentPerString: 10.2,
-        voltagePerString: 87.4,
+        voltage: 125.0, 
+        current: 273.0,
+        voltagePerCell: 2.50,
+        internalResistance: 4500,
+        currentPerString: 273.0,
+        voltagePerString: 125.0,
         stateOfCharge: 78,
         stateOfHealth: 85,
         ambientTemp: 32,
         province: 'พิษณุโลก' 
       },
       { 
-        id: 4, 
-        name: 'น่าน', 
-        lat: 13.3611, 
-        lng: 100.9847, 
-        status: 'good', 
-        battery: 88, 
-        temp: 29, 
-        voltage: 48.1, 
-        current: 12.0, 
-        power: 577,
-        voltagePerCell: 3.2,
-        internalResistance: 120,
-        currentPerString: 12.0,
-        voltagePerString: 96.2,
-        stateOfCharge: 88,
-        stateOfHealth: 96,
-        ambientTemp: 29,
-        province: 'น่าน' 
-      },
-      { 
         id: 5, 
-        name: 'ท่าวุ้ง', 
-        lat: 16.4322, 
-        lng: 102.8236, 
+        name: 'สถานีไฟฟ้า ท่าวุ้ง', 
+        lat: 16.43, 
+        lng: 102.82, 
         status: 'critical', 
-        battery: 45, 
-        temp: 38, 
-        voltage: 46.8, 
-        current: 8.5, 
-        power: 398,
-        voltagePerCell: 2.6,
-        internalResistance: 1200,
-        currentPerString: 8.5,
-        voltagePerString: 83.6,
-        stateOfCharge: 45,
-        stateOfHealth: 65,
-        ambientTemp: 38,
-        province: 'ท่าวุ้ง' 
+        battery: 40, 
+        temp: 35, 
+        voltage: 125.0, 
+        current: 140.0,
+        voltagePerCell: 2.50,
+        internalResistance: 5000,
+        currentPerString: 140.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 40,
+        stateOfHealth: 75,
+        ambientTemp: 35,
+        province: 'ลพบุรี' 
       },
       { 
         id: 6, 
@@ -1290,23 +1285,14 @@ function closeAlert(alertId) {
       pin.setAttribute('data-site-id', site.id);
       pin.innerHTML = `
         ${renderBatteryPin(site)}
-        <div class="province-label">
-          <div class="px-2 py-1 rounded">
-            ${site.province}
-          </div>
-        </div>
-        <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity pointer-events-none z-20">
-          <div class="glass-card rounded-lg px-3 py-2">
-            <div class="font-bold text-sm text-center text-white">${site.name}</div>
-            <div class="text-xs text-gray-300 text-center mt-1">
+        <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap pointer-events-none z-20">
+          <div class="glass-card rounded-lg px-3 py-2 text-center shadow-lg">
+            <div class="font-bold text-sm text-white">${site.name}</div>
+            <div class="text-xs text-gray-300 mt-1">
               SoC: <span class="font-bold ${getStatusColor(site.status)}">${site.stateOfCharge}%</span>
             </div>
-            <div class="text-xs text-gray-300 text-center">
-              ${site.province}
-            </div>
-            <div class="text-xs text-blue-400 text-center mt-2 font-semibold">
-              Click for details →
-            </div>
+            <div class="text-xs text-gray-400">${site.province}</div>
+            <div class="text-xs text-blue-400 mt-1 font-semibold">Click for details →</div>
           </div>
         </div>
       `;
