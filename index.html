@@ -445,12 +445,24 @@
 
     .pin {
       cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+    
+    .pin:hover {
+      transform: scale(1.15);
+      filter: brightness(1.3) drop-shadow(0 4px 8px rgba(255, 255, 255, 0.3));
     }
     
     .pin circle,
     .pin path,
+    .pin rect,
     .pin text {
       cursor: pointer;
+      transition: filter 0.2s ease;
+    }
+    
+    .battery-icon:hover rect {
+      filter: brightness(1.2);
     }
 
     .label {
@@ -2333,14 +2345,76 @@
           pinGroup.style.transform = 'scale(1)';
         });
         
-        // Add click handler
+        // SIMPLIFIED AND RELIABLE CLICK HANDLER
         pinGroup.addEventListener('click', (e) => {
           e.stopPropagation();
-          console.log('Clicked battery icon:', siteId, site.name); // Debug log
+          e.preventDefault();
+          
+          // Clear any active tooltips
+          const tooltip = document.getElementById('tooltip');
+          if (tooltip) tooltip.style.display = 'none';
+          
+          console.log('🔋 BATTERY CLICKED:', siteId, '-', site.name);
+          
+          // Immediate visual feedback
+          pinGroup.style.transform = 'scale(0.9)';
+          pinGroup.style.filter = 'brightness(1.5)';
+          
+          setTimeout(() => {
+            pinGroup.style.transform = 'scale(1)';
+            pinGroup.style.filter = 'brightness(1)';
+            
+            // Navigate to detail page
+            console.log('📍 Going to detail page for:', site.name);
+            showDetail(siteId);
+          }, 150);
+        });
+        
+        // Add touch support for mobile
+        pinGroup.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          pinGroup.style.transform = 'scale(0.95)';
+        });
+        
+        pinGroup.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Battery touched - ID:', siteId, 'Name:', site.name);
+          pinGroup.style.transform = 'scale(1)';
           showDetail(siteId);
         });
-
         
+        // Add keyboard support
+        pinGroup.setAttribute('tabindex', '0');
+        pinGroup.setAttribute('role', 'button');
+        pinGroup.setAttribute('aria-label', `Battery ${siteId}: ${site.name} - Click for details`);
+        
+        pinGroup.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            console.log('Battery keyboard activated - ID:', siteId);
+            showDetail(siteId);
+          }
+        });
+        
+        // SIMPLIFIED INDIVIDUAL ELEMENT CLICK HANDLERS
+        [batteryOutline, batteryCap, batteryFill, nameLabel].forEach(element => {
+          element.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log('🔋 Battery element clicked - ID:', siteId, 'Name:', site.name);
+            
+            // Same behavior as main click
+            const tooltip = document.getElementById('tooltip');
+            if (tooltip) tooltip.style.display = 'none';
+            
+            element.style.filter = 'brightness(1.5)';
+            setTimeout(() => {
+              element.style.filter = 'brightness(1)';
+              showDetail(siteId);
+            }, 100);
+          });
+        });
         
         svgPins.appendChild(pinGroup);
       });
@@ -2716,7 +2790,7 @@ VALUES
               </thead>
               <tbody>
                 ${displaySites.map(site => `
-                  <tr onclick="showDetail(${site.id})" class="group cursor-pointer border-b border-slate-800/70 last:border-none hover:bg-slate-800/40 transition-colors">
+                  <tr onclick="console.log('Table row clicked for site ID:', ${site.id}); showDetail(${site.id})" class="group cursor-pointer border-b border-slate-800/70 last:border-none hover:bg-slate-800/40 transition-colors">
                     <td class="py-3 pr-6">
                       <div class="font-semibold text-white">${site.name}</div>
                       <div class="text-xs text-gray-400">${site.province}</div>
@@ -2909,17 +2983,61 @@ VALUES
               </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Comprehensive Battery Information -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Battery Specifications -->
               <div class="glass-card rounded-xl p-6">
-                <h3 class="text-xl font-bold mb-4">Battery Metrics</h3>
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                  <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="5" y="6" width="14" height="12" rx="2" stroke-width="2"/>
+                    <path d="M12 6V2M8 2h8" stroke-width="2"/>
+                  </svg>
+                  Battery Specifications
+                </h3>
+                <div class="space-y-3">
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">System Voltage</span>
+                    <div class="font-semibold">125 VDC</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Capacity</span>
+                    <div class="font-semibold">350 Ah</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Cells per String</span>
+                    <div class="font-semibold">60 cells</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Number of Strings</span>
+                    <div class="font-semibold">${selectedSite.strings || 2}</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Total Capacity</div>
+                    <div class="font-semibold">${(selectedSite.strings || 2) * 350} Ah</div>
+                  </div>
+                  <div class="flex justify-between py-2">
+                    <span class="text-gray-400">Nominal Energy</span>
+                    <div class="font-semibold">${((selectedSite.strings || 2) * 125 * 350 / 1000).toFixed(1)} kWh</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Real-time Parameters -->
+              <div class="glass-card rounded-xl p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                  <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002 2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 002 2m0 0V5a2 2 0 012-2h2a2 2 0 012-2"/>
+                  </svg>
+                  Real-time Parameters
+                </h3>
                 <div class="space-y-3">
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">State of Charge</span>
-                    <div class="font-semibold">${selectedSite.stateOfCharge}%</div>
+                    <div class="font-semibold ${selectedSite.stateOfCharge >= 80 ? 'text-green-400' : selectedSite.stateOfCharge >= 60 ? 'text-yellow-400' : 'text-red-400'}">${selectedSite.stateOfCharge}%</div>
                   </div>
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">State of Health</span>
-                    <div class="font-semibold">${selectedSite.stateOfHealth}%</div>
+                    <div class="font-semibold ${selectedSite.stateOfHealth >= 90 ? 'text-green-400' : 'text-yellow-400'}">${selectedSite.stateOfHealth || 95}%</div>
                   </div>
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Voltage per Cell</span>
@@ -2931,12 +3049,50 @@ VALUES
                   </div>
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Current per String</span>
-                    <div class="font-semibold">${selectedSite.currentPerString} A</div>
+                    <div class="font-semibold">${selectedSite.currentPerString || selectedSite.current} A</div>
                   </div>
                   <div class="flex justify-between py-2">
                     <span class="text-gray-400">Voltage per String</span>
-                    <div class="font-semibold">${selectedSite.voltagePerString} V</div>
+                    <div class="font-semibold">${selectedSite.voltagePerString || selectedSite.voltage} V</div>
                   </div>
+                </div>
+              </div>
+
+              <!-- Performance Metrics -->
+              <div class="glass-card rounded-xl p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                  <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                  </svg>
+                  Performance Metrics
+                </h3>
+                <div class="space-y-3">
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Power Output</span>
+                    <div class="font-semibold">${((selectedSite.voltagePerString || selectedSite.voltage) * (selectedSite.currentPerString || selectedSite.current) / 1000).toFixed(2)} kW</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Efficiency</span>
+                    <div class="font-semibold">${((selectedSite.stateOfCharge / 100) * ((selectedSite.stateOfHealth || 95) / 100) * 100).toFixed(1)}%</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Ambient Temperature</span>
+                    <div class="font-semibold ${selectedSite.ambientTemp <= 25 ? 'text-green-400' : selectedSite.ambientTemp <= 35 ? 'text-yellow-400' : 'text-red-400'}">${selectedSite.ambientTemp}°C</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Cell Temperature</span>
+                    <div class="font-semibold">${selectedSite.temp || selectedSite.ambientTemp}°C</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Charge Status</span>
+                    <div class="font-semibold">${selectedSite.stateOfCharge >= 80 ? 'Charged' : selectedSite.stateOfCharge >= 30 ? 'Normal' : 'Low Charge'}</div>
+                  </div>
+                  <div class="flex justify-between py-2">
+                    <span class="text-gray-400">Health Status</span>
+                    <div class="font-semibold ${(selectedSite.stateOfHealth || 95) >= 90 ? 'text-green-400' : 'text-yellow-400'}">${(selectedSite.stateOfHealth || 95) >= 90 ? 'Excellent' : 'Good'}</div>
+                  </div>
+                </div>
+              </div>
                 </div>
               </div>
 
@@ -2976,15 +3132,32 @@ VALUES
     }
 
     function render() {
+      console.log('Rendering page:', currentPage);
       const app = document.getElementById('app');
+      if (!app) {
+        console.error('App element not found!');
+        return;
+      }
       if (currentPage === 'home') {
+        console.log('Rendering home page');
         app.innerHTML = renderHomePage();
         renderBatteryPins();
       } else if (currentPage === 'detail') {
+        console.log('Rendering detail page');
+        if (!selectedSite) {
+          console.error('No selected site for detail page!');
+          // Return to home page if no site selected
+          currentPage = 'home';
+          render();
+          return;
+        }
         app.innerHTML = renderDetailPage();
+        console.log('Detail page rendered');
       } else if (currentPage === 'database') {
+        console.log('Rendering database page');
         app.innerHTML = renderDatabasePage();
       }
+      console.log('Render complete');
     }
 
     function renderDatabasePage() {
@@ -3063,17 +3236,31 @@ VALUES
 
     function showDetail(siteId) {
       console.log('showDetail called with siteId:', siteId);
+      console.log('Type of siteId:', typeof siteId);
       // Ensure siteId is an integer for comparison
       const id = parseInt(siteId);
-      selectedSite = sites.find(s => parseInt(s.id) === id);
+      console.log('Parsed ID:', id, 'Type:', typeof id);
+      selectedSite = sites.find(s => {
+        const siteIdInt = parseInt(s.id);
+        console.log('Comparing with site ID:', siteIdInt, 'Match:', siteIdInt === id);
+        return siteIdInt === id;
+      });
       console.log('selectedSite:', selectedSite);
       if (!selectedSite) {
         console.error('Site not found with ID:', siteId);
-        alert('Site not found');
-        return;
+        // Try to find by string comparison as fallback
+        selectedSite = sites.find(s => s.id == siteId);
+        if (!selectedSite) {
+          alert('Site not found with ID: ' + siteId);
+          return;
+        } else {
+          console.log('Found site with loose comparison:', selectedSite);
+        }
       }
+      console.log('Navigating to detail page for:', selectedSite.name);
       currentPage = 'detail';
       render();
+      console.log('Detail page rendered for:', selectedSite.name);
     }
 
     function render() {
