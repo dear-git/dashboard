@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Battery Monitoring System - Thailand</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
   <style>
     @keyframes pulse {
       0%, 100% { opacity: 1; }
@@ -249,87 +250,168 @@
       box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
     }
 
-    /* Alert notification styling */
-    .alert-notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1000;
-      animation: slideIn 0.3s ease-out;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    /* Form styling */
-    .form-input {
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 6px;
+    /* Enhanced Battery Icon Styles */
+    .enhanced-battery-pin {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      cursor: pointer;
       transition: all 0.3s ease;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: rgba(59, 130, 246, 0.5);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .form-input::placeholder {
-      color: rgba(148, 163, 184, 0.5);
-    }
-
-    /* Metric card styling */
-    .metric-card {
-      transition: all 0.3s ease;
-    }
-
-    .metric-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Progress bar styling */
-    .progress-bar {
-      transition: width 0.3s ease;
-    }
-
-    /* Gauge styling */
-    .gauge-container {
-      position: relative;
-      display: inline-block;
-    }
-
-    .gauge-arc {
-      transition: stroke-dashoffset 0.5s ease;
-    }
-
-    .cluster-marker {
+      animation: float 2.5s ease-in-out infinite;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+      z-index: 10;
+      pointer-events: auto;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(14, 165, 233, 0.85));
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.35);
-      color: #fff;
-      font-weight: 700;
+      gap: 4px;
     }
 
-    .cluster-marker span {
-      font-size: 0.85rem;
+    .enhanced-battery-pin:hover {
+      transform: translate(-50%, -100%) scale(1.15);
+      z-index: 100;
+      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
+    }
+
+    .enhanced-battery-pin.alerting {
+      animation: float 2.5s ease-in-out infinite, alertBlink 1s ease-in-out infinite;
+    }
+
+    .battery-icon {
+      position: relative;
+      width: 32px;
+      height: 48px;
+    }
+
+    .battery-body {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 28px;
+      height: 42px;
+      border: 2px solid white;
+      border-radius: 4px;
+      overflow: hidden;
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(4px);
+    }
+
+    .battery-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: var(--fill-height, 50%);
+      transition: all 0.3s ease;
+      border-radius: 0 0 2px 2px;
+    }
+
+    .battery-fill.pin-good {
+      background: linear-gradient(to top, #16a34a, #22c55e);
+      box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.5);
+    }
+
+    .battery-fill.pin-warning {
+      background: linear-gradient(to top, #ca8a04, #eab308);
+      box-shadow: inset 0 0 10px rgba(234, 179, 8, 0.5);
+    }
+
+    .battery-fill.pin-critical {
+      background: linear-gradient(to top, #dc2626, #ef4444);
+      box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.5);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .battery-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+      z-index: 2;
+    }
+
+    .battery-cap {
+      position: absolute;
+      top: -3px;
+      right: -2px;
+      width: 8px;
+      height: 6px;
+      background: white;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .site-info {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 20;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .enhanced-battery-pin:hover .site-info {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    .site-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 2px;
+    }
+
+    .site-status {
+      font-size: 9px;
+      color: #60a5fa;
+      font-weight: 500;
+    }
+
+        .battery-pin-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+    }
+    
+    .province-label {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 600;
+      white-space: nowrap;
+      z-index: 25;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .battery-pin:hover .province-label {
+      opacity: 1;
     }
   </style>
 </head>
@@ -348,19 +430,19 @@
     let sites = [
       { 
         id: 1, 
-        name: 'เชียงราย', 
+        name: 'สถานีไฟฟ้าเชียงราย 2', 
         lat: 13.7563, 
         lng: 100.5018, 
         status: 'good', 
         battery: 95, 
         temp: 28, 
-        voltage: 125.0, 
-        current: 350.0, 
-        power: 43750,
-        voltagePerCell: 2.08,
+        voltage: 48.2, 
+        current: 12.5, 
+        power: 603,
+        voltagePerCell: 3.2,
         internalResistance: 150,
-        currentPerString: 350.0,
-        voltagePerString: 125.0,
+        currentPerString: 12.5,
+        voltagePerString: 96.4,
         stateOfCharge: 95,
         stateOfHealth: 98,
         ambientTemp: 28,
@@ -368,19 +450,19 @@
       },
       { 
         id: 2, 
-        name: 'ลำปาง', 
+        name: 'สถานีไฟฟ้าลำปาง 3', 
         lat: 18.7883, 
         lng: 98.9853, 
         status: 'good', 
         battery: 92, 
         temp: 26, 
-        voltage: 125.0, 
-        current: 322.0, 
-        power: 40250,
-        voltagePerCell: 2.08,
+        voltage: 48.0, 
+        current: 11.8, 
+        power: 566,
+        voltagePerCell: 3.2,
         internalResistance: 180,
-        currentPerString: 322.0,
-        voltagePerString: 125.0,
+        currentPerString: 11.8,
+        voltagePerString: 96.0,
         stateOfCharge: 92,
         stateOfHealth: 95,
         ambientTemp: 26,
@@ -394,13 +476,13 @@
         status: 'warning', 
         battery: 78, 
         temp: 32, 
-        voltage: 125.0, 
-        current: 273.0, 
-        power: 34125,
-        voltagePerCell: 2.08,
+        voltage: 47.5, 
+        current: 10.2, 
+        power: 485,
+        voltagePerCell: 2.9,
         internalResistance: 450,
-        currentPerString: 273.0,
-        voltagePerString: 125.0,
+        currentPerString: 10.2,
+        voltagePerString: 87.4,
         stateOfCharge: 78,
         stateOfHealth: 85,
         ambientTemp: 32,
@@ -414,13 +496,13 @@
         status: 'good', 
         battery: 88, 
         temp: 29, 
-        voltage: 125.0, 
-        current: 308.0, 
-        power: 38500,
-        voltagePerCell: 2.08,
+        voltage: 48.1, 
+        current: 12.0, 
+        power: 577,
+        voltagePerCell: 3.2,
         internalResistance: 120,
-        currentPerString: 308.0,
-        voltagePerString: 125.0,
+        currentPerString: 12.0,
+        voltagePerString: 96.2,
         stateOfCharge: 88,
         stateOfHealth: 96,
         ambientTemp: 29,
@@ -434,13 +516,13 @@
         status: 'critical', 
         battery: 45, 
         temp: 38, 
-        voltage: 125.0, 
-        current: 157.5, 
-        power: 19687.5,
-        voltagePerCell: 2.08,
+        voltage: 46.8, 
+        current: 8.5, 
+        power: 398,
+        voltagePerCell: 2.6,
         internalResistance: 1200,
-        currentPerString: 280.0,
-        voltagePerString: 125.0,
+        currentPerString: 8.5,
+        voltagePerString: 83.6,
         stateOfCharge: 45,
         stateOfHealth: 65,
         ambientTemp: 38,
@@ -454,13 +536,13 @@
         status: 'good', 
         battery: 91, 
         temp: 30, 
-        voltage: 125.0, 
-        current: 318.5, 
-        power: 39812.5,
-        voltagePerCell: 2.08,
+        voltage: 48.3, 
+        current: 11.5, 
+        power: 555,
+        voltagePerCell: 3.2,
         internalResistance: 110,
-        currentPerString: 318.5,
-        voltagePerString: 125.0,
+        currentPerString: 11.5,
+        voltagePerString: 96.6,
         stateOfCharge: 91,
         stateOfHealth: 97,
         ambientTemp: 30,
@@ -474,13 +556,12 @@
         status: 'good', 
         battery: 89, 
         temp: 27, 
-        voltage: 125.0, 
-        current: 311.5, 
-        power: 38937.5,
-        voltagePerCell: 2.08,
+        voltage: 48.0, 
+        current: 12.2, 
+        power: 586,
+        voltagePerCell: 3.2,
         internalResistance: 95,
-        currentPerString: 311.5,
-        voltagePerString: 125.0,
+        currentPerString: 12.2,
         stateOfCharge: 89,
         stateOfHealth: 94,
         ambientTemp: 27,
@@ -494,13 +575,13 @@
         status: 'warning', 
         battery: 72, 
         temp: 33, 
-        voltage: 125.0, 
-        current: 252.0, 
-        power: 31500,
-        voltagePerCell: 2.08,
+        voltage: 47.7, 
+        current: 9.8, 
+        power: 467,
+        voltagePerCell: 2.9,
         internalResistance: 380,
-        currentPerString: 252.0,
-        voltagePerString: 125.0,
+        currentPerString: 9.8,
+        voltagePerString: 93.4,
         stateOfCharge: 72,
         stateOfHealth: 82,
         ambientTemp: 33,
@@ -514,13 +595,12 @@
         status: 'good', 
         battery: 94, 
         temp: 28, 
-        voltage: 125.0, 
-        current: 329.0, 
-        power: 41125,
-        voltagePerCell: 2.08,
+        voltage: 48.2, 
+        current: 12.8, 
+        power: 617,
+        voltagePerCell: 3.2,
         internalResistance: 85,
-        currentPerString: 329.0,
-        voltagePerString: 125.0,
+        currentPerString: 12.8,
         stateOfCharge: 94,
         stateOfHealth: 99,
         ambientTemp: 28,
@@ -534,13 +614,13 @@
         status: 'good', 
         battery: 87, 
         temp: 25, 
-        voltage: 125.0, 
-        current: 304.5, 
-        power: 38062.5,
-        voltagePerCell: 2.08,
+        voltage: 48.1, 
+        current: 11.9, 
+        power: 572,
+        voltagePerCell: 3.2,
         internalResistance: 130,
-        currentPerString: 304.5,
-        voltagePerString: 125.0,
+        currentPerString: 11.9,
+        voltagePerString: 96.2,
         stateOfCharge: 87,
         stateOfHealth: 93,
         ambientTemp: 25,
@@ -548,23 +628,22 @@
       },
       { 
         id: 11, 
-        name: 'Ayutthaya', 
-        lat: 14.37, 
-        lng: 100.59, 
-        status: 'warning', 
-        battery: 75, 
-        temp: 30, 
-        voltage: 125.0, 
-        current: 262.5, 
-        power: 32812.5,
-        voltagePerCell: 2.50,
-        internalResistance: 3800,
-        currentPerString: 262.5,
-        voltagePerString: 125.0,
-        stateOfCharge: 75,
-        stateOfHealth: 88,
-        ambientTemp: 30,
-        province: 'พระนครศรีอยุธยา' 
+        name: 'บรบือ', 
+        lat: 12.6814, 
+        lng: 101.2816, 
+        status: 'good', 
+        battery: 93, 
+        temp: 27, 
+        voltage: 48.3, 
+        current: 12.6, 
+        power: 609,
+        voltagePerCell: 3.2,
+        internalResistance: 100,
+        currentPerString: 12.6,
+        stateOfCharge: 93,
+        stateOfHealth: 98,
+        ambientTemp: 27,
+        province: 'บรบือ' 
       },
       { 
         id: 12, 
@@ -574,13 +653,13 @@
         status: 'warning', 
         battery: 68, 
         temp: 35, 
-        voltage: 125.0, 
-        current: 238.0, 
-        power: 29750,
-        voltagePerCell: 2.08,
+        voltage: 47.4, 
+        current: 9.2, 
+        power: 436,
+        voltagePerCell: 2.8,
         internalResistance: 520,
-        currentPerString: 238.0,
-        voltagePerString: 125.0,
+        currentPerString: 9.2,
+        voltagePerString: 90.4,
         stateOfCharge: 68,
         stateOfHealth: 78,
         ambientTemp: 35,
@@ -594,13 +673,12 @@
         status: 'good', 
         battery: 90, 
         temp: 29, 
-        voltage: 125.0, 
-        current: 315.0, 
-        power: 39375,
-        voltagePerCell: 2.08,
+        voltage: 48.0, 
+        current: 11.7, 
+        power: 562,
+        voltagePerCell: 3.0,
         internalResistance: 150,
-        currentPerString: 315.0,
-        voltagePerString: 125.0,
+        currentPerString: 11.7,
         stateOfCharge: 90,
         stateOfHealth: 95,
         ambientTemp: 29,
@@ -614,13 +692,12 @@
         status: 'good', 
         battery: 85, 
         temp: 30, 
-        voltage: 125.0, 
-        current: 297.5, 
-        power: 37187.5,
-        voltagePerCell: 2.08,
+        voltage: 47.9, 
+        current: 11.3, 
+        power: 541,
+        voltagePerCell: 3.0,
         internalResistance: 200,
-        currentPerString: 297.5,
-        voltagePerString: 125.0,
+        currentPerString: 11.3,
         stateOfCharge: 85,
         stateOfHealth: 88,
         ambientTemp: 30,
@@ -634,13 +711,12 @@
         status: 'critical', 
         battery: 42, 
         temp: 39, 
-        voltage: 125.0, 
-        current: 147.0, 
-        power: 18375,
-        voltagePerCell: 2.08,
+        voltage: 46.5, 
+        current: 7.8, 
+        power: 363,
+        voltagePerCell: 2.5,
         internalResistance: 1500,
-        currentPerString: 280.0,
-        voltagePerString: 125.0,
+        currentPerString: 7.8,
         stateOfCharge: 42,
         stateOfHealth: 60,
         ambientTemp: 39,
@@ -654,13 +730,12 @@
         status: 'good', 
         battery: 88, 
         temp: 28, 
-        voltage: 125.0, 
-        current: 308.0, 
-        power: 38500,
-        voltagePerCell: 2.08,
+        voltage: 48.1, 
+        current: 12.1, 
+        power: 582,
+        voltagePerCell: 3.2,
         internalResistance: 115,
-        currentPerString: 308.0,
-        voltagePerString: 125.0,
+        currentPerString: 12.1,
         stateOfCharge: 88,
         stateOfHealth: 96,
         ambientTemp: 28,
@@ -674,13 +749,12 @@
         status: 'good', 
         battery: 91, 
         temp: 29, 
-        voltage: 125.0, 
-        current: 318.5, 
-        power: 39812.5,
-        voltagePerCell: 2.08,
+        voltage: 48.2, 
+        current: 11.8, 
+        power: 569,
+        voltagePerCell: 3.2,
         internalResistance: 105,
-        currentPerString: 318.5,
-        voltagePerString: 125.0,
+        currentPerString: 11.8,
         stateOfCharge: 91,
         stateOfHealth: 97,
         ambientTemp: 29,
@@ -694,13 +768,12 @@
         status: 'warning', 
         battery: 75, 
         temp: 31, 
-        voltage: 125.0, 
-        current: 262.5, 
-        power: 32812.5,
-        voltagePerCell: 2.08,
+        voltage: 47.6, 
+        current: 10.5, 
+        power: 500,
+        voltagePerCell: 2.9,
         internalResistance: 320,
-        currentPerString: 262.5,
-        voltagePerString: 125.0,
+        currentPerString: 10.5,
         stateOfCharge: 75,
         stateOfHealth: 84,
         ambientTemp: 31,
@@ -714,13 +787,12 @@
         status: 'good', 
         battery: 86, 
         temp: 28, 
-        voltage: 125.0, 
-        current: 301.0, 
-        power: 37625,
-        voltagePerCell: 2.08,
+        voltage: 48.0, 
+        current: 11.6, 
+        power: 557,
+        voltagePerCell: 3.2,
         internalResistance: 125,
-        currentPerString: 301.0,
-        voltagePerString: 125.0,
+        currentPerString: 11.6,
         stateOfCharge: 86,
         stateOfHealth: 92,
         ambientTemp: 28,
@@ -734,13 +806,12 @@
         status: 'good', 
         battery: 89, 
         temp: 30, 
-        voltage: 125.0, 
-        current: 311.5, 
-        power: 38937.5,
-        voltagePerCell: 2.08,
+        voltage: 48.1, 
+        current: 12.0, 
+        power: 577,
+        voltagePerCell: 3.2,
         internalResistance: 110,
-        currentPerString: 311.5,
-        voltagePerString: 125.0,
+        currentPerString: 12.0,
         stateOfCharge: 89,
         stateOfHealth: 95,
         ambientTemp: 30,
@@ -754,13 +825,12 @@
         status: 'good', 
         battery: 92, 
         temp: 27, 
-        voltage: 125.0, 
-        current: 322.0, 
-        power: 40250,
-        voltagePerCell: 2.08,
+        voltage: 48.2, 
+        current: 12.3, 
+        power: 593,
+        voltagePerCell: 3.2,
         internalResistance: 95,
-        currentPerString: 322.0,
-        voltagePerString: 125.0,
+        currentPerString: 12.3,
         stateOfCharge: 92,
         stateOfHealth: 96,
         ambientTemp: 27,
@@ -774,13 +844,12 @@
         status: 'warning', 
         battery: 70, 
         temp: 34, 
-        voltage: 125.0, 
-        current: 245.0, 
-        power: 30625,
-        voltagePerCell: 2.08,
+        voltage: 47.5, 
+        current: 9.5, 
+        power: 451,
+        voltagePerCell: 2.8,
         internalResistance: 420,
-        currentPerString: 245.0,
-        voltagePerString: 125.0,
+        currentPerString: 9.5,
         stateOfCharge: 70,
         stateOfHealth: 80,
         ambientTemp: 34,
@@ -794,13 +863,12 @@
         status: 'good', 
         battery: 87, 
         temp: 29, 
-        voltage: 125.0, 
-        current: 304.5, 
-        power: 38062.5,
-        voltagePerCell: 2.08,
+        voltage: 48.0, 
+        current: 11.9, 
+        power: 571,
+        voltagePerCell: 3.2,
         internalResistance: 120,
-        currentPerString: 304.5,
-        voltagePerString: 125.0,
+        currentPerString: 11.9,
         stateOfCharge: 87,
         stateOfHealth: 93,
         ambientTemp: 29,
@@ -814,13 +882,12 @@
         status: 'good', 
         battery: 90, 
         temp: 27, 
-        voltage: 125.0, 
-        current: 315.0, 
-        power: 39375,
-        voltagePerCell: 2.08,
+        voltage: 48.1, 
+        current: 12.2, 
+        power: 587,
+        voltagePerCell: 3.2,
         internalResistance: 90,
-        currentPerString: 315.0,
-        voltagePerString: 125.0,
+        currentPerString: 12.2,
         stateOfCharge: 90,
         stateOfHealth: 94,
         ambientTemp: 27,
@@ -832,18 +899,20 @@ const BATTERY_SPEC = {
   voltageString: 125,
   cells: 60,
   capacityAh: 350,
-        voltagePerCell: parseFloat((125 / 60).toFixed(2))
+  voltagePerCell: parseFloat((125 / 60).toFixed(2))
 };
 
 function normalizeSiteMetrics(site) {
   const normalized = { ...site };
-  const soc = normalized.battery ?? normalized.stateOfCharge ?? 100;
+  const soc = normalized.stateOfCharge ?? normalized.battery ?? 100;
   const loadFactor = Math.max(0, Math.min(1, soc / 100));
   const nominalDischarge = BATTERY_SPEC.capacityAh * 0.4; // 40% of capacity as nominal operating current
   const current = parseFloat((nominalDischarge * loadFactor).toFixed(1));
 
-  normalized.stateOfCharge = normalized.stateOfCharge ?? soc;
-  normalized.voltagePerCell = normalized.voltagePerCell ?? BATTERY_SPEC.voltagePerCell;
+  normalized.stateOfCharge = soc;
+  normalized.battery = soc;
+  normalized.temp = normalized.temp ?? normalized.ambientTemp;
+  normalized.voltagePerCell = parseFloat(BATTERY_SPEC.voltagePerCell.toFixed(2));
   normalized.voltagePerString = BATTERY_SPEC.voltageString;
   normalized.voltage = BATTERY_SPEC.voltageString;
   normalized.currentPerString = current;
@@ -877,73 +946,73 @@ let markerCluster = null;
 let AdvancedMarker = null;
 let supportsClustering = false;
 
-    // Province regions mapping
-    const provinceRegions = {
-      north: ['เชียงราย', 'ลำปาง', 'น่าน', 'แพร่', 'แม่ฮ่องสอน', 'อุตรดิตถ์'],
-      northeast: ['ขอนแก่น', 'อุดรธานี', 'โพนพิสัย', 'บรบือ', 'เขื่องใน', 'โรจนะ 3', 'โรจนะ 4', 'สกลนคร', 'บุรีรัมย์', 'ศรีสะเกษ', 'มุกดาระหว่าง'],
-      central: ['พิษณุโลก', 'ชนแดน', 'ชัยนาท', 'ท่าวุ้ง', 'บางพระครู', 'สมุทรสาคร', 'สามพราน', 'นครสวรรค์', 'อ่างทอง', 'สิงห์บุรี'],
-      east: ['ชลบุรี', 'ระยอง', 'จันทบุรี', 'ตราด'],
-      south: ['ถลาง', 'ภูเก็ต', 'กระบี่', 'หาดใหญ่', 'ฉลุง', 'ปัตตานี', 'สุราษฎร์ธานี', 'นครศรีธรรมราช', 'พัทลุง', 'สงขลา'],
-      west: ['กำแพงเพชร', 'ตาก', 'ประจวบคีรีขันธ์', 'ระนอง', 'เพชรบุรี', 'ปราจีนบุรี']
-    };
+// Province regions mapping
+const provinceRegions = {
+  north: ['เชียงราย', 'ลำปาง', 'น่าน', 'แพร่', 'แม่ฮ่องสอน', 'อุตรดิตถ์'],
+  northeast: ['ขอนแก่น', 'อุดรธานี', 'โพนพิสัย', 'บรบือ', 'เขื่องใน', 'โรจนะ 3', 'โรจนะ 4', 'สกลนคร', 'บุรีรัมย์', 'ศรีสะเกษ'],
+  central: ['พิษณุโลก', 'ชนแดน', 'ชัยนาท', 'ท่าวุ้ง', 'บางพระครู', 'สมุทรสาคร', 'สามพราน', 'นครสวรรค์', 'อ่างทอง', 'สิงห์บุรี'],
+  east: ['ชลบุรี', 'ระยอง', 'จันทบุรี', 'ตราด'],
+  south: ['ถลาง', 'ภูเก็ต', 'กระบี่', 'หาดใหญ่', 'ฉลุง', 'ปัตตานี', 'สุราษฎร์ธานี', 'นครศรีธรรมราช', 'พัทลุง', 'สงขลา'],
+  west: ['กำแพงเพชร', 'ตาก', 'ประจวบคีรีขันธ์', 'ระนอง', 'เพชรบุรี', 'ปราจีนบุรี']
+};
 
-    // Thailand center coordinates
-    const THAILAND_CENTER = { lat: 13.7563, lng: 100.5018 };
+// Thailand center coordinates
+const THAILAND_CENTER = { lat: 13.7563, lng: 100.5018 };
 
-    // Alert system
-    function showAlert(message, type = 'info') {
-      const alertContainer = document.getElementById('alertContainer');
-      const alertId = 'alert-' + Date.now();
-      
-      const alertColors = {
-        'success': 'bg-green-500',
-        'warning': 'bg-yellow-500',
-        'error': 'bg-red-500',
-        'info': 'bg-blue-500'
-      };
+// Alert system
+function showAlert(message, type = 'info') {
+  const alertContainer = document.getElementById('alertContainer');
+  const alertId = 'alert-' + Date.now();
 
-      const alertIcons = {
-        'success': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>',
-        'warning': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>',
-        'error': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>',
-        'info': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'
-      };
+  const alertColors = {
+    success: 'bg-green-500',
+    warning: 'bg-yellow-500',
+    error: 'bg-red-500',
+    info: 'bg-blue-500'
+  };
 
-      const alertHTML = `
-        <div id="${alertId}" class="alert-notification glass-card rounded-lg p-4 mb-3 max-w-sm">
-          <div class="flex items-start gap-3">
-            <div class="${alertColors[type]} p-2 rounded-lg">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                ${alertIcons[type]}
-              </svg>
-            </div>
-            <div class="flex-1">
-              <p class="text-sm font-medium">${message}</p>
-            </div>
-            <button onclick="closeAlert('${alertId}')" class="text-gray-400 hover:text-white">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
+  const alertIcons = {
+    success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>',
+    warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>',
+    error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>',
+    info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'
+  };
+
+  const alertHTML = `
+    <div id="${alertId}" class="alert-notification glass-card rounded-lg p-4 mb-3 max-w-sm">
+      <div class="flex items-start gap-3">
+        <div class="${alertColors[type]} p-2 rounded-lg">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            ${alertIcons[type]}
+          </svg>
         </div>
-      `;
+        <div class="flex-1">
+          <p class="text-sm font-medium">${message}</p>
+        </div>
+        <button onclick="closeAlert('${alertId}')" class="text-gray-400 hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `;
 
-      alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+  alertContainer.insertAdjacentHTML('beforeend', alertHTML);
 
-      // Auto-remove after 5 seconds
-      setTimeout(() => {
-        closeAlert(alertId);
-      }, 5000);
-    }
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    closeAlert(alertId);
+  }, 5000);
+}
 
-    function closeAlert(alertId) {
-      const alert = document.getElementById(alertId);
-      if (alert) {
-        alert.style.animation = 'slideIn 0.3s ease-out reverse';
-        setTimeout(() => alert.remove(), 300);
-      }
-    }
+function closeAlert(alertId) {
+  const alert = document.getElementById(alertId);
+  if (alert) {
+    alert.style.animation = 'slideIn 0.3s ease-out reverse';
+    setTimeout(() => alert.remove(), 300);
+  }
+}
 
     function shouldTriggerAlert(key) {
       const now = Date.now();
@@ -1124,7 +1193,8 @@ let supportsClustering = false;
         lat: parseFloat(document.getElementById('latitude').value),
         lng: parseFloat(document.getElementById('longitude').value),
         stateOfCharge,
-        stateOfHealth,        internalResistance: parseInt(document.getElementById('internalResistance').value),
+        stateOfHealth,
+        internalResistance: parseInt(document.getElementById('internalResistance').value),
         ambientTemp: parseFloat(document.getElementById('ambientTemp').value),
         temp: parseFloat(document.getElementById('ambientTemp').value),
         battery: stateOfCharge,
@@ -1190,9 +1260,23 @@ let supportsClustering = false;
       const pinClass = site.status === 'good' ? 'pin-good' : 
                        site.status === 'warning' ? 'pin-warning' : 'pin-critical';
       
+      const statusIcon = site.status === 'good' ? '✓' : 
+                        site.status === 'warning' ? '!' : '⚠';
+      
       return `
-        <div class="pin-circle ${pinClass}"></div>
-        <div class="pin-stem ${pinClass}"></div>
+        <div class="enhanced-battery-pin ${pinClass}">
+          <div class="battery-icon">
+            <div class="battery-body">
+              <div class="battery-fill ${pinClass}" style="width: ${site.stateOfCharge}%"></div>
+              <div class="battery-indicator">${statusIcon}</div>
+            </div>
+            <div class="battery-cap"></div>
+          </div>
+          <div class="site-info">
+            <div class="site-name">${site.name}</div>
+            <div class="site-status">${site.stateOfCharge}%</div>
+          </div>
+        </div>
       `;
     }
 
@@ -1206,14 +1290,23 @@ let supportsClustering = false;
       pin.setAttribute('data-site-id', site.id);
       pin.innerHTML = `
         ${renderBatteryPin(site)}
-        <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap pointer-events-none z-20">
-          <div class="glass-card rounded-lg px-3 py-2 text-center shadow-lg">
-            <div class="font-bold text-sm text-white">${site.name}</div>
-            <div class="text-xs text-gray-300 mt-1">
+        <div class="province-label">
+          <div class="px-2 py-1 rounded">
+            ${site.province}
+          </div>
+        </div>
+        <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity pointer-events-none z-20">
+          <div class="glass-card rounded-lg px-3 py-2">
+            <div class="font-bold text-sm text-center text-white">${site.name}</div>
+            <div class="text-xs text-gray-300 text-center mt-1">
               SoC: <span class="font-bold ${getStatusColor(site.status)}">${site.stateOfCharge}%</span>
             </div>
-            <div class="text-xs text-gray-400">${site.province}</div>
-            <div class="text-xs text-blue-400 mt-1 font-semibold">Click for details →</div>
+            <div class="text-xs text-gray-300 text-center">
+              ${site.province}
+            </div>
+            <div class="text-xs text-blue-400 text-center mt-2 font-semibold">
+              Click for details →
+            </div>
           </div>
         </div>
       `;
@@ -1289,7 +1382,7 @@ let supportsClustering = false;
         'ฉลุง': { x: 50, y: 88 },
         'ปัตตานี': { x: 65, y: 87 },
         'วาปีปทุม': { x: 62, y: 38 },
-        'สุรทศา': { x: 55, y: 35 }
+        'สุราษฎร์ธานี': { x: 55, y: 35 }
       };
       return positions[province] || { x: 50, y: 50 };
     }

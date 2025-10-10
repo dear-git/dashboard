@@ -83,3 +83,27 @@ The application uses Google Maps JavaScript API to display battery locations wit
 - **Critical (Red)**: State of charge <60%
 
 The status is reflected in both the map pins and detailed views.
+ site name substation
+ เชียงราย 2
+ ลำปาง 3
+ พิษณุโลก 6
+ น่าน 1
+ ท่าวุ้ง
+ ชนแดน
+ ชัยนาท
+ อุดรธานี 3
+ ขอนแก่น 3
+ โพนพิสัย
+ บรบือ
+ วาปีปทุม
+ เขื่องใน
+ โรจนะ 3
+ โรจนะ 4
+ บางพระครู
+ สมุทรสาคร 7
+ สามพราน 4
+ ถลาง 2
+ ภูเก็ต 3
+ กระบี่ 1
+ หาดใหญ่ 2
+ 
