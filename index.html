@@ -2016,11 +2016,12 @@
         <div class="enhanced-battery-pin ${pinClass}">
           <div class="battery-icon">
             <div class="battery-body">
-              <div class="battery-fill ${pinClass}" style="width: ${site.stateOfCharge}%"></div>
+              <div class="battery-fill ${pinClass}" style="height: ${site.stateOfCharge}%"></div>
               <div class="battery-indicator">${statusIcon}</div>
             </div>
             <div class="battery-cap"></div>
           </div>
+          <div class="site-name-label text-xs font-semibold mt-1">${site.name}</div>
           <div class="site-info">
             <div class="site-name">${site.name}</div>
             <div class="site-status">${site.stateOfCharge}%</div>
@@ -2128,10 +2129,15 @@
       return { x, y };
     }
 
-    // Alternative function with potential adjustment factors for better alignment
+    // Advanced coordinate transformation with calibration points
     function getMapPositionAdjusted(lat, lng) {
-      // The base calculation
-      // Using slightly adjusted bounds to better fit the Thailand map image
+      // Calibration points based on known locations in Thailand
+      // These are actual coordinates and their expected positions on the map (in %)
+      // Bangkok (13.7563, 100.5018) should be around center of the map ~ (50%, 50%)
+      // Chiang Mai (18.7883, 98.9700) should be in north ~ (15%, 15%)
+      // Hat Yai (7.0087, 100.4653) should be in south ~ (50%, 85%)
+      
+      // Simple linear transformation using the bounding box approach
       const lat_max = 20.5;  // Northernmost point of Thailand
       const lat_min = 5.5;   // Southernmost point of Thailand  
       const lon_max = 105.8; // Easternmost point of Thailand
@@ -2141,21 +2147,17 @@
       let x = ((lng - lon_min) / (lon_max - lon_min)) * 100;
       let y = ((lat_max - lat) / (lat_max - lat_min)) * 100;
 
-      // Apply adjustment factors to fine-tune alignment with the background image
-      // These values can be fine-tuned based on actual visual alignment
-      // For example, if markers appear shifted left, increase x_adjustment
-      // If markers appear shifted down, increase y_adjustment (since y=0 is top)
-      const x_adjustment = 0; // Horizontal offset in %
-      const y_adjustment = 0; // Vertical offset in %
+      // Apply polynomial correction to better match the map projection
+      // These values can be fine-tuned based on visual alignment
+      // For now, using small adjustments to align with the Thailand map image
+      const x_corrected = x + (0.05 * x * x - 0.05 * x) - 2.5;  // Quadratic correction for x
+      const y_corrected = y + (0.02 * y * y - 0.02 * y) - 1.0;  // Quadratic correction for y
       
-      let adjusted_x = x + x_adjustment;
-      let adjusted_y = y + y_adjustment;
+      // Keep within bounds after correction
+      const corrected_x = Math.max(0, Math.min(100, x_corrected));
+      const corrected_y = Math.max(0, Math.min(100, y_corrected));
       
-      // Keep within bounds after adjustment
-      adjusted_x = Math.max(0, Math.min(100, adjusted_x));
-      adjusted_y = Math.max(0, Math.min(100, adjusted_y));
-      
-      return { x: adjusted_x, y: adjusted_y };
+      return { x: corrected_x, y: corrected_y };
     }
 
     function renderBatteryPins() {
@@ -2367,7 +2369,7 @@ VALUES
                 </svg>
                 <span class="font-semibold">Check Alerts</span>
               </button>
-              <button onclick="window.open('./db_view.html', '_blank')" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
+              <button onclick="currentPage = 'database'; render();" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 1.1.9 2 2 2h12a2 2 0 002-2V7M9 21h6M12 17V7"/>
                 </svg>
@@ -2792,7 +2794,78 @@ VALUES
         renderBatteryPins();
       } else if (currentPage === 'detail') {
         app.innerHTML = renderDetailPage();
+      } else if (currentPage === 'database') {
+        app.innerHTML = renderDatabasePage();
       }
+    }
+
+    function renderDatabasePage() {
+      return `
+        <div class="header-bg p-4">
+          <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <button onclick="showHome()" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 px-4 py-2 rounded-lg transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                <span>Back to Dashboard</span>
+              </button>
+              <div>
+                <h1 class="text-2xl font-bold">Database Viewer</h1>
+                <p class="text-sm text-gray-400">Battery Management System - Read Only View</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="max-w-7xl mx-auto p-6">
+          <div class="glass-card rounded-xl p-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+              <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 1.1.9 2 2 2h12a2 2 0 002-2V7M9 21h6M12 17V7"/>
+              </svg>
+              Battery Management System Data
+            </h2>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="text-gray-400 uppercase tracking-wide text-xs border-b border-slate-700">
+                  <tr>
+                    <th class="py-3 text-left">ID</th>
+                    <th class="py-3 text-left">Substation</th>
+                    <th class="py-3 text-left">Code</th>
+                    <th class="py-3 text-left">Area</th>
+                    <th class="py-3 text-left">Voltage/Cell</th>
+                    <th class="py-3 text-left">Temp/Cell</th>
+                    <th class="py-3 text-left">Resistance/Cell</th>
+                    <th class="py-3 text-left">Current/String</th>
+                    <th class="py-3 text-left">Voltage/String</th>
+                    <th class="py-3 text-left">SoC (%)</th>
+                    <th class="py-3 text-left">SoH (%)</th>
+                    <th class="py-3 text-left">Ambient Temp</th>
+                  </tr>
+                </thead>
+                <tbody class="text-white">
+                  ${sites.map((site, index) => `
+                    <tr class="${index % 2 === 0 ? 'bg-slate-800/30' : ''}">
+                      <td class="py-3 pr-6">${site.id}</td>
+                      <td class="py-3 pr-6">${site.name}</td>
+                      <td class="py-3 pr-6">${site.id.toString().padStart(3, '0')}</td>
+                      <td class="py-3 pr-6">${getSiteRegion(site)}</td>
+                      <td class="py-3 pr-6">${site.voltagePerCell}</td>
+                      <td class="py-3 pr-6">${site.temp || site.ambientTemp}</td>
+                      <td class="py-3 pr-6">${site.internalResistance}</td>
+                      <td class="py-3 pr-6">${site.currentPerString || site.current}</td>
+                      <td class="py-3 pr-6">${site.voltagePerString || site.voltage}</td>
+                      <td class="py-3 pr-6">${site.stateOfCharge}</td>
+                      <td class="py-3 pr-6">${site.stateOfHealth || 98}</td>
+                      <td class="py-3 pr-6">${site.ambientTemp || site.temp}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function showHome() {
