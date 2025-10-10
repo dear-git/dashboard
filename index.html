@@ -4,416 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Battery Monitoring System - Thailand</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
-  <style>
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    .animate-pulse {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    @keyframes ping {
-      75%, 100% {
-        transform: scale(2);
-        opacity: 0;
-      }
-    }
-    .animate-ping {
-      animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-    }
-    @keyframes float {
-      0%, 100% { transform: translate(-50%, -100%) translateY(0px); }
-      50% { transform: translate(-50%, -100%) translateY(-8px); }
-    }
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    @keyframes grid {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(20px); }
-    }
-    @keyframes alertBlink {
-      0%, 50%, 100% { opacity: 1; }
-      25%, 75% { opacity: 0.3; }
-    }
-    
-    /* Enhanced body background with animated gradient */
-    body {
-      background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #1e293b, #0f172a);
-      background-size: 400% 400%;
-      animation: gradient 15s ease infinite;
-      position: relative;
-      overflow-x: hidden;
-    }
-    
-    /* Animated grid pattern background */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: 
-        linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
-      background-size: 50px 50px;
-      animation: grid 10s linear infinite;
-      z-index: -2;
-    }
-    
-    /* Particle effect background */
-    body::after {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.2) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 20%, rgba(239, 68, 68, 0.2) 0%, transparent 50%);
-      z-index: -1;
-    }
-    
-    /* Map container */
-    #map, #detailMap {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
-    
-    .map-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, 
-        rgba(15, 23, 42, 0.05) 0%, 
-        rgba(15, 23, 42, 0.1) 25%, 
-        rgba(15, 23, 42, 0.15) 50%, 
-        rgba(15, 23, 42, 0.1) 75%, 
-        rgba(15, 23, 42, 0.05) 100%);
-      z-index: 1;
-      pointer-events: none;
-    }
-    
-    .battery-pin {
-      position: absolute;
-      transform: translate(-50%, -100%);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      animation: float 2.5s ease-in-out infinite;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-      z-index: 10;
-    }
-    
-    .battery-pin:hover {
-      z-index: 100 !important;
-      animation: none;
-      transform: translate(-50%, -100%) scale(1.2);
-      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
-    }
-    
-    .battery-pin.alerting {
-      animation: float 2.5s ease-in-out infinite, alertBlink 1s ease-in-out infinite;
-    }
+<link href="./output.css" rel="stylesheet">
 
-    .pin-circle {
-      width: 24px;
-      height: 24px;
-      border: 3px solid white;
-      border-radius: 50%;
-      display: block;
-      position: relative;
-      z-index: 2;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-    
-    .pin-stem {
-      width: 3px;
-      height: 12px;
-      display: block;
-      margin: 0 auto;
-      transform: translateY(-2px);
-      border-radius: 1.5px;
-    }
-    
-    .pin-good { 
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
-    }
-    .pin-warning { 
-      background: linear-gradient(135deg, #eab308, #ca8a04);
-      box-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
-    }
-    .pin-critical { 
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-    }
-    
-    /* Glass morphism effect for cards */
-    .glass-card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    }
-    
-    /* Enhanced header background */
-    .header-bg {
-      background: linear-gradient(135deg, 
-        rgba(15, 23, 42, 0.9) 0%, 
-        rgba(30, 41, 59, 0.8) 50%, 
-        rgba(15, 23, 42, 0.9) 100%);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-      z-index: 20;
-      position: relative;
-    }
-    
-    /* Map container enhanced background */
-    .map-container {
-      background: linear-gradient(135deg, 
-        rgba(15, 23, 42, 0.85) 0%, 
-        rgba(30, 41, 59, 0.75) 100%),
-        url('./file/thailand-map.png');
-      background-size: cover;
-      background-position: center;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .map-container::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-      animation: rotate 30s linear infinite;
-      z-index: 1;
-    }
-    
-    @keyframes rotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    /* Enhanced button hover effects */
-    .btn-enhanced {
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    
-    .btn-enhanced::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-    
-    .btn-enhanced:hover::before {
-      width: 300px;
-      height: 300px;
-    }
-    
-    /* Status indicators with glow effect */
-    .status-good {
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
-    }
-    
-    .status-warning {
-      background: linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(234, 179, 8, 0.1));
-      border: 1px solid rgba(234, 179, 8, 0.3);
-      box-shadow: 0 0 20px rgba(234, 179, 8, 0.2);
-    }
-    
-    .status-critical {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
-    }
-
-    /* Enhanced Battery Icon Styles */
-    .enhanced-battery-pin {
-      position: absolute;
-      transform: translate(-50%, -100%);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      animation: float 2.5s ease-in-out infinite;
-      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
-      z-index: 10;
-      pointer-events: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .enhanced-battery-pin:hover {
-      transform: translate(-50%, -100%) scale(1.15);
-      z-index: 100;
-      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
-    }
-
-    .enhanced-battery-pin.alerting {
-      animation: float 2.5s ease-in-out infinite, alertBlink 1s ease-in-out infinite;
-    }
-
-    .battery-icon {
-      position: relative;
-      width: 32px;
-      height: 48px;
-    }
-
-    .battery-body {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 28px;
-      height: 42px;
-      border: 2px solid white;
-      border-radius: 4px;
-      overflow: hidden;
-      background: rgba(30, 41, 59, 0.8);
-      backdrop-filter: blur(4px);
-    }
-
-    .battery-fill {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: var(--fill-height, 50%);
-      transition: all 0.3s ease;
-      border-radius: 0 0 2px 2px;
-    }
-
-    .battery-fill.pin-good {
-      background: linear-gradient(to top, #16a34a, #22c55e);
-      box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.5);
-    }
-
-    .battery-fill.pin-warning {
-      background: linear-gradient(to top, #ca8a04, #eab308);
-      box-shadow: inset 0 0 10px rgba(234, 179, 8, 0.5);
-    }
-
-    .battery-fill.pin-critical {
-      background: linear-gradient(to top, #dc2626, #ef4444);
-      box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.5);
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    .battery-indicator {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 14px;
-      font-weight: bold;
-      color: white;
-      text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-      z-index: 2;
-    }
-
-    .battery-cap {
-      position: absolute;
-      top: -3px;
-      right: -2px;
-      width: 8px;
-      height: 6px;
-      background: white;
-      border-radius: 0 2px 2px 0;
-    }
-
-    .site-info {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(30, 41, 59, 0.95);
-      backdrop-filter: blur(8px);
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      white-space: nowrap;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-      z-index: 20;
-      min-width: 80px;
-      text-align: center;
-    }
-
-    .enhanced-battery-pin:hover .site-info {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(-50%) translateY(-2px);
-    }
-
-    .site-name {
-      font-size: 11px;
-      font-weight: 600;
-      color: white;
-      margin-bottom: 2px;
-    }
-
-    .site-status {
-      font-size: 9px;
-      color: #60a5fa;
-      font-weight: 500;
-    }
-
-        .battery-pin-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 20;
-    }
-    
-    .province-label {
-      position: absolute;
-      top: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(30, 41, 59, 0.85);
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      border-radius: 6px;
-      padding: 4px 8px;
-      color: white;
-      font-size: 0.6rem;
-      font-weight: 600;
-      white-space: nowrap;
-      z-index: 25;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    
-    .battery-pin:hover .province-label {
-      opacity: 1;
-    }
-  </style>
 </head>
 <body class="text-white min-h-screen">
   <div id="app"></div>
@@ -426,21 +18,491 @@
         v: "weekly",
     });
 
-    let sites = [];
+    let sites = [
+      { 
+        id: 1, 
+        name: 'สถานีไฟฟ้า น่าน 1', 
+        lat: 17.01, 
+        lng: 99.82, 
+        status: 'good', 
+        battery: 95, 
+        temp: 28, 
+        voltage: 125.0, 
+        current: 332.5,
+        voltagePerCell: 2.50,
+        internalResistance: 2500,
+        currentPerString: 332.5,
+        voltagePerString: 125.0,
+        stateOfCharge: 95,
+        stateOfHealth: 98,
+        ambientTemp: 28,
+        province: 'น่าน' 
+      },
+      { 
+        id: 2, 
+        name: 'สถานีไฟฟ้า เชียงราย 2', 
+        lat: 19.91, 
+        lng: 99.84, 
+        status: 'good', 
+        battery: 90, 
+        temp: 27, 
+        voltage: 125.0, 
+        current: 315.0,
+        voltagePerCell: 2.50,
+        internalResistance: 2200,
+        currentPerString: 315.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 90,
+        stateOfHealth: 96,
+        ambientTemp: 27,
+        province: 'เชียงราย' 
+      },
+      { 
+        id: 3, 
+        name: 'สถานีไฟฟ้า ลำปาง 3', 
+        lat: 18.29, 
+        lng: 99.49, 
+        status: 'critical', 
+        battery: 45, 
+        temp: 32, 
+        voltage: 125.0, 
+        current: 157.5,
+        voltagePerCell: 2.50,
+        internalResistance: 4800,
+        currentPerString: 157.5,
+        voltagePerString: 125.0,
+        stateOfCharge: 45,
+        stateOfHealth: 85,
+        ambientTemp: 32,
+        province: 'ลำปาง' 
+      },
+      { 
+        id: 4, 
+        name: 'สถานีไฟฟ้า น่าน', 
+        lat: 13.3611, 
+        lng: 100.9847, 
+        status: 'good', 
+        battery: 88, 
+        temp: 29, 
+        voltage: 48.1, 
+        current: 12.0, 
+        power: 577,
+        voltagePerCell: 3.2,
+        internalResistance: 120,
+        currentPerString: 12.0,
+        voltagePerString: 96.2,
+        stateOfCharge: 88,
+        stateOfHealth: 96,
+        ambientTemp: 29,
+        province: 'น่าน' 
+      },
+      { 
+        id: 5, 
+        name: 'สถานีไฟฟ้า ท่าวุ้ง', 
+        lat: 16.4322, 
+        lng: 102.8236, 
+        status: 'critical', 
+        battery: 45, 
+        temp: 38, 
+        voltage: 48.1, 
+        current: 8.5, 
+        power: 398,
+        voltagePerCell: 2.6,
+        internalResistance: 1200,
+        currentPerString: 8.5,
+        voltagePerString: 83.6,
+        stateOfCharge: 45,
+        stateOfHealth: 65,
+        ambientTemp: 38,
+        province: 'ท่าวุ้ง' 
+      },
+      { 
+        id: 6, 
+        name: 'สถานีไฟฟ้า ชนแดน', 
+        lat: 7.0087, 
+        lng: 100.4653, 
+        status: 'good', 
+        battery: 91, 
+        temp: 30, 
+        voltage: 48.3, 
+        current: 11.5, 
+        power: 555,
+        voltagePerCell: 3.2,
+        internalResistance: 110,
+        currentPerString: 11.5,
+        voltagePerString: 96.6,
+        stateOfCharge: 91,
+        stateOfHealth: 97,
+        ambientTemp: 30,
+        province: 'ชนแดน' 
+      },
+      { 
+        id: 7, 
+        name: 'สถานีไฟฟ้า ชัยนาท', 
+        lat: 14.9799, 
+        lng: 102.0977, 
+        status: 'good', 
+        battery: 89, 
+        temp: 27, 
+        voltage: 48.0, 
+        current: 12.2, 
+        power: 586,
+        voltagePerCell: 3.2,
+        internalResistance: 95,
+        currentPerString: 12.2,
+        stateOfCharge: 89,
+        stateOfHealth: 94,
+        ambientTemp: 27,
+        province: 'ชัยนาท' 
+      },
+      { 
+        id: 8, 
+        name: 'สถานีไฟฟ้า อุดรธานี', 
+        lat: 17.4138, 
+        lng: 102.7872, 
+        status: 'warning', 
+        battery: 72, 
+        temp: 33, 
+        voltage: 47.7, 
+        current: 9.8, 
+        power: 467,
+        voltagePerCell: 2.9,
+        internalResistance: 380,
+        currentPerString: 9.8,
+        voltagePerString: 93.4,
+        stateOfCharge: 72,
+        stateOfHealth: 82,
+        ambientTemp: 33,
+        province: 'อุดรธานี' 
+      },
+      { 
+        id: 9, 
+        name: 'สถานีไฟฟ้า ขอนแก่น', 
+        lat: 9.1382, 
+        lng: 99.3331, 
+        status: 'good', 
+        battery: 94, 
+        temp: 28, 
+        voltage: 48.2, 
+        current: 12.8, 
+        power: 617,
+        voltagePerCell: 3.2,
+        internalResistance: 85,
+        currentPerString: 12.8,
+        stateOfCharge: 94,
+        stateOfHealth: 99,
+        ambientTemp: 28,
+        province: 'ขอนแก่น' 
+      },
+      { 
+        id: 10, 
+        name: 'สถานีไฟฟ้า โพนพิสัย', 
+        lat: 19.9105, 
+        lng: 99.8406, 
+        status: 'good', 
+        battery: 87, 
+        temp: 25, 
+        voltage: 48.1, 
+        current: 11.9, 
+        power: 572,
+        voltagePerCell: 3.2,
+        internalResistance: 130,
+        currentPerString: 11.9,
+        voltagePerString: 96.2,
+        stateOfCharge: 87,
+        stateOfHealth: 93,
+        ambientTemp: 25,
+        province: 'โพนพิสัย' 
+      },
+      { 
+        id: 11, 
+        name: 'สถานีไฟฟ้า บรบือ', 
+        lat: 12.6814, 
+        lng: 101.2816, 
+        status: 'good', 
+        battery: 93, 
+        temp: 27, 
+        voltage: 48.3, 
+        current: 12.6, 
+        power: 609,
+        voltagePerCell: 3.2,
+        internalResistance: 100,
+        currentPerString: 12.6,
+        stateOfCharge: 93,
+        stateOfHealth: 98,
+        ambientTemp: 27,
+        province: 'บรบือ' 
+      },
+      { 
+        id: 12, 
+        name: 'สถานีไฟฟ้า วาปีปทุม', 
+        lat: 14.3692, 
+        lng: 100.5877, 
+        status: 'warning', 
+        battery: 68, 
+        temp: 35, 
+        voltage: 47.4, 
+        current: 9.2, 
+        power: 436,
+        voltagePerCell: 2.8,
+        internalResistance: 520,
+        currentPerString: 9.2,
+        voltagePerString: 90.4,
+        stateOfCharge: 68,
+        stateOfHealth: 78,
+        ambientTemp: 35,
+        province: 'วาปีปทุม' 
+      },
+      { 
+        id: 13, 
+        name: 'สถานีไฟฟ้า เขื่องใน', 
+        lat: 8.0863, 
+        lng: 98.9063, 
+        status: 'good', 
+        battery: 90, 
+        temp: 29, 
+        voltage: 48.0, 
+        current: 11.7, 
+        power: 562,
+        voltagePerCell: 3.0,
+        internalResistance: 150,
+        currentPerString: 11.7,
+        stateOfCharge: 90,
+        stateOfHealth: 95,
+        ambientTemp: 29,
+        province: 'เขื่องใน' 
+      },
+      { 
+        id: 14, 
+        name: 'สถานีไฟฟ้า โรจนะ 3', 
+        lat: 8.4304, 
+        lng: 99.9631, 
+        status: 'good', 
+        battery: 85, 
+        temp: 30, 
+        voltage: 47.9, 
+        current: 11.3, 
+        power: 541,
+        voltagePerCell: 3.0,
+        internalResistance: 200,
+        currentPerString: 11.3,
+        stateOfCharge: 85,
+        stateOfHealth: 88,
+        ambientTemp: 30,
+        province: 'โรจนะ 3' 
+      },
+      { 
+        id: 15, 
+        name: 'สถานีไฟฟ้า โรจนะ 4', 
+        lat: 18.2888, 
+        lng: 99.4919, 
+        status: 'critical', 
+        battery: 42, 
+        temp: 39, 
+        voltage: 46.5, 
+        current: 7.8, 
+        power: 363,
+        voltagePerCell: 2.5,
+        internalResistance: 1500,
+        currentPerString: 7.8,
+        stateOfCharge: 42,
+        stateOfHealth: 60,
+        ambientTemp: 39,
+        province: 'โรจนะ 4' 
+      },
+      { 
+        id: 16, 
+        name: 'สถานีไฟฟ้า บางพระครู', 
+        lat: 13.8199, 
+        lng: 100.0376, 
+        status: 'good', 
+        battery: 88, 
+        temp: 28, 
+        voltage: 48.1, 
+        current: 12.1, 
+        power: 582,
+        voltagePerCell: 3.2,
+        internalResistance: 115,
+        currentPerString: 12.1,
+        stateOfCharge: 88,
+        stateOfHealth: 96,
+        ambientTemp: 28,
+        province: 'บางพระครู' 
+      },
+      { 
+        id: 17, 
+        name: 'สถานีไฟฟ้า สมุทรสาคร', 
+        lat: 12.5683, 
+        lng: 99.9577, 
+        status: 'good', 
+        battery: 91, 
+        temp: 29, 
+        voltage: 48.2, 
+        current: 11.8, 
+        power: 569,
+        voltagePerCell: 3.2,
+        internalResistance: 105,
+        currentPerString: 11.8,
+        stateOfCharge: 91,
+        stateOfHealth: 97,
+        ambientTemp: 29,
+        province: 'สมุทรสาคร' 
+      },
+      { 
+        id: 18, 
+        name: 'สถานีไฟฟ้า สามพราน', 
+        lat: 14.0227, 
+        lng: 99.5328, 
+        status: 'warning', 
+        battery: 75, 
+        temp: 31, 
+        voltage: 47.6, 
+        current: 10.5, 
+        power: 500,
+        voltagePerCell: 2.9,
+        internalResistance: 320,
+        currentPerString: 10.5,
+        stateOfCharge: 75,
+        stateOfHealth: 84,
+        ambientTemp: 31,
+        province: 'สามพราน' 
+      },
+      { 
+        id: 19, 
+        name: 'สถานีไฟฟ้า ถลาง', 
+        lat: 16.8214, 
+        lng: 100.2659, 
+        status: 'good', 
+        battery: 86, 
+        temp: 28, 
+        voltage: 48.0, 
+        current: 11.6, 
+        power: 557,
+        voltagePerCell: 3.2,
+        internalResistance: 125,
+        currentPerString: 11.6,
+        stateOfCharge: 86,
+        stateOfHealth: 92,
+        ambientTemp: 28,
+        province: 'ถลาง' 
+      },
+      { 
+        id: 20, 
+        name: 'สถานีไฟฟ้า ภูเก็ต', 
+        lat: 15.6950, 
+        lng: 100.1378, 
+        status: 'good', 
+        battery: 89, 
+        temp: 30, 
+        voltage: 48.1, 
+        current: 12.0, 
+        power: 577,
+        voltagePerCell: 3.2,
+        internalResistance: 110,
+        currentPerString: 12.0,
+        stateOfCharge: 89,
+        stateOfHealth: 95,
+        ambientTemp: 30,
+        province: 'ภูเก็ต' 
+      },
+      { 
+        id: 21, 
+        name: 'สถานีไฟฟ้า กระบี่', 
+        lat: 15.2286, 
+        lng: 104.8564, 
+        status: 'good', 
+        battery: 92, 
+        temp: 27, 
+        voltage: 48.2, 
+        current: 12.3, 
+        power: 593,
+        voltagePerCell: 3.2,
+        internalResistance: 95,
+        currentPerString: 12.3,
+        stateOfCharge: 92,
+        stateOfHealth: 96,
+        ambientTemp: 27,
+        province: 'กระบี่' 
+      },
+      { 
+        id: 22, 
+        name: 'สถานีไฟฟ้า หาดใหญ่', 
+        lat: 7.5563, 
+        lng: 99.6114, 
+        status: 'warning', 
+        battery: 70, 
+        temp: 34, 
+        voltage: 47.5, 
+        current: 9.5, 
+        power: 451,
+        voltagePerCell: 2.8,
+        internalResistance: 420,
+        currentPerString: 9.5,
+        stateOfCharge: 70,
+        stateOfHealth: 80,
+        ambientTemp: 34,
+        province: 'หาดใหญ่' 
+      },
+      { 
+        id: 23, 
+        name: 'สถานีไฟฟ้า ฉลุง', 
+        lat: 15.0000, 
+        lng: 103.1000, 
+        status: 'good', 
+        battery: 87, 
+        temp: 29, 
+        voltage: 48.0, 
+        current: 11.9, 
+        power: 571,
+        voltagePerCell: 3.2,
+        internalResistance: 120,
+        currentPerString: 11.9,
+        stateOfCharge: 87,
+        stateOfHealth: 93,
+        ambientTemp: 29,
+        province: 'ฉลุง' 
+      },
+      { 
+        id: 24, 
+        name: 'สถานีไฟฟ้า ปัตตานี', 
+        lat: 17.0078, 
+        lng: 99.8236, 
+        status: 'good', 
+        battery: 90, 
+        temp: 27, 
+        voltage: 48.1, 
+        current: 12.2, 
+        power: 587,
+        voltagePerCell: 3.2,
+        internalResistance: 90,
+        currentPerString: 12.2,
+        stateOfCharge: 90,
+        stateOfHealth: 94,
+        ambientTemp: 27,
+        province: 'ปัตตานี' 
+      }
+    ];
 
     async function fetchData() {
       try {
         const response = await fetch('http://127.0.0.1:5001/api/bms');
         const data = await response.json();
-        sites = data.map(site => ({
+        // Merge API data with default sites if needed
+        const apiSites = data.map(site => ({
           ...site,
           lat: parseFloat(site.lat),
           lng: parseFloat(site.lng)
         }));
+        
+        // If API returns new sites, replace current sites with API data
+        if (apiSites.length > 0) {
+          sites = apiSites;
+        }
         render();
       } catch (error) {
         console.error('Error fetching site data:', error);
-        showAlert('Failed to load site data from the database.', 'error');
+        showAlert('Failed to load site data from the database. Using default data.', 'info');
+        // Sites will remain with default values if API fails
       }
     }
 
@@ -471,7 +533,12 @@ function normalizeSiteMetrics(site) {
   return normalized;
 }
 
-sites = sites.map(normalizeSiteMetrics);
+function initializeSites() {
+  sites = sites.map(normalizeSiteMetrics);
+}
+
+// Initialize sites with default data
+initializeSites();
 
 function getBatterySpecLabel() {
   return `Li-ion ${BATTERY_SPEC.voltageString}VDC (${BATTERY_SPEC.cells} Cells)`;
@@ -1661,14 +1728,23 @@ function closeAlert(alertId) {
 
       if (currentPage === 'home') {
         setTimeout(() => {
-          renderBatteryPins();
+          initMap();
         }, 60);
+      } else {
+        setTimeout(() => {
+          initDetailMap();
+        }, 100);
       }
     }
 
     // Initial render
-    render();
-    fetchData();
+    fetchData(); // Try to load from API first
+    setTimeout(() => {
+      // If API fails, render with default data
+      if (sites.length === 0) {
+        render();
+      }
+    }, 2000); // Wait 2 seconds for API before falling back
 
     // Auto-check for battery failures every 30 seconds
     setInterval(checkBatteryFailures, 30000);
