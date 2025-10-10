@@ -1081,7 +1081,7 @@
 
     // Initialize and add the map
     let map;
-    async function initMap(): Promise<void> {
+    async function initMap() {
       // The location of Thailand center
       const position = { lat: 13.7563, lng: 100.5018 };
 
@@ -1184,7 +1184,7 @@
     }
 
     // Initialize detail map
-    async function initDetailMap(): Promise<void> {
+    async function initDetailMap() {
       if (!selectedSite) return;
       
       // The location of selected site
@@ -1620,7 +1620,7 @@
     }
 
     // Initialize detail map for the selected site
-    async function initDetailMap(): Promise<void> {
+    async function initDetailMap() {
       if (!selectedSite) return;
       
       // The location of selected site
