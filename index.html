@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Battery Monitoring System - Thailand</title>
-  
+<!-- NOTE: output.css is a generated file (e.g., by Tailwind). Do not edit directly. -->
+<link href="./output.css" rel="stylesheet">
   <style>
     @keyframes pulse {
       0%, 100% { opacity: 1; }
@@ -188,6 +189,21 @@
       background-color: #1e293b; /* Fallback color if image fails to load */
       position: relative;
       overflow: hidden;
+      /* Set explicit aspect ratio to match PNG dimensions (1057:720 ≈ 1.47:1) */
+      aspect-ratio: 1057 / 720;
+    }
+    
+    /* Ensure map container maintains proper aspect ratio */
+    .map-container[style*="height: 700px"] {
+      height: 700px !important;
+      width: calc(700px * 1057 / 720);
+      max-width: 100%;
+    }
+    
+    .map-container[style*="height: 400px"] {
+      height: 400px !important;
+      width: calc(400px * 1057 / 720);
+      max-width: 100%;
     }
     
     .map-container::before {
@@ -402,6 +418,63 @@
       font-size: 9px;
       color: #60a5fa;
       font-weight: 500;
+    }
+
+    .site-number-label {
+      font-size: 10px;
+      font-weight: bold;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      min-width: 20px;
+      text-align: center;
+      backdrop-filter: blur(2px);
+    }
+
+    /* SVG-based map styles */
+    .svg-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .map {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .pin {
+      cursor: pointer;
+    }
+    
+    .pin circle,
+    .pin path,
+    .pin text {
+      cursor: pointer;
+    }
+
+    .label {
+      font-size: 12px;
+      user-select: none;
+      pointer-events: none;
+      text-shadow: 0 1px 2px rgba(0,0,0,.8);
+      fill: #fff;
+      font-weight: bold;
+    }
+
+    .tooltip {
+      display: none;
+      position: absolute;
+      background: rgba(17, 24, 39, 0.95);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      transform: translate(-50%, -120%);
+      white-space: nowrap;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
         .battery-pin-container {
@@ -2097,89 +2170,142 @@
     }
 
         function getMapPosition(lat, lng) {
-      // Thailand coordinates optimized for thailand-map.png
+      // Convert lat/lng to SVG pixel coordinates (1200x800 viewBox)
       const lat_max = 20.5;   // Northern boundary
       const lat_min = 5.5;    // Southern boundary  
       const lon_max = 105.5;  // Eastern boundary
       const lon_min = 97.0;   // Western boundary
 
-      // Convert lat/lng to map percentage coordinates
-      let x = ((lng - lon_min) / (lon_max - lon_min)) * 100;
-      let y = ((lat_max - lat) / (lat_max - lat_min)) * 100;
+      // SVG viewBox dimensions
+      const svgWidth = 1200;
+      const svgHeight = 800;
 
-      // Province-specific adjustments for accurate placement on thailand-map.png
-      if (lat > 18 && lng < 100) {           // Northwest (เชียงราย, ลำปาง, น่าน)
-        x = x * 0.88 + 4; y = y * 0.82 + 6;
-      } else if (lat > 17 && lng >= 100) {     // Northeast (อุดรธานี, ขอนแก่น)
-        x = x * 0.92 + 5; y = y * 0.86 + 6;
-      } else if (lat >= 15.5 && lat <= 17.5) {  // Central (พิษณุโลก, ชัยนาท, ท่าวุ้ง, ชนแดน)
-        x = x * 0.89 + 5; y = y * 0.84 + 6;
-      } else if (lat < 13 && lng > 100) {      // South East (สงขลา, ฉลุง, ปัตตานี)
-        x = x * 0.87 + 6; y = y * 0.83 + 8;
-      } else if (lat < 13 && lng <= 100) {     // South West (กระบี่, ภูเก็ต, ถลาง)
-        x = x * 0.85 + 5; y = y * 0.81 + 8;
+      // Direct conversion to pixels
+      let x = ((lng - lon_min) / (lon_max - lon_min)) * svgWidth;
+      let y = ((lat_max - lat) / (lat_max - lat_min)) * svgHeight;
+
+      // Fine-tune pixel positioning for thailand-map.png
+      if (lat > 18 && lng < 100) {           // Northwest
+        x = x * 0.85 + 80; y = y * 0.80 + 60;
+      } else if (lat > 17 && lng >= 100) {     // Northeast
+        x = x * 0.90 + 100; y = y * 0.85 + 70;
+      } else if (lat >= 15.5 && lat <= 17.5) {  // Central
+        x = x * 0.87 + 90; y = y * 0.83 + 65;
+      } else if (lat < 13 && lng > 100) {      // South East
+        x = x * 0.88 + 110; y = y * 0.82 + 90;
+      } else if (lat < 13 && lng <= 100) {     // South West
+        x = x * 0.86 + 85; y = y * 0.81 + 85;
       } else {                                // Other regions
-        x = x * 0.90 + 5; y = y * 0.86 + 6;
+        x = x * 0.88 + 95; y = y * 0.84 + 75;
       }
 
-      // Keep icons within visible map bounds
-      x = Math.max(3, Math.min(97, x));
-      y = Math.max(3, Math.min(97, y));
+      // Keep within SVG bounds
+      x = Math.max(50, Math.min(1150, x));
+      y = Math.max(50, Math.min(750, y));
 
       return { x, y };
     }
 
     // Advanced coordinate transformation with calibration points
-    function getMapPositionAdjusted(lat, lng) {
-      // Calibration points based on known locations in Thailand
-      // These are actual coordinates and their expected positions on the map (in %)
-      // Bangkok (13.7563, 100.5018) should be around center of the map ~ (50%, 50%)
-      // Chiang Mai (18.7883, 98.9700) should be in north ~ (15%, 15%)
-      // Hat Yai (7.0087, 100.4653) should be in south ~ (50%, 85%)
-      
-      // Simple linear transformation using the bounding box approach
-      const lat_max = 20.5;  // Northernmost point of Thailand
-      const lat_min = 5.5;   // Southernmost point of Thailand  
-      const lon_max = 105.8; // Easternmost point of Thailand
-      const lon_min = 97.2;  // Westernmost point of Thailand
+    function getProvincePosition(site) {
+      const lat_max = 21.5;
+      const lat_min = 4.5;
+      const lon_max = 106.5;
+      const lon_min = 96.5;
 
-      // Calculate the position as a percentage within the bounding box
-      let x = ((lng - lon_min) / (lon_max - lon_min)) * 100;
-      let y = ((lat_max - lat) / (lat_max - lat_min)) * 100;
+      const x = ((site.lng - lon_min) / (lon_max - lon_min)) * 100;
+      const y = ((lat_max - site.lat) / (lat_max - lat_min)) * 100;
 
-      // Apply polynomial correction to better match the map projection
-      // These values can be fine-tuned based on visual alignment
-      // For now, using small adjustments to align with the Thailand map image
-      const x_corrected = x + (0.05 * x * x - 0.05 * x) - 2.5;  // Quadratic correction for x
-      const y_corrected = y + (0.02 * y * y - 0.02 * y) - 1.0;  // Quadratic correction for y
-      
-      // Keep within bounds after correction
-      const corrected_x = Math.max(0, Math.min(100, x_corrected));
-      const corrected_y = Math.max(0, Math.min(100, y_corrected));
-      
-      return { x: corrected_x, y: corrected_y };
+      return { x, y };
     }
 
     function renderBatteryPins() {
-      const pinContainer = document.getElementById('batteryPinContainer');
-      if (!pinContainer) return;
+      const svgPins = document.getElementById('batteryPins');
+      if (!svgPins) return;
 
       const filteredSites = getFilteredSites();
       const displaySites = filteredSites.length ? filteredSites : sites;
       
-      pinContainer.innerHTML = '';
+      svgPins.innerHTML = '';
       displaySites.forEach(site => {
-        const position = getMapPositionAdjusted(site.lat, site.lng);
-        const pin = document.createElement('div');
-        pin.className = `battery-pin ${site.battery < 30 ? 'alerting' : ''}`;
-        pin.setAttribute('data-site-id', site.id);
-        pin.style.left = `${position.x}%`;
-        pin.style.top = `${position.y}%`;
-        pin.innerHTML = renderBatteryPin(site);
-        pin.addEventListener('click', () => {
+        const position = getMapPosition(site.lat, site.lng);
+        const statusColor = site.status === 'good' ? '#22c55e' : 
+                           site.status === 'warning' ? '#eab308' : '#ef4444';
+        
+        const pinGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        pinGroup.setAttribute('class', 'pin');
+        pinGroup.setAttribute('data-title', `${site.name} - SoC: ${site.stateOfCharge}% - Status: ${site.status}`);
+        pinGroup.setAttribute('data-site-id', site.id);
+        pinGroup.setAttribute('transform', `translate(${position.x}, ${position.y})`);
+        
+        // Create pin circle
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('r', '12');
+        circle.setAttribute('fill', statusColor);
+        circle.setAttribute('stroke', '#fff');
+        circle.setAttribute('stroke-width', '2');
+        circle.setAttribute('opacity', site.status === 'critical' ? '0.8' : '0.9');
+        
+        // Create pin marker (triangle)
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M0,-25 L8,-9 L-8,-9 Z');
+        path.setAttribute('fill', statusColor);
+        path.setAttribute('stroke', '#fff');
+        path.setAttribute('stroke-width', '2');
+        
+        // Create number label
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('class', 'label');
+        text.setAttribute('x', '16');
+        text.setAttribute('y', '-12');
+        text.textContent = site.id;
+        
+        // Add elements to pin group
+        pinGroup.appendChild(circle);
+        pinGroup.appendChild(path);
+        pinGroup.appendChild(text);
+        
+        // Add click handler
+        pinGroup.addEventListener('click', (e) => {
+          e.stopPropagation();
+          console.log('Clicked pin:', site.id, site.name); // Debug log
           showDetail(site.id);
         });
-        pinContainer.appendChild(pin);
+
+        // Also add click handler to individual elements
+        [circle, path, text].forEach(element => {
+          element.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Clicked element:', site.id, site.name); // Debug log
+            showDetail(site.id);
+          });
+        });
+        
+        svgPins.appendChild(pinGroup);
+      });
+
+      // Initialize SVG tooltips
+      initializeSvgTooltips();
+    }
+
+    function initializeSvgTooltips() {
+      const svg = document.getElementById('mapSvg');
+      const tooltip = document.getElementById('tooltip');
+
+      svg.addEventListener('mousemove', (e) => {
+        const target = e.target.closest('.pin');
+        if (target) {
+          tooltip.textContent = target.getAttribute('data-title') || '';
+          tooltip.style.display = 'block';
+          tooltip.style.left = e.pageX + 'px';
+          tooltip.style.top = e.pageY + 'px';
+        } else {
+          tooltip.style.display = 'none';
+        }
+      });
+
+      svg.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
       });
     }
 
@@ -2369,7 +2495,7 @@ VALUES
                 </svg>
                 <span class="font-semibold">Check Alerts</span>
               </button>
-              <button onclick="currentPage = 'database'; render();" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
+              <button onclick="sessionStorage.setItem('bmsSitesData', JSON.stringify(sites)); window.open('./db_view.html', '_blank')" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 1.1.9 2 2 2h12a2 2 0 002-2V7M9 21h6M12 17V7"/>
                 </svg>
@@ -2458,28 +2584,13 @@ VALUES
 
             <div class="glass-card rounded-xl p-6">
               <div class="map-container rounded-lg overflow-hidden relative" style="height: 700px;">
-                <div class="thailand-map" id="map">
-                  <div class="map-grid"></div>
-                  <div class="thailand-shape"></div>
-                  <div class="province-boundary" style="top: 15%; left: 25%; width: 30%; height: 25%;"></div>
-                  <div class="province-boundary" style="top: 35%; left: 55%; width: 35%; height: 30%;"></div>
-                  <div class="province-boundary" style="top: 45%; left: 30%; width: 25%; height: 20%;"></div>
-                  <div class="province-boundary" style="top: 70%; left: 40%; width: 30%; height: 25%;"></div>
-                  <div class="battery-pin-container" id="batteryPinContainer"></div>
-                  <div class="province-label" style="top: 15%; left: 40%;" onclick="filterByRegion('north')">ภาคเหนือ</div>
-                  <div class="province-label" style="top: 40%; left: 70%;" onclick="filterByRegion('northeast')">ภาคอีสาน</div>
-                  <div class="province-label" style="top: 50%; left: 35%;" onclick="filterByRegion('central')">ภาคกลาง</div>
-                  <div class="province-label" style="top: 65%; left: 75%;" onclick="filterByRegion('east')">ภาคตะวันออก</div>
-                  <div class="province-label" style="top: 75%; left: 25%;" onclick="filterByRegion('west')">ภาคตะวันตก</div>
-                  <div class="province-label" style="top: 85%; left: 50%;" onclick="filterByRegion('south')">ภาคใต้</div>
-                  <div class="province-marker province-north" style="top: 20%; left: 25%;" title="เชียงราย">เชีย</div>
-                  <div class="province-marker province-north" style="top: 18%; left: 30%;" title="ลำปาง">ลำป</div>
-                  <div class="province-marker province-north" style="top: 15%; left: 20%;" title="น่าน">น่าน</div>
-                  <div class="province-marker province-central" style="top: 35%; left: 45%;" title="พิษณุโลก">พิษ</div>
-                  <div class="province-marker province-central" style="top: 42%; left: 38%;" title="ท่าวุ้ง">ท่าว</div>
-                  <div class="province-marker province-northeast" style="top: 25%; left: 65%;" title="อุดรธานี">อุดร</div>
-                  <div class="province-marker province-northeast" style="top: 38%; left: 60%;" title="ขอนแก่น">ขอน</div>
-                  <div class="province-marker province-northeast" style="top: 22%; left: 75%;" title="โพนพิสัย">โพน</div>
+                <div class="svg-wrap" id="mapContainer">
+                  <svg id="mapSvg" class="map" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet">
+                    <image href="./file/thailand-map.png" x="0" y="0" width="1200" height="800" />
+                    <g id="batteryPins"></g>
+                  </svg>
+                  <div id="tooltip" class="tooltip"></div>
+                </div>
                   <div class="province-marker province-south" style="top: 75%; left: 48%;" title="ถลาง">ถลา</div>
                   <div class="province-marker province-south" style="top: 78%; left: 45%;" title="ภูเก็ต">ภูเก</div>
                   <div class="province-marker province-south" style="top: 82%; left: 52%;" title="กระบี่">กระ</div>
@@ -2874,7 +2985,14 @@ VALUES
     }
 
     function showDetail(siteId) {
+      console.log('showDetail called with siteId:', siteId);
       selectedSite = sites.find(s => s.id === siteId);
+      console.log('selectedSite:', selectedSite);
+      if (!selectedSite) {
+        console.error('Site not found with ID:', siteId);
+        alert('Site not found');
+        return;
+      }
       currentPage = 'detail';
       render();
     }
