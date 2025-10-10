@@ -121,7 +121,7 @@
     .battery-pin.alerting {
       animation: float 2.5s ease-in-out infinite, alertBlink 1s ease-in-out infinite;
     }
-    
+
     .pin-circle {
       width: 24px;
       height: 24px;
@@ -179,8 +179,11 @@
     /* Map container enhanced background */
     .map-container {
       background: linear-gradient(135deg, 
-        rgba(15, 23, 42, 0.95) 0%, 
-        rgba(30, 41, 59, 0.9) 100%);
+        rgba(15, 23, 42, 0.85) 0%, 
+        rgba(30, 41, 59, 0.75) 100%),
+        url('./file/thailand-map.png');
+      background-size: cover;
+      background-position: center;
       position: relative;
       overflow: hidden;
     }
@@ -310,6 +313,24 @@
     .gauge-arc {
       transition: stroke-dashoffset 0.5s ease;
     }
+
+    .cluster-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(14, 165, 233, 0.85));
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.35);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .cluster-marker span {
+      font-size: 0.85rem;
+    }
   </style>
 </head>
 <body class="text-white min-h-screen">
@@ -333,13 +354,13 @@
         status: 'good', 
         battery: 95, 
         temp: 28, 
-        voltage: 48.2, 
-        current: 12.5, 
-        power: 603,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 350.0, 
+        power: 43750,
+        voltagePerCell: 2.08,
         internalResistance: 150,
-        currentPerString: 12.5,
-        voltagePerString: 96.4,
+        currentPerString: 350.0,
+        voltagePerString: 125.0,
         stateOfCharge: 95,
         stateOfHealth: 98,
         ambientTemp: 28,
@@ -353,13 +374,13 @@
         status: 'good', 
         battery: 92, 
         temp: 26, 
-        voltage: 48.0, 
-        current: 11.8, 
-        power: 566,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 322.0, 
+        power: 40250,
+        voltagePerCell: 2.08,
         internalResistance: 180,
-        currentPerString: 11.8,
-        voltagePerString: 96.0,
+        currentPerString: 322.0,
+        voltagePerString: 125.0,
         stateOfCharge: 92,
         stateOfHealth: 95,
         ambientTemp: 26,
@@ -373,13 +394,13 @@
         status: 'warning', 
         battery: 78, 
         temp: 32, 
-        voltage: 47.5, 
-        current: 10.2, 
-        power: 485,
-        voltagePerCell: 2.9,
+        voltage: 125.0, 
+        current: 273.0, 
+        power: 34125,
+        voltagePerCell: 2.08,
         internalResistance: 450,
-        currentPerString: 10.2,
-        voltagePerString: 87.4,
+        currentPerString: 273.0,
+        voltagePerString: 125.0,
         stateOfCharge: 78,
         stateOfHealth: 85,
         ambientTemp: 32,
@@ -393,13 +414,13 @@
         status: 'good', 
         battery: 88, 
         temp: 29, 
-        voltage: 48.1, 
-        current: 12.0, 
-        power: 577,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 308.0, 
+        power: 38500,
+        voltagePerCell: 2.08,
         internalResistance: 120,
-        currentPerString: 12.0,
-        voltagePerString: 96.2,
+        currentPerString: 308.0,
+        voltagePerString: 125.0,
         stateOfCharge: 88,
         stateOfHealth: 96,
         ambientTemp: 29,
@@ -413,13 +434,13 @@
         status: 'critical', 
         battery: 45, 
         temp: 38, 
-        voltage: 46.8, 
-        current: 8.5, 
-        power: 398,
-        voltagePerCell: 2.6,
+        voltage: 125.0, 
+        current: 157.5, 
+        power: 19687.5,
+        voltagePerCell: 2.08,
         internalResistance: 1200,
-        currentPerString: 8.5,
-        voltagePerString: 83.6,
+        currentPerString: 280.0,
+        voltagePerString: 125.0,
         stateOfCharge: 45,
         stateOfHealth: 65,
         ambientTemp: 38,
@@ -433,13 +454,13 @@
         status: 'good', 
         battery: 91, 
         temp: 30, 
-        voltage: 48.3, 
-        current: 11.5, 
-        power: 555,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 318.5, 
+        power: 39812.5,
+        voltagePerCell: 2.08,
         internalResistance: 110,
-        currentPerString: 11.5,
-        voltagePerString: 96.6,
+        currentPerString: 318.5,
+        voltagePerString: 125.0,
         stateOfCharge: 91,
         stateOfHealth: 97,
         ambientTemp: 30,
@@ -453,12 +474,13 @@
         status: 'good', 
         battery: 89, 
         temp: 27, 
-        voltage: 48.0, 
-        current: 12.2, 
-        power: 586,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 311.5, 
+        power: 38937.5,
+        voltagePerCell: 2.08,
         internalResistance: 95,
-        currentPerString: 12.2,
+        currentPerString: 311.5,
+        voltagePerString: 125.0,
         stateOfCharge: 89,
         stateOfHealth: 94,
         ambientTemp: 27,
@@ -472,13 +494,13 @@
         status: 'warning', 
         battery: 72, 
         temp: 33, 
-        voltage: 47.7, 
-        current: 9.8, 
-        power: 467,
-        voltagePerCell: 2.9,
+        voltage: 125.0, 
+        current: 252.0, 
+        power: 31500,
+        voltagePerCell: 2.08,
         internalResistance: 380,
-        currentPerString: 9.8,
-        voltagePerString: 93.4,
+        currentPerString: 252.0,
+        voltagePerString: 125.0,
         stateOfCharge: 72,
         stateOfHealth: 82,
         ambientTemp: 33,
@@ -492,12 +514,13 @@
         status: 'good', 
         battery: 94, 
         temp: 28, 
-        voltage: 48.2, 
-        current: 12.8, 
-        power: 617,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 329.0, 
+        power: 41125,
+        voltagePerCell: 2.08,
         internalResistance: 85,
-        currentPerString: 12.8,
+        currentPerString: 329.0,
+        voltagePerString: 125.0,
         stateOfCharge: 94,
         stateOfHealth: 99,
         ambientTemp: 28,
@@ -511,13 +534,13 @@
         status: 'good', 
         battery: 87, 
         temp: 25, 
-        voltage: 48.1, 
-        current: 11.9, 
-        power: 572,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 304.5, 
+        power: 38062.5,
+        voltagePerCell: 2.08,
         internalResistance: 130,
-        currentPerString: 11.9,
-        voltagePerString: 96.2,
+        currentPerString: 304.5,
+        voltagePerString: 125.0,
         stateOfCharge: 87,
         stateOfHealth: 93,
         ambientTemp: 25,
@@ -531,12 +554,13 @@
         status: 'good', 
         battery: 93, 
         temp: 27, 
-        voltage: 48.3, 
-        current: 12.6, 
-        power: 609,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 325.5, 
+        power: 40687.5,
+        voltagePerCell: 2.08,
         internalResistance: 100,
-        currentPerString: 12.6,
+        currentPerString: 325.5,
+        voltagePerString: 125.0,
         stateOfCharge: 93,
         stateOfHealth: 98,
         ambientTemp: 27,
@@ -550,13 +574,13 @@
         status: 'warning', 
         battery: 68, 
         temp: 35, 
-        voltage: 47.4, 
-        current: 9.2, 
-        power: 436,
-        voltagePerCell: 2.8,
+        voltage: 125.0, 
+        current: 238.0, 
+        power: 29750,
+        voltagePerCell: 2.08,
         internalResistance: 520,
-        currentPerString: 9.2,
-        voltagePerString: 90.4,
+        currentPerString: 238.0,
+        voltagePerString: 125.0,
         stateOfCharge: 68,
         stateOfHealth: 78,
         ambientTemp: 35,
@@ -570,12 +594,13 @@
         status: 'good', 
         battery: 90, 
         temp: 29, 
-        voltage: 48.0, 
-        current: 11.7, 
-        power: 562,
-        voltagePerCell: 3.0,
+        voltage: 125.0, 
+        current: 315.0, 
+        power: 39375,
+        voltagePerCell: 2.08,
         internalResistance: 150,
-        currentPerString: 11.7,
+        currentPerString: 315.0,
+        voltagePerString: 125.0,
         stateOfCharge: 90,
         stateOfHealth: 95,
         ambientTemp: 29,
@@ -589,12 +614,13 @@
         status: 'good', 
         battery: 85, 
         temp: 30, 
-        voltage: 47.9, 
-        current: 11.3, 
-        power: 541,
-        voltagePerCell: 3.0,
+        voltage: 125.0, 
+        current: 297.5, 
+        power: 37187.5,
+        voltagePerCell: 2.08,
         internalResistance: 200,
-        currentPerString: 11.3,
+        currentPerString: 297.5,
+        voltagePerString: 125.0,
         stateOfCharge: 85,
         stateOfHealth: 88,
         ambientTemp: 30,
@@ -608,12 +634,13 @@
         status: 'critical', 
         battery: 42, 
         temp: 39, 
-        voltage: 46.5, 
-        current: 7.8, 
-        power: 363,
-        voltagePerCell: 2.5,
+        voltage: 125.0, 
+        current: 147.0, 
+        power: 18375,
+        voltagePerCell: 2.08,
         internalResistance: 1500,
-        currentPerString: 7.8,
+        currentPerString: 280.0,
+        voltagePerString: 125.0,
         stateOfCharge: 42,
         stateOfHealth: 60,
         ambientTemp: 39,
@@ -627,12 +654,13 @@
         status: 'good', 
         battery: 88, 
         temp: 28, 
-        voltage: 48.1, 
-        current: 12.1, 
-        power: 582,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 308.0, 
+        power: 38500,
+        voltagePerCell: 2.08,
         internalResistance: 115,
-        currentPerString: 12.1,
+        currentPerString: 308.0,
+        voltagePerString: 125.0,
         stateOfCharge: 88,
         stateOfHealth: 96,
         ambientTemp: 28,
@@ -646,12 +674,13 @@
         status: 'good', 
         battery: 91, 
         temp: 29, 
-        voltage: 48.2, 
-        current: 11.8, 
-        power: 569,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 318.5, 
+        power: 39812.5,
+        voltagePerCell: 2.08,
         internalResistance: 105,
-        currentPerString: 11.8,
+        currentPerString: 318.5,
+        voltagePerString: 125.0,
         stateOfCharge: 91,
         stateOfHealth: 97,
         ambientTemp: 29,
@@ -665,12 +694,13 @@
         status: 'warning', 
         battery: 75, 
         temp: 31, 
-        voltage: 47.6, 
-        current: 10.5, 
-        power: 500,
-        voltagePerCell: 2.9,
+        voltage: 125.0, 
+        current: 262.5, 
+        power: 32812.5,
+        voltagePerCell: 2.08,
         internalResistance: 320,
-        currentPerString: 10.5,
+        currentPerString: 262.5,
+        voltagePerString: 125.0,
         stateOfCharge: 75,
         stateOfHealth: 84,
         ambientTemp: 31,
@@ -684,12 +714,13 @@
         status: 'good', 
         battery: 86, 
         temp: 28, 
-        voltage: 48.0, 
-        current: 11.6, 
-        power: 557,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 301.0, 
+        power: 37625,
+        voltagePerCell: 2.08,
         internalResistance: 125,
-        currentPerString: 11.6,
+        currentPerString: 301.0,
+        voltagePerString: 125.0,
         stateOfCharge: 86,
         stateOfHealth: 92,
         ambientTemp: 28,
@@ -703,12 +734,13 @@
         status: 'good', 
         battery: 89, 
         temp: 30, 
-        voltage: 48.1, 
-        current: 12.0, 
-        power: 577,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 311.5, 
+        power: 38937.5,
+        voltagePerCell: 2.08,
         internalResistance: 110,
-        currentPerString: 12.0,
+        currentPerString: 311.5,
+        voltagePerString: 125.0,
         stateOfCharge: 89,
         stateOfHealth: 95,
         ambientTemp: 30,
@@ -722,12 +754,13 @@
         status: 'good', 
         battery: 92, 
         temp: 27, 
-        voltage: 48.2, 
-        current: 12.3, 
-        power: 593,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 322.0, 
+        power: 40250,
+        voltagePerCell: 2.08,
         internalResistance: 95,
-        currentPerString: 12.3,
+        currentPerString: 322.0,
+        voltagePerString: 125.0,
         stateOfCharge: 92,
         stateOfHealth: 96,
         ambientTemp: 27,
@@ -741,12 +774,13 @@
         status: 'warning', 
         battery: 70, 
         temp: 34, 
-        voltage: 47.5, 
-        current: 9.5, 
-        power: 451,
-        voltagePerCell: 2.8,
+        voltage: 125.0, 
+        current: 245.0, 
+        power: 30625,
+        voltagePerCell: 2.08,
         internalResistance: 420,
-        currentPerString: 9.5,
+        currentPerString: 245.0,
+        voltagePerString: 125.0,
         stateOfCharge: 70,
         stateOfHealth: 80,
         ambientTemp: 34,
@@ -760,12 +794,13 @@
         status: 'good', 
         battery: 87, 
         temp: 29, 
-        voltage: 48.0, 
-        current: 11.9, 
-        power: 571,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 304.5, 
+        power: 38062.5,
+        voltagePerCell: 2.08,
         internalResistance: 120,
-        currentPerString: 11.9,
+        currentPerString: 304.5,
+        voltagePerString: 125.0,
         stateOfCharge: 87,
         stateOfHealth: 93,
         ambientTemp: 29,
@@ -779,12 +814,13 @@
         status: 'good', 
         battery: 90, 
         temp: 27, 
-        voltage: 48.1, 
-        current: 12.2, 
-        power: 587,
-        voltagePerCell: 3.2,
+        voltage: 125.0, 
+        current: 315.0, 
+        power: 39375,
+        voltagePerCell: 2.08,
         internalResistance: 90,
-        currentPerString: 12.2,
+        currentPerString: 315.0,
+        voltagePerString: 125.0,
         stateOfCharge: 90,
         stateOfHealth: 94,
         ambientTemp: 27,
@@ -795,9 +831,26 @@
     let currentPage = 'home';
     let selectedSite = null;
     let nextId = 25;
+    let hasRunInitialHealthCheck = false;
+    const ALERT_COOLDOWN_MS = 120000;
+    const alertHistory = {};
+    let currentFilter = 'all';
     let map = null;
     let detailMap = null;
     let markers = [];
+    let markerCluster = null;
+    let AdvancedMarker = null;
+    let supportsClustering = false;
+
+    // Province regions mapping
+    const provinceRegions = {
+      north: ['เชียงราย', 'ลำปาง', 'น่าน', 'แพร่', 'แม่ฮ่องสอน', 'อุตรดิตถ์'],
+      northeast: ['ขอนแก่น', 'อุดรธานี', 'โพนพิสัย', 'บรบือ', 'เขื่องใน', 'โรจนะ 3', 'โรจนะ 4', 'สกลนคร', 'บุรีรัมย์', 'ศรีสะเกษ', 'มุกดาระหว่าง'],
+      central: ['พิษณุโลก', 'ชนแดน', 'ชัยนาท', 'ท่าวุ้ง', 'บางพระครู', 'สมุทรสาคร', 'สามพราน', 'นครสวรรค์', 'อ่างทอง', 'สิงห์บุรี'],
+      east: ['ชลบุรี', 'ระยอง', 'จันทบุรี', 'ตราด'],
+      south: ['ถลาง', 'ภูเก็ต', 'กระบี่', 'หาดใหญ่', 'ฉลุง', 'ปัตตานี', 'สุราษฎร์ธานี', 'นครศรีธรรมราช', 'พัทลุง', 'สงขลา'],
+      west: ['กำแพงเพชร', 'ตาก', 'ประจวบคีรีขันธ์', 'ระนอง', 'เพชรบุรี', 'ปราจีนบุรี']
+    };
 
     // Thailand center coordinates
     const THAILAND_CENTER = { lat: 13.7563, lng: 100.5018 };
@@ -857,20 +910,59 @@
       }
     }
 
+    function shouldTriggerAlert(key) {
+      const now = Date.now();
+      const lastTriggered = alertHistory[key];
+      if (!lastTriggered || now - lastTriggered > ALERT_COOLDOWN_MS) {
+        alertHistory[key] = now;
+        return true;
+      }
+      return false;
+    }
+
     // Battery failure detection and alert
     function checkBatteryFailures() {
       sites.forEach(site => {
-        if (site.battery < 30) {
-          showAlert(`CRITICAL: Battery failure at ${site.name}! Battery level: ${site.battery}%`, 'error');
-          triggerSiteAlert(site.id);
-        } else if (site.battery < 50) {
-          showAlert(`WARNING: Low battery at ${site.name}. Battery level: ${site.battery}%`, 'warning');
-        } else if (site.temp > 40) {
-          showAlert(`WARNING: High temperature at ${site.name}. Temperature: ${site.temp}°C`, 'warning');
-        } else if (site.stateOfHealth < 70) {
-          showAlert(`WARNING: Low health at ${site.name}. SoH: ${site.stateOfHealth}%`, 'warning');
-        } else if (site.internalResistance > 500) {
-          showAlert(`WARNING: High internal resistance at ${site.name}. Resistance: ${site.internalResistance}µΩ`, 'warning');
+        const soc = site.stateOfCharge ?? site.battery;
+        const soh = site.stateOfHealth;
+        const temp = site.temp;
+        const resistance = site.internalResistance;
+
+        if (soc < 30) {
+          const key = `${site.id}-critical-soc`;
+          if (shouldTriggerAlert(key)) {
+            showAlert(`CRITICAL: Battery failure at ${site.name}! Battery level: ${soc}%`, 'error');
+            triggerSiteAlert(site.id);
+          }
+          return;
+        }
+
+        if (soc < 50) {
+          const key = `${site.id}-warning-soc`;
+          if (shouldTriggerAlert(key)) {
+            showAlert(`WARNING: Low battery at ${site.name}. Battery level: ${soc}%`, 'warning');
+          }
+        }
+
+        if (temp > 40) {
+          const key = `${site.id}-warning-temp`;
+          if (shouldTriggerAlert(key)) {
+            showAlert(`WARNING: High temperature at ${site.name}. Temperature: ${temp}°C`, 'warning');
+          }
+        }
+
+        if (soh < 70) {
+          const key = `${site.id}-warning-soh`;
+          if (shouldTriggerAlert(key)) {
+            showAlert(`WARNING: Low health at ${site.name}. SoH: ${soh}%`, 'warning');
+          }
+        }
+
+        if (resistance > 500) {
+          const key = `${site.id}-warning-resistance`;
+          if (shouldTriggerAlert(key)) {
+            showAlert(`WARNING: High internal resistance at ${site.name}. Resistance: ${resistance}µΩ`, 'warning');
+          }
         }
       });
     }
@@ -949,7 +1041,7 @@
                 <div class="grid grid-cols-3 gap-4">
                   <div>
                     <label class="block text-sm font-medium mb-1">Voltage per Cell (V)</label>
-                    <input type="number" id="voltagePerCell" step="0.1" min="1.5" required class="form-input w-full" placeholder="3.2">
+                    <input type="number" id="voltagePerCell" step="0.1" min="1.5" required class="form-input w-full" placeholder="2.08">
                   </div>
                   <div>
                     <label class="block text-sm font-medium mb-1">Internal Resistance (µΩ)</label>
@@ -1001,24 +1093,20 @@
                 parseInt(document.getElementById('battery').value) >= 60 ? 'warning' : 'critical'
       };
 
-      // Calculate derived values
+      // Calculate derived values for 125VDC, 350Ah, 60 cells system
       newAsset.battery = newAsset.stateOfCharge;
       newAsset.temp = newAsset.ambientTemp;
-      newAsset.voltage = newAsset.voltagePerCell * 16; // Assuming 16 cells in series
-      newAsset.current = (newAsset.voltage * 1000) / (newAsset.voltagePerCell * 16);
-      newAsset.power = newAsset.voltage * newAsset.current;
+      newAsset.voltage = 125.0; // Fixed voltage for 125VDC system
+      newAsset.current = (newAsset.stateOfCharge / 100) * 350.0; // Current based on SoC and 350Ah capacity
+      newAsset.power = newAsset.voltage * newAsset.current; // P = V * I
       newAsset.currentPerString = newAsset.current;
-      newAsset.voltagePerString = newAsset.voltage;
-
+      newAsset.voltagePerString = 125.0; // Fixed voltage for 125VDC system
+      
       sites.push(newAsset);
+      hasRunInitialHealthCheck = false;
       closeAddAssetModal();
       render();
       showAlert(`Successfully added new battery asset: ${newAsset.name}`, 'success');
-      
-      // Add marker to map
-      if (map) {
-        addMarkerToMap(newAsset);
-      }
     }
 
     function getStatusColor(status) {
@@ -1079,22 +1167,130 @@
       `;
     }
 
+    // Create custom marker element (for static map)
+    function createMarkerElement(site) {
+      const pinClass = site.status === 'good' ? 'pin-good' : 
+                       site.status === 'warning' ? 'pin-warning' : 'pin-critical';
+      
+      const pin = document.createElement("div");
+      pin.className = `battery-pin ${site.battery < 30 ? 'alerting' : ''}`;
+      pin.setAttribute('data-site-id', site.id);
+      pin.innerHTML = `
+        ${renderBatteryPin(site)}
+        <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap pointer-events-none z-20">
+          <div class="glass-card rounded-lg px-3 py-2 text-center shadow-lg">
+            <div class="font-bold text-sm text-white">${site.name}</div>
+            <div class="text-xs text-gray-300 mt-1">
+              SoC: <span class="font-bold ${getStatusColor(site.status)}">${site.stateOfCharge}%</span>
+            </div>
+            <div class="text-xs text-gray-400">${site.province}</div>
+            <div class="text-xs text-blue-400 mt-1 font-semibold">Click for details →</div>
+          </div>
+        </div>
+      `;
+      
+      // Add click event listener
+      pin.addEventListener('click', () => {
+        showDetail(site.id);
+      });
+      
+      return pin;
+    }
+
+    // Province filtering functions
+    function filterByRegion(region) {
+      currentFilter = region;
+      render();
+      
+      // Show feedback
+      const regionNames = {
+        north: 'ภาคเหนือ',
+        northeast: 'ภาคอีสาน', 
+        central: 'ภาคกลาง',
+        east: 'ภาคตะวันออก',
+        west: 'ภาคตะวันตก',
+        south: 'ภาคใต้',
+        all: 'ทุกภาค'
+      };
+      showAlert(`Filtering sites: ${regionNames[region]}`, 'info');
+    }
+
+    function getFilteredSites() {
+      if (currentFilter === 'all') {
+        return sites;
+      }
+      
+      const provinceNames = provinceRegions[currentFilter] || [];
+      return sites.filter(site => provinceNames.includes(site.province));
+    }
+
+    function getSiteRegion(site) {
+      for (const [region, provinces] of Object.entries(provinceRegions)) {
+        if (provinces.includes(site.province)) {
+          return region;
+        }
+      }
+      return 'central'; // default
+    }
+
+    // Map positioning for provinces
+    function getProvincePosition(province) {
+      const positions = {
+        'เชียงราย': { x: 25, y: 20 },
+        'ลำปาง': { x: 30, y: 18 },
+        'น่าน': { x: 20, y: 15 },
+        'พิษณุโลก': { x: 45, y: 35 },
+        'ท่าวุ้ง': { x: 38, y: 42 },
+        'ชนแดน': { x: 52, y: 40 },
+        'ชัยนาท': { x: 35, y: 48 },
+        'อุดรธานี': { x: 65, y: 25 },
+        'ขอนแก่น': { x: 60, y: 38 },
+        'โพนพิสัย': { x: 75, y: 22 },
+        'บรบือ': { x: 68, y: 35 },
+        'เขื่องใน': { x: 58, y: 45 },
+        'โรจนะ 3': { x: 55, y: 42 },
+        'โรจนะ 4': { x: 70, y: 28 },
+        'บางพระครู': { x: 42, y: 52 },
+        'สมุทรสาคร': { x: 38, y: 55 },
+        'สามพราน': { x: 40, y: 58 },
+        'ถลาง': { x: 48, y: 75 },
+        'ภูเก็ต': { x: 45, y: 78 },
+        'กระบี่': { x: 52, y: 82 },
+        'หาดใหญ่': { x: 58, y: 85 },
+        'ฉลุง': { x: 50, y: 88 },
+        'ปัตตานี': { x: 65, y: 87 },
+        'วาปีปทุม': { x: 62, y: 38 },
+        'สุรทศา': { x: 55, y: 35 }
+      };
+      return positions[province] || { x: 50, y: 50 };
+    }
+
     // Initialize and add the map
-    let map;
     async function initMap() {
-      // The location of Thailand center
-      const position = { lat: 13.7563, lng: 100.5018 };
+      const mapContainer = document.getElementById('map');
+      if (!mapContainer) return;
 
-      // Request needed libraries.
+      markers.forEach(marker => marker.map = null);
+      markers = [];
+      if (markerCluster && typeof markerCluster.clearMarkers === 'function') {
+        markerCluster.clearMarkers();
+      }
+      markerCluster = null;
+
       const { Map } = await google.maps.importLibrary("maps");
-      const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+      const markerLib = await google.maps.importLibrary("marker");
+      AdvancedMarker = markerLib.AdvancedMarkerElement;
 
-      // The map, centered at Thailand
+      if (!AdvancedMarker) {
+        console.error('AdvancedMarkerElement failed to load.');
+        return;
+      }
+
       map = new Map(
-        document.getElementById('map'),
+        mapContainer,
         {
           zoom: 6.5,
-          center: position,
+          center: THAILAND_CENTER,
           mapId: 'BATTERY_MONITORING_MAP',
           styles: [
             { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
@@ -1129,77 +1325,78 @@
         }
       );
 
-      // Add markers for all sites
-      sites.forEach(site => {
-        addMarkerToMap(site);
-      });
+      supportsClustering = Boolean(window.markerClusterer?.MarkerClusterer);
+      syncMapMarkers();
+      if (!hasRunInitialHealthCheck) {
+        hasRunInitialHealthCheck = true;
+        checkBatteryFailures();
+      }
     }
 
-    // Add marker to map
-    function addMarkerToMap(site) {
-      const pinClass = site.status === 'good' ? 'pin-good' : 
-                       site.status === 'warning' ? 'pin-warning' : 'pin-critical';
-      
-      const marker = new AdvancedMarkerElement({
+    function syncMapMarkers() {
+      if (!map || !AdvancedMarker) return;
+
+      const markerSites = getFilteredSites();
+      const activeSites = markerSites.length ? markerSites : sites;
+
+      markers.forEach(marker => marker.map = null);
+      markers = activeSites.map(site => createMapMarker(site)).filter(Boolean);
+
+      if (supportsClustering) {
+        markerCluster = new markerClusterer.MarkerClusterer({
+          map,
+          markers,
+          renderer: {
+            render: ({ count, position }) => new AdvancedMarker({
+              position,
+              content: createClusterContent(count),
+              zIndex: 100 + count
+            })
+          }
+        });
+      } else {
+        markers.forEach(marker => marker.map = map);
+      }
+    }
+
+    function createMapMarker(site) {
+      if (!AdvancedMarker) return null;
+
+      const marker = new AdvancedMarker({
         position: { lat: site.lat, lng: site.lng },
-        map: map,
         title: site.name,
-        content: createMarkerElement(site)
+        content: createMarkerElement(site),
+        map: supportsClustering ? null : map
       });
-      
+
       marker.addListener("click", () => {
         showDetail(site.id);
       });
-      
-      markers.push(marker);
+
+      return marker;
     }
 
-    // Create custom marker element
-    function createMarkerElement(site) {
-      const pinClass = site.status === 'good' ? 'pin-good' : 
-                       site.status === 'warning' ? 'pin-warning' : 'pin-critical';
-      
-      const pin = document.createElement("div");
-      pin.className = `battery-pin ${site.battery < 30 ? 'alerting' : ''}`;
-      pin.setAttribute('data-site-id', site.id);
-      pin.innerHTML = `
-        ${renderBatteryPin(site)}
-        <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity pointer-events-none z-20">
-          <div class="glass-card rounded-lg px-3 py-2">
-            <div class="font-bold text-sm text-center text-white">${site.name}</div>
-            <div class="text-xs text-gray-300 text-center mt-1">
-              SoC: <span class="font-bold ${getStatusColor(site.status)}">${site.stateOfCharge}%</span>
-            </div>
-            <div class="text-xs text-gray-300 text-center">
-              ${site.province}
-            </div>
-            <div class="text-xs text-blue-400 text-center mt-2 font-semibold">
-              Click for details →
-            </div>
-          </div>
-        </div>
-      `;
-      
-      return pin;
+    function createClusterContent(count) {
+      const cluster = document.createElement('div');
+      cluster.className = 'cluster-marker';
+      cluster.innerHTML = `<span>${count}</span>`;
+      return cluster;
     }
 
-    // Initialize detail map
     async function initDetailMap() {
       if (!selectedSite) return;
-      
-      // The location of selected site
-      const position = { lat: selectedSite.lat, lng: selectedSite.lng };
 
-      // Request needed libraries.
+      const detailContainer = document.getElementById('detailMap');
+      if (!detailContainer) return;
+
       const { Map } = await google.maps.importLibrary("maps");
       const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-      // The map, centered at selected site
       detailMap = new Map(
-        document.getElementById('detailMap'),
+        detailContainer,
         {
           zoom: 10,
-          center: position,
+          center: { lat: selectedSite.lat, lng: selectedSite.lng },
           mapId: 'BATTERY_DETAIL_MAP',
           styles: [
             { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
@@ -1234,30 +1431,47 @@
         }
       );
 
-      // Add marker for selected site
       new AdvancedMarkerElement({
         position: { lat: selectedSite.lat, lng: selectedSite.lng },
         map: detailMap,
         title: selectedSite.name,
         content: createMarkerElement(selectedSite)
       });
-      
-      // Add markers for other sites
-      sites.filter(s => s.id !== selectedSite.id).forEach(site => {
-        new AdvancedMarkerElement({
-          position: { lat: site.lat, lng: site.lng },
-          map: detailMap,
-          title: site.name,
-          content: createMarkerElement(site)
+
+      sites
+        .filter(site => site.id !== selectedSite.id)
+        .forEach(site => {
+          new AdvancedMarkerElement({
+            position: { lat: site.lat, lng: site.lng },
+            map: detailMap,
+            title: site.name,
+            content: createMarkerElement(site)
+          });
         });
-      });
     }
+    
 
     function renderHomePage() {
-      const statusCounts = sites.reduce((acc, site) => {
+      const filteredSites = getFilteredSites();
+      const displaySites = filteredSites.length ? filteredSites : sites;
+
+      const statusCounts = displaySites.reduce((acc, site) => {
         acc[site.status] = (acc[site.status] || 0) + 1;
         return acc;
       }, {});
+
+      const networkTotals = displaySites.reduce((acc, site) => {
+        acc.soc += site.stateOfCharge;
+        acc.soh += site.stateOfHealth;
+        acc.power += site.power;
+        return acc;
+      }, { soc: 0, soh: 0, power: 0 });
+
+      const averageSoc = displaySites.length ? Math.round(networkTotals.soc / displaySites.length) : 0;
+      const averageSoh = displaySites.length ? Math.round(networkTotals.soh / displaySites.length) : 0;
+      const peakTempSite = displaySites.length ? displaySites.reduce((hottest, site) => site.temp > hottest.temp ? site : hottest, displaySites[0]) : null;
+      const activeAlerts = (statusCounts.critical || 0) + (statusCounts.warning || 0);
+      const totalPower = Math.round(networkTotals.power);
 
       return `
         <div class="header-bg p-4">
@@ -1271,7 +1485,7 @@
               </div>
               <div>
                 <h1 class="text-2xl font-bold">Battery Monitoring System</h1>
-                <p class="text-sm text-gray-400">Thailand Network - ${sites.length} Sites</p>
+                <p class="text-sm text-gray-400">Thailand Network - ${displaySites.length} Sites</p>
               </div>
             </div>
             <div class="flex gap-4 flex-wrap">
@@ -1315,35 +1529,122 @@
           </div>
         </div>
 
-        <div class="max-w-7xl mx-auto p-6">
-          <div class="mb-6">
-            <h2 class="text-2xl font-bold mb-2">Thailand Sites Overview</h2>
-            <p class="text-gray-400">Click on any battery pin to view detailed information</p>
-          </div>
-
-          <div class="glass-card rounded-xl p-6">
-            <div class="map-container rounded-lg overflow-hidden relative" style="height: 700px;">
-              <div id="map"></div>
-              <div class="map-overlay"></div>
+        <div class="max-w-7xl mx-auto p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="glass-card rounded-xl p-5 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-gray-400 text-sm">
+                <span>Average SoC</span>
+                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <div class="text-3xl font-bold">${averageSoc}%</div>
+              <p class="text-xs text-gray-400">Target: ≥ 80% network-wide</p>
+            </div>
+            <div class="glass-card rounded-xl p-5 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-gray-400 text-sm">
+                <span>Average SoH</span>
+                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.79-3 4s1.343 4 3 4 3-1.79 3-4-1.343-4-3-4z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v2m0 16v2m10-10h-2M6 12H4m14.142-7.071l-1.414 1.414M7.272 16.97l-1.415 1.414m0-11.314l1.415 1.414m10.556 10.556l1.414 1.414"/>
+                </svg>
+              </div>
+              <div class="text-3xl font-bold">${averageSoh}%</div>
+              <p class="text-xs text-gray-400">Health across all monitored assets</p>
+            </div>
+            <div class="glass-card rounded-xl p-5 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-gray-400 text-sm">
+                <span>Peak Temperature</span>
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9a2 2 0 012 2v5a2 2 0 11-4 0v-5a2 2 0 012-2z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m6-10h2M4 12H2m14.142-7.071l1.414 1.414M6.343 17.657l-1.415 1.414m0-11.314l1.415 1.414m10.556 10.556l1.414 1.414"/>
+                </svg>
+              </div>
+              <div class="text-3xl font-bold">${peakTempSite ? peakTempSite.temp : '—'}°C</div>
+              <p class="text-xs text-gray-400">${peakTempSite ? peakTempSite.name : 'No data'} hotspot</p>
+            </div>
+            <div class="glass-card rounded-xl p-5 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-gray-400 text-sm">
+                <span>Active Alerts</span>
+                <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div class="text-3xl font-bold">${activeAlerts}</div>
+              <p class="text-xs text-gray-400">${statusCounts.critical || 0} critical · ${statusCounts.warning || 0} warning</p>
+              <p class="text-xs text-gray-500">Network load: ${totalPower} kW</p>
             </div>
           </div>
 
-          <div class="mt-6 glass-card rounded-xl p-4">
-            <h3 class="font-bold mb-3">Legend</h3>
-            <div class="flex flex-wrap gap-6">
-              <div class="flex items-center gap-2">
-                <div class="pin-circle pin-good" style="width: 16px; height: 16px;"></div>
-                <span class="text-sm">Good Status (≥80%)</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="pin-circle pin-warning" style="width: 16px; height: 16px;"></div>
-                <span class="text-sm">Warning Status (60-79%)</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="pin-circle pin-critical" style="width: 16px; height: 16px;"></div>
-                <span class="text-sm">Critical Status (&lt;60%)</span>
+          <div>
+            <div class="mb-6">
+              <h2 class="text-2xl font-bold mb-2">Thailand Sites Overview</h2>
+              <p class="text-gray-400">Click on any battery pin or table row to view detailed information</p>
+            </div>
+
+            <div class="glass-card rounded-xl p-6">
+              <div class="map-container rounded-lg overflow-hidden relative" style="height: 700px;">
+                <div id="map"></div>
+                <div class="map-overlay"></div>
               </div>
             </div>
+
+            <div class="mt-6 glass-card rounded-xl p-4">
+              <h3 class="font-bold mb-3">Legend</h3>
+              <div class="flex flex-wrap gap-6">
+                <div class="flex items-center gap-2">
+                  <div class="pin-circle pin-good" style="width: 16px; height: 16px;"></div>
+                  <span class="text-sm">Good Status (≥80%)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="pin-circle pin-warning" style="width: 16px; height: 16px;"></div>
+                  <span class="text-sm">Warning Status (60-79%)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="pin-circle pin-critical" style="width: 16px; height: 16px;"></div>
+                  <span class="text-sm">Critical Status (&lt;60%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-xl p-4 lg:p-6 overflow-x-auto">
+            <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+              <h3 class="font-bold text-lg">Site Metrics Overview</h3>
+              <span class="text-sm text-gray-400">Click any row to drill into the detailed dashboard</span>
+            </div>
+            <table class="min-w-full text-sm">
+              <thead class="text-gray-400 uppercase tracking-wide text-xs border-b border-slate-700">
+                <tr>
+                  <th class="py-2 text-left">Site</th>
+                  <th class="py-2 text-left">Status</th>
+                  <th class="py-2 text-left">SoC</th>
+                  <th class="py-2 text-left">SoH</th>
+                  <th class="py-2 text-left">Temp</th>
+                  <th class="py-2 text-left">Power</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${displaySites.map(site => `
+                  <tr onclick="showDetail(${site.id})" class="group cursor-pointer border-b border-slate-800/70 last:border-none hover:bg-slate-800/40 transition-colors">
+                    <td class="py-3 pr-6">
+                      <div class="font-semibold text-white">${site.name}</div>
+                      <div class="text-xs text-gray-400">${site.province}</div>
+                    </td>
+                    <td class="py-3 pr-6">
+                      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(site.status)}">
+                        <span class="w-2.5 h-2.5 rounded-full ${getStatusBg(site.status)}"></span>
+                        <span class="capitalize">${site.status}</span>
+                      </span>
+                    </td>
+                    <td class="py-3 pr-6 font-semibold">${site.stateOfCharge}%</td>
+                    <td class="py-3 pr-6 font-semibold">${site.stateOfHealth}%</td>
+                    <td class="py-3 pr-6 font-semibold">${site.temp}°C</td>
+                    <td class="py-3 pr-6 font-semibold">${site.power} kW</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
           </div>
         </div>
       `;
@@ -1547,11 +1848,11 @@
                   </div>
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Battery Type</span>
-                    <span class="font-semibold">Li-ion 48V</span>
+                    <span class="font-semibold">Li-ion 125VDC (60 Cells)</span>
                   </div>
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Capacity</span>
-                    <span class="font-semibold">100 kWh</span>
+                    <span class="font-semibold">350 Ah</span>
                   </div>
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Last Updated</span>
@@ -1612,81 +1913,6 @@
       selectedSite = sites.find(s => s.id === siteId);
       currentPage = 'detail';
       render();
-      
-      // Initialize detail map after rendering
-      setTimeout(() => {
-        initDetailMap();
-      }, 100);
-    }
-
-    // Initialize detail map for the selected site
-    async function initDetailMap() {
-      if (!selectedSite) return;
-      
-      // The location of selected site
-      const position = { lat: selectedSite.lat, lng: selectedSite.lng };
-
-      // Request needed libraries.
-      const { Map } = await google.maps.importLibrary("maps");
-      const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-
-      // The map, centered at selected site
-      detailMap = new Map(
-        document.getElementById('detailMap'),
-        {
-          zoom: 10,
-          center: position,
-          mapId: 'BATTERY_DETAIL_MAP',
-          styles: [
-            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-            {
-              featureType: "administrative",
-              elementType: "geometry",
-              stylers: [{ visibility: "off" }]
-            },
-            {
-              featureType: "administrative.country",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#4a5568" }, { weight: 1 }]
-            },
-            {
-              featureType: "administrative.province",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#4a5568" }, { weight: 0.5 }]
-            },
-            {
-              featureType: "water",
-              elementType: "geometry",
-              stylers: [{ color: "#172a38" }]
-            },
-            {
-              featureType: "landscape.natural",
-              elementType: "geometry",
-              stylers: [{ color: "#1a202c" }]
-            }
-          ]
-        }
-      );
-
-      // Add marker for selected site
-      new AdvancedMarkerElement({
-        position: { lat: selectedSite.lat, lng: selectedSite.lng },
-        map: detailMap,
-        title: selectedSite.name,
-        content: createMarkerElement(selectedSite)
-      });
-      
-      // Add markers for other sites
-      sites.filter(s => s.id !== selectedSite.id).forEach(site => {
-        new AdvancedMarkerElement({
-          position: { lat: site.lat, lng: site.lng },
-          map: detailMap,
-          title: site.name,
-          content: createMarkerElement(site)
-        });
-      });
     }
 
     function showHome() {
@@ -1698,11 +1924,14 @@
     function render() {
       const app = document.getElementById('app');
       app.innerHTML = currentPage === 'home' ? renderHomePage() : renderDetailPage();
-      
-      // Initialize map if on home page
-      if (currentPage === 'home' && !map) {
+
+      if (currentPage === 'home') {
         setTimeout(() => {
           initMap();
+        }, 60);
+      } else {
+        setTimeout(() => {
+          initDetailMap();
         }, 100);
       }
     }
