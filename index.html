@@ -4,26 +4,1147 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Battery Monitoring System - Thailand</title>
-<link href="./output.css" rel="stylesheet">
+  
+  <style>
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+    .animate-ping {
+      animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(-50%, -100%) translateY(0px); }
+      50% { transform: translate(-50%, -100%) translateY(-8px); }
+    }
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes grid {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(20px); }
+    }
+    @keyframes alertBlink {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0.3; }
+    }
+    
+    /* Enhanced body background with animated gradient */
+    body {
+      background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #1e293b, #0f172a);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Animated grid pattern background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: grid 10s linear infinite;
+      z-index: -2;
+    }
+    
+    /* Particle effect background */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.2) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(239, 68, 68, 0.2) 0%, transparent 50%);
+      z-index: -1;
+    }
+    
+    /* Map container */
+    #map, #detailMap {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    
+    .map-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, 
+        rgba(15, 23, 42, 0.05) 0%, 
+        rgba(15, 23, 42, 0.1) 25%, 
+        rgba(15, 23, 42, 0.15) 50%,
+        rgba(15, 23, 42, 0.1) 75%,
+        rgba(15, 23, 42, 0.05) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    .battery-pin {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      animation: float 2.5s ease-in-out infinite;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+      z-index: 10;
+    }
+    
+    .battery-pin:hover {
+      z-index: 100 !important;
+      animation: none;
+      transform: translate(-50%, -100%) scale(1.2);
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+    }
+    
+    .battery-pin.alerting {
+      animation: float 2.5s ease-in-out infinite, alertBlink 1s ease-in-out infinite;
+    }
 
+    .pin-circle {
+      width: 24px;
+      height: 24px;
+      border: 3px solid white;
+      border-radius: 50%;
+      display: block;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .pin-stem {
+      width: 3px;
+      height: 12px;
+      display: block;
+      margin: 0 auto;
+      transform: translateY(-2px);
+      border-radius: 1.5px;
+    }
+    
+    .pin-good { 
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+    }
+    .pin-warning { 
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      box-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
+    }
+    .pin-critical { 
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+    }
+    
+    /* Glass morphism effect for cards */
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+    
+    /* Enhanced header background */
+    .header-bg {
+      background: linear-gradient(135deg, 
+        rgba(15, 23, 42, 0.9) 0%,
+        rgba(30, 41, 59, 0.8) 50%,
+        rgba(15, 23, 42, 0.9) 100%);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+      z-index: 20;
+      position: relative;
+    }
+    
+    /* Map container enhanced background */
+    .map-container {
+      background: linear-gradient(135deg, 
+        rgba(15, 23, 42, 0.85) 0%,
+        rgba(30, 41, 59, 0.75) 100%),
+        url(\'./file/thailand-map.png\'');
+      background-size: contain;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .map-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
+      z-index: 1;
+    }
+    
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Enhanced button hover effects */
+    .btn-enhanced {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-enhanced::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn-enhanced:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    /* Status indicators with glow effect */
+    .status-good {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+    }
+    
+    .status-warning {
+      background: linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(234, 179, 8, 0.1));
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      box-shadow: 0 0 20px rgba(234, 179, 8, 0.2);
+    }
+    
+    .status-critical {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+    }
+
+    /* Enhanced Battery Icon Styles */
+    .enhanced-battery-pin {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      animation: float 2.5s ease-in-out infinite;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+      z-index: 10;
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .enhanced-battery-pin:hover {
+      transform: translate(-50%, -100%) scale(1.15);
+      z-index: 100;
+      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
+    }
+
+    .enhanced-battery-pin.alerting {
+      animation: float 2.5s ease-in-out infinite, alertBlink 1s ease-in-out infinite;
+    }
+
+    .battery-icon {
+      position: relative;
+      width: 32px;
+      height: 48px;
+    }
+
+    .battery-body {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 28px;
+      height: 42px;
+      border: 2px solid white;
+      border-radius: 4px;
+      overflow: hidden;
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(4px);
+    }
+
+    .battery-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: var(--fill-height, 50%);
+      transition: all 0.3s ease;
+      border-radius: 0 0 2px 2px;
+    }
+
+    .battery-fill.pin-good {
+      background: linear-gradient(to top, #16a34a, #22c55e);
+      box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.5);
+    }
+
+    .battery-fill.pin-warning {
+      background: linear-gradient(to top, #ca8a04, #eab308);
+      box-shadow: inset 0 0 10px rgba(234, 179, 8, 0.5);
+    }
+
+    .battery-fill.pin-critical {
+      background: linear-gradient(to top, #dc2626, #ef4444);
+      box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.5);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .battery-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+      z-index: 2;
+    }
+
+    .battery-cap {
+      position: absolute;
+      top: -3px;
+      right: -2px;
+      width: 8px;
+      height: 6px;
+      background: white;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .site-info {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 20;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .enhanced-battery-pin:hover .site-info {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    .site-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 2px;
+    }
+
+    .site-status {
+      font-size: 9px;
+      color: #60a5fa;
+      font-weight: 500;
+    }
+
+        .battery-pin-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+    }
+    
+    .province-label {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 600;
+      white-space: nowrap;
+      z-index: 25;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .battery-pin:hover .province-label {
+      opacity: 1;
+    }
+  </style>
+  <style>
+    /* Minimal Tailwind CSS implementation for production */
+    /*! tailwindcss v3.3.0 | MIT License | https://tailwindcss.com */
+    /*
+    * This is a minimal Tailwind CSS implementation to replace the CDN.
+    * It includes only the essential classes used in the application.
+    */
+    
+    /* Base styles */
+    *, ::before, ::after {
+      box-sizing: border-box;
+      border-width: 0;
+      border-style: solid;
+      border-color: #e5e7eb;
+    }
+    
+    ::before, ::after {
+      --tw-content: '';
+    }
+    
+    html {
+      line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+      -moz-tab-size: 4;
+      -o-tab-size: 4;
+      tab-size: 4;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      font-feature-settings: normal;
+    }
+    
+    body {
+      margin: 0;
+      line-height: inherit;
+    }
+    
+    hr {
+      height: 0;
+      color: inherit;
+      border-top-width: 1px;
+    }
+    
+    abbr:where([title]) {
+      -webkit-text-decoration: underline dotted;
+      text-decoration: underline dotted;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-size: inherit;
+      font-weight: inherit;
+    }
+    
+    a {
+      color: inherit;
+      text-decoration: inherit;
+    }
+    
+    b, strong {
+      font-weight: bolder;
+    }
+    
+    code, kbd, samp, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 1em;
+    }
+    
+    small {
+      font-size: 80%;
+    }
+    
+    sub, sup {
+      font-size: 75%;
+      line-height: 0;
+      position: relative;
+      vertical-align: baseline;
+    }
+    
+    sub {
+      bottom: -0.25em;
+    }
+    
+    sup {
+      top: -0.5em;
+    }
+    
+    table {
+      text-indent: 0;
+      border-color: inherit;
+      border-collapse: collapse;
+    }
+    
+    button, input, optgroup, select, textarea {
+      font-family: inherit;
+      font-size: 100%;
+      font-weight: inherit;
+      line-height: inherit;
+      color: inherit;
+      margin: 0;
+      padding: 0;
+    }
+    
+    button, select {
+      text-transform: none;
+    }
+    
+    button, [type='button'], [type='reset'], [type='submit'] {
+      -webkit-appearance: button;
+      background-color: transparent;
+      background-image: none;
+    }
+    
+    :-moz-focusring {
+      outline: auto;
+    }
+    
+    :-moz-ui-invalid {
+      box-shadow: none;
+    }
+    
+    progress {
+      vertical-align: baseline;
+    }
+    
+    ::-webkit-inner-spin-button, ::-webkit-outer-spin-button {
+      height: auto;
+    }
+    
+    ::-webkit-search-decoration {
+      -webkit-appearance: none;
+    }
+    
+    ::-webkit-file-upload-button {
+      -webkit-appearance: button;
+      font: inherit;
+    }
+    
+    summary {
+      display: list-item;
+    }
+    
+    blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre {
+      margin: 0;
+    }
+    
+    fieldset {
+      margin: 0;
+      padding: 0;
+    }
+    
+    legend {
+      padding: 0;
+    }
+    
+    ol, ul, menu {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    textarea {
+      resize: vertical;
+    }
+    
+    input::placeholder, textarea::placeholder {
+      opacity: 1;
+      color: #9ca3af;
+    }
+    
+    button, [role="button"] {
+      cursor: pointer;
+    }
+    
+    :disabled {
+      cursor: default;
+    }
+    
+    img, svg, video, canvas, audio, iframe, embed, object {
+      display: block;
+      vertical-align: middle;
+    }
+    
+    img, video {
+      max-width: 100%;
+      height: auto;
+    }
+    
+    [hidden] {
+      display: none;
+    }
+    
+    /* Utility classes used in the application */
+    .text-white { color: #fff; }
+    .text-gray-400 { color: #9ca3af; }
+    .text-gray-500 { color: #6b7280; }
+    .text-green-500 { color: #10b981; }
+    .text-yellow-500 { color: #f59e0b; }
+    .text-red-500 { color: #ef4444; }
+    .text-blue-400 { color: #60a5fa; }
+    .text-blue-500 { color: #3b82f6; }
+    .text-amber-400 { color: #fbbf24; }
+    .text-purple-400 { color: #a78bfa; }
+    .text-emerald-400 { color: #34d399; }
+    .text-orange-400 { color: #fb923c; }
+    .text-gray-300 { color: #d1d5db; }
+    
+    .bg-white { background-color: #fff; }
+    .bg-black { background-color: #000; }
+    .bg-gray-600 { background-color: #4b5563; }
+    .bg-gray-700 { background-color: #374151; }
+    .bg-green-500 { background-color: #10b981; }
+    .bg-yellow-500 { background-color: #f59e0b; }
+    .bg-red-500 { background-color: #ef4444; }
+    .bg-blue-500 { background-color: #3b82f6; }
+    .bg-blue-600 { background-color: #2563eb; }
+    .bg-green-600 { background-color: #059669; }
+    .bg-orange-600 { background-color: #ea580c; }
+    .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
+    .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)); }
+    .from-blue-500 { --tw-gradient-from: #3b82f6; --tw-gradient-to: rgb(59 130 246 / 0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+    .to-blue-600 { --tw-gradient-to: #2563eb; }
+    .from-green-600 { --tw-gradient-from: #059669; --tw-gradient-to: rgb(5 150 105 / 0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+    .to-green-700 { --tw-gradient-to: #047857; }
+    .from-orange-600 { --tw-gradient-from: #ea580c; --tw-gradient-to: rgb(234 88 12 / 0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+    .to-orange-700 { --tw-gradient-to: #c2410c; }
+    .from-blue-600 { --tw-gradient-from: #2563eb; --tw-gradient-to: rgb(37 99 235 / 0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+    .to-blue-700 { --tw-gradient-to: #1d4ed8; }
+    
+    .border { border-width: 1px; }
+    .border-b { border-bottom-width: 1px; }
+    .border-t { border-top-width: 1px; }
+    .border-l { border-left-width: 1px; }
+    .border-r { border-right-width: 1px; }
+    .border-gray-700 { border-color: #374151; }
+    .border-slate-700 { border-color: #334155; }
+    .border-slate-800\/70 { border-color: rgb(15 23 42 / 0.7); }
+    
+    .rounded { border-radius: 0.25rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-2xl { border-radius: 1rem; }
+    .rounded-full { border-radius: 9999px; }
+    .rounded-md { border-radius: 0.375rem; }
+    .rounded-sm { border-radius: 0.125rem; }
+    
+    .p-4 { padding: 1rem; }
+    .p-5 { padding: 1.25rem; }
+    .p-6 { padding: 1.5rem; }
+    .p-2 { padding: 0.5rem; }
+    .p-3 { padding: 0.75rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .pt-4 { padding-top: 1rem; }
+    .pb-4 { padding-bottom: 1rem; }
+    .pl-4 { padding-left: 1rem; }
+    .pr-4 { padding-right: 1rem; }
+    .pt-2 { padding-top: 0.5rem; }
+    .pb-2 { padding-bottom: 0.5rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .ml-4 { margin-left: 1rem; }
+    .mr-4 { margin-right: 1rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .ml-2 { margin-left: 0.5rem; }
+    .mr-2 { margin-right: 0.5rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    .my-4 { margin-top: 1rem; margin-bottom: 1rem; }
+    .my-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+    .m-4 { margin: 1rem; }
+    .m-2 { margin: 0.5rem; }
+    
+    .gap-4 { gap: 1rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-6 { gap: 1.5rem; }
+    
+    .flex { display: flex; }
+    .grid { display: grid; }
+    .inline-flex { display: inline-flex; }
+    .hidden { display: none; }
+    .block { display: block; }
+    .inline-block { display: inline-block; }
+    
+    .flex-col { flex-direction: column; }
+    .flex-row { flex-direction: row; }
+    .flex-wrap { flex-wrap: wrap; }
+    .flex-nowrap { flex-wrap: nowrap; }
+    .flex-1 { flex: 1 1 0%; }
+    
+    .items-center { align-items: center; }
+    .items-start { align-items: flex-start; }
+    .items-end { align-items: flex-end; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-around { justify-content: space-around; }
+    .justify-evenly { justify-content: space-evenly; }
+    
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .fixed { position: fixed; }
+    .sticky { position: sticky; }
+    
+    .top-0 { top: 0; }
+    .bottom-0 { bottom: 0; }
+    .left-0 { left: 0; }
+    .right-0 { right: 0; }
+    
+    .w-full { width: 100%; }
+    .w-8 { width: 2rem; }
+    .w-5 { width: 1.25rem; }
+    .w-4 { width: 1rem; }
+    .w-6 { width: 1.5rem; }
+    .w-10 { width: 2.5rem; }
+    .w-12 { width: 3rem; }
+    .w-16 { width: 4rem; }
+    .w-20 { width: 5rem; }
+    .w-24 { width: 6rem; }
+    .w-32 { width: 8rem; }
+    .w-48 { width: 12rem; }
+    .w-64 { width: 16rem; }
+    .w-1\/2 { width: 50%; }
+    .w-1\/3 { width: 33.333333%; }
+    .w-2\/3 { width: 66.666667%; }
+    .w-1\/4 { width: 25%; }
+    .w-3\/4 { width: 75%; }
+    .w-auto { width: auto; }
+    
+    .h-full { height: 100%; }
+    .h-8 { height: 2rem; }
+    .h-5 { height: 1.25rem; }
+    .h-4 { height: 1rem; }
+    .h-6 { height: 1.5rem; }
+    .h-10 { height: 2.5rem; }
+    .h-12 { height: 3rem; }
+    .h-16 { height: 4rem; }
+    .h-20 { height: 5rem; }
+    .h-24 { height: 6rem; }
+    .h-32 { height: 8rem; }
+    .h-48 { height: 12rem; }
+    .h-64 { height: 16rem; }
+    .h-auto { height: auto; }
+    .h-1\/2 { height: 50%; }
+    .h-1\/3 { height: 33.333333%; }
+    .h-2\/3 { height: 66.666667%; }
+    .h-1\/4 { height: 25%; }
+    .h-3\/4 { height: 75%; }
+    
+    .min-h-screen { min-height: 100vh; }
+    
+    .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+    .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+    .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    .text-base { font-size: 1rem; line-height: 1.5rem; }
+    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-xs { font-size: 0.75rem; line-height: 1rem; }
+    .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+    .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+    .text-5xl { font-size: 3rem; line-height: 1; }
+    
+    .font-bold { font-weight: 700; }
+    .font-semibold { font-weight: 600; }
+    .font-normal { font-weight: 400; }
+    .font-light { font-weight: 300; }
+    .font-medium { font-weight: 500; }
+    
+    .uppercase { text-transform: uppercase; }
+    .lowercase { text-transform: lowercase; }
+    .capitalize { text-transform: capitalize; }
+    .normal-case { text-transform: none; }
+    
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+    .text-right { text-align: right; }
+    .text-justify { text-align: justify; }
+    
+    .underline { text-decoration: underline; }
+    .line-through { text-decoration: line-through; }
+    .no-underline { text-decoration: none; }
+    
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    
+    .opacity-0 { opacity: 0; }
+    .opacity-100 { opacity: 1; }
+    .opacity-50 { opacity: 0.5; }
+    .opacity-75 { opacity: 0.75; }
+    .opacity-25 { opacity: 0.25; }
+    
+    .cursor-pointer { cursor: pointer; }
+    .cursor-default { cursor: default; }
+    .cursor-not-allowed { cursor: not-allowed; }
+    
+    .z-0 { z-index: 0; }
+    .z-10 { z-index: 10; }
+    .z-20 { z-index: 20; }
+    .z-30 { z-index: 30; }
+    .z-40 { z-index: 40; }
+    .z-50 { z-index: 50; }
+    .z-auto { z-index: auto; }
+    
+    .transition { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .transition-colors { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .transition-opacity { transition-property: opacity; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .transition-transform { transition-property: transform; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    
+    .duration-300 { transition-duration: 300ms; }
+    .duration-200 { transition-duration: 200ms; }
+    .duration-150 { transition-duration: 150ms; }
+    .duration-100 { transition-duration: 100ms; }
+    .duration-75 { transition-duration: 75ms; }
+    .duration-500 { transition-duration: 500ms; }
+    
+    .ease-in { transition-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+    .ease-out { transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+    .ease-in-out { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    .transform { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+    .translate-x-1\/2 { --tw-translate-x: 50%; }
+    .translate-x-0 { --tw-translate-x: 0px; }
+    .translate-y-0 { --tw-translate-y: 0px; }
+    .translate-y-1\/2 { --tw-translate-y: 50%; }
+    .-translate-x-1\/2 { --tw-translate-x: -50%; }
+    .-translate-y-1\/2 { --tw-translate-y: -50%; }
+    .-translate-y-2 { --tw-translate-y: -0.5rem; }
+    .translate-y-2 { --tw-translate-y: 0.5rem; }
+    
+    .scale-100 { --tw-scale-x: 1; --tw-scale-y: 1; }
+    .scale-110 { --tw-scale-x: 1.1; --tw-scale-y: 1.1; }
+    .scale-115 { --tw-scale-x: 1.15; --tw-scale-y: 1.15; }
+    .scale-125 { --tw-scale-x: 1.25; --tw-scale-y: 1.25; }
+    .scale-90 { --tw-scale-x: 0.9; --tw-scale-y: 0.9; }
+    .scale-95 { --tw-scale-x: 0.95; --tw-scale-y: 0.95; }
+    .scale-75 { --tw-scale-x: 0.75; --tw-scale-y: 0.75; }
+    .scale-50 { --tw-scale-x: 0.5; --tw-scale-y: 0.5; }
+    
+    .rotate-0 { --tw-rotate: 0deg; }
+    .rotate-90 { --tw-rotate: 90deg; }
+    .rotate-180 { --tw-rotate: 180deg; }
+    .rotate-45 { --tw-rotate: 45deg; }
+    .-rotate-90 { --tw-rotate: -90deg; }
+    
+    .skew-x-0 { --tw-skew-x: 0deg; }
+    .skew-y-0 { --tw-skew-y: 0deg; }
+    
+    .origin-center { transform-origin: center; }
+    .origin-top { transform-origin: top; }
+    .origin-bottom { transform-origin: bottom; }
+    .origin-left { transform-origin: left; }
+    .origin-right { transform-origin: right; }
+    
+    .shadow { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
+    .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+    .shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+    .shadow-2xl { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+    .shadow-inner { box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05); }
+    .shadow-none { box-shadow: none; }
+    .shadow-md { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+    .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+    
+    .outline { outline-style: solid; }
+    .outline-none { outline: 2px solid transparent; outline-offset: 2px; }
+    
+    .ring { --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color); box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000); }
+    .ring-0 { --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color); }
+    .ring-1 { --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color); }
+    .ring-2 { --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color); }
+    .ring-inset { --tw-ring-inset: inset; }
+    
+    .filter { filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow); }
+    .blur { --tw-blur: blur(8px); }
+    .backdrop-blur { --tw-backdrop-blur: blur(8px); }
+    .backdrop-blur-sm { --tw-backdrop-blur: blur(4px); }
+    .backdrop-blur-md { --tw-backdrop-blur: blur(12px); }
+    .backdrop-blur-lg { --tw-backdrop-blur: blur(16px); }
+    
+    .grayscale { --tw-grayscale: grayscale(100%); }
+    .invert { --tw-invert: invert(100%); }
+    .sepia { --tw-sepia: sepia(100%); }
+    .hue-rotate-0 { --tw-hue-rotate: hue-rotate(0deg); }
+    .hue-rotate-15 { --tw-hue-rotate: hue-rotate(15deg); }
+    .hue-rotate-30 { --tw-hue-rotate: hue-rotate(30deg); }
+    .hue-rotate-60 { --tw-hue-rotate: hue-rotate(60deg); }
+    .hue-rotate-90 { --tw-hue-rotate: hue-rotate(90deg); }
+    .hue-rotate-180 { --tw-hue-rotate: hue-rotate(180deg); }
+    .saturate-0 { --tw-saturate: saturate(0); }
+    .saturate-50 { --tw-saturate: saturate(.5); }
+    .saturate-100 { --tw-saturate: saturate(1); }
+    .saturate-150 { --tw-saturate: saturate(1.5); }
+    .saturate-200 { --tw-saturate: saturate(2); }
+    .brightness-0 { --tw-brightness: brightness(0); }
+    .brightness-50 { --tw-brightness: brightness(.5); }
+    .brightness-75 { --tw-brightness: brightness(.75); }
+    .brightness-90 { --tw-brightness: brightness(.9); }
+    .brightness-95 { --tw-brightness: brightness(.95); }
+    .brightness-100 { --tw-brightness: brightness(1); }
+    .brightness-105 { --tw-brightness: brightness(1.05); }
+    .brightness-110 { --tw-brightness: brightness(1.1); }
+    .brightness-125 { --tw-brightness: brightness(1.25); }
+    .brightness-150 { --tw-brightness: brightness(1.5); }
+    .brightness-200 { --tw-brightness: brightness(2); }
+    .contrast-0 { --tw-contrast: contrast(0); }
+    .contrast-50 { --tw-contrast: contrast(.5); }
+    .contrast-75 { --tw-contrast: contrast(.75); }
+    .contrast-100 { --tw-contrast: contrast(1); }
+    .contrast-125 { --tw-contrast: contrast(1.25); }
+    .contrast-150 { --tw-contrast: contrast(1.5); }
+    .contrast-200 { --tw-contrast: contrast(2); }
+    
+    .hover\:bg-gray-700:hover { background-color: #374151; }
+    .hover\:bg-green-700:hover { background-color: #047857; }
+    .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
+    .hover\:bg-orange-700:hover { background-color: #c2410c; }
+    .hover\:bg-gray-600:hover { background-color: #4b5563; }
+    .hover\:bg-blue-600:hover { background-color: #2563eb; }
+    .hover\:bg-green-600:hover { background-color: #059669; }
+    .hover\:bg-orange-600:hover { background-color: #ea580c; }
+    .hover\:text-white:hover { color: #fff; }
+    .hover\:text-blue-300:hover { color: #93c5fd; }
+    .hover\:shadow-xl:hover { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+    .hover\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+    .hover\:shadow:hover { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
+    .hover\:opacity-100:hover { opacity: 1; }
+    .hover\:opacity-75:hover { opacity: 0.75; }
+    .hover\:scale-110:hover { --tw-scale-x: 1.1; --tw-scale-y: 1.1; }
+    .hover\:scale-115:hover { --tw-scale-x: 1.15; --tw-scale-y: 1.15; }
+    .hover\:scale-125:hover { --tw-scale-x: 1.25; --tw-scale-y: 1.25; }
+    .hover\:scale-105:hover { --tw-scale-x: 1.05; --tw-scale-y: 1.05; }
+    
+    .focus\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
+    .focus\:ring:focus { --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color); box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000); }
+    .focus\:ring-2:focus { --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color); }
+    .focus\:ring-blue-500:focus { --tw-ring-opacity: 1; --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity)); }
+    .focus\:ring-opacity-50:focus { --tw-ring-opacity: 0.5; }
+    .focus\:ring-offset-2:focus { --tw-ring-offset-width: 2px; }
+    
+    .group:hover .group-hover\:opacity-100 { opacity: 1; }
+    .group:hover .group-hover\:bg-slate-800\/40 { background-color: rgb(15 23 42 / 0.4); }
+    
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .grid-cols-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .grid-cols-8 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+    .grid-cols-9 { grid-template-columns: repeat(9, minmax(0, 1fr)); }
+    .grid-cols-10 { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+    .grid-cols-11 { grid-template-columns: repeat(11, minmax(0, 1fr)); }
+    .grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .grid-cols-none { grid-template-columns: none; }
+    
+    .col-span-1 { grid-column: span 1 / span 1; }
+    .col-span-2 { grid-column: span 2 / span 2; }
+    .col-span-3 { grid-column: span 3 / span 3; }
+    .col-span-4 { grid-column: span 4 / span 4; }
+    .col-span-5 { grid-column: span 5 / span 5; }
+    .col-span-6 { grid-column: span 6 / span 6; }
+    .col-span-7 { grid-column: span 7 / span 7; }
+    .col-span-8 { grid-column: span 8 / span 8; }
+    .col-span-9 { grid-column: span 9 / span 9; }
+    .col-span-10 { grid-column: span 10 / span 10; }
+    .col-span-11 { grid-column: span 11 / span 11; }
+    .col-span-12 { grid-column: span 12 / span 12; }
+    .col-span-full { grid-column: 1 / -1; }
+    
+    .row-span-1 { grid-row: span 1 / span 1; }
+    .row-span-2 { grid-row: span 2 / span 2; }
+    .row-span-3 { grid-row: span 3 / span 3; }
+    .row-span-4 { grid-row: span 4 / span 4; }
+    .row-span-5 { grid-row: span 5 / span 5; }
+    .row-span-6 { grid-row: span 6 / span 6; }
+    .row-span-full { grid-row: 1 / -1; }
+    
+    .col-start-1 { grid-column-start: 1; }
+    .col-start-2 { grid-column-start: 2; }
+    .col-start-3 { grid-column-start: 3; }
+    .col-start-4 { grid-column-start: 4; }
+    .col-start-5 { grid-column-start: 5; }
+    .col-start-6 { grid-column-start: 6; }
+    .col-start-7 { grid-column-start: 7; }
+    .col-start-8 { grid-column-start: 8; }
+    .col-start-9 { grid-column-start: 9; }
+    .col-start-10 { grid-column-start: 10; }
+    .col-start-11 { grid-column-start: 11; }
+    .col-start-12 { grid-column-start: 12; }
+    .col-start-13 { grid-column-start: 13; }
+    .col-start-auto { grid-column-start: auto; }
+    
+    .col-end-1 { grid-column-end: 1; }
+    .col-end-2 { grid-column-end: 2; }
+    .col-end-3 { grid-column-end: 3; }
+    .col-end-4 { grid-column-end: 4; }
+    .col-end-5 { grid-column-end: 5; }
+    .col-end-6 { grid-column-end: 6; }
+    .col-end-7 { grid-column-end: 7; }
+    .col-end-8 { grid-column-end: 8; }
+    .col-end-9 { grid-column-end: 9; }
+    .col-end-10 { grid-column-end: 10; }
+    .col-end-11 { grid-column-end: 11; }
+    .col-end-12 { grid-column-end: 12; }
+    .col-end-13 { grid-column-end: 13; }
+    .col-end-auto { grid-column-end: auto; }
+    
+    .grid-flow-row { grid-auto-flow: row; }
+    .grid-flow-col { grid-auto-flow: column; }
+    .grid-flow-row-dense { grid-auto-flow: row dense; }
+    .grid-flow-col-dense { grid-auto-flow: column dense; }
+    
+    .auto-cols-auto { grid-auto-columns: auto; }
+    .auto-cols-min { grid-auto-columns: min-content; }
+    .auto-cols-max { grid-auto-columns: max-content; }
+    .auto-cols-fr { grid-auto-columns: minmax(0, 1fr); }
+    
+    .auto-rows-auto { grid-auto-rows: auto; }
+    .auto-rows-min { grid-auto-rows: min-content; }
+    .auto-rows-max { grid-auto-rows: max-content; }
+    .auto-rows-fr { grid-auto-rows: minmax(0, 1fr); }
+    
+    .gap-0 { gap: 0px; }
+    .gap-x-0 { column-gap: 0px; }
+    .gap-y-0 { row-gap: 0px; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-x-1 { column-gap: 0.25rem; }
+    .gap-y-1 { row-gap: 0.25rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-x-2 { column-gap: 0.5rem; }
+    .gap-y-2 { row-gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-x-3 { column-gap: 0.75rem; }
+    .gap-y-3 { row-gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+    .gap-x-4 { column-gap: 1rem; }
+    .gap-y-4 { row-gap: 1rem; }
+    .gap-5 { gap: 1.25rem; }
+    .gap-x-5 { column-gap: 1.25rem; }
+    .gap-y-5 { row-gap: 1.25rem; }
+    .gap-6 { gap: 1.5rem; }
+    .gap-x-6 { column-gap: 1.5rem; }
+    .gap-y-6 { row-gap: 1.5rem; }
+    .gap-7 { gap: 1.75rem; }
+    .gap-x-7 { column-gap: 1.75rem; }
+    .gap-y-7 { row-gap: 1.75rem; }
+    .gap-8 { gap: 2rem; }
+    .gap-x-8 { column-gap: 2rem; }
+    .gap-y-8 { row-gap: 2rem; }
+    .gap-9 { gap: 2.25rem; }
+    .gap-x-9 { column-gap: 2.25rem; }
+    .gap-y-9 { row-gap: 2.25rem; }
+    .gap-10 { gap: 2.5rem; }
+    .gap-x-10 { column-gap: 2.5rem; }
+    .gap-y-10 { row-gap: 2.5rem; }
+    .gap-11 { gap: 2.75rem; }
+    .gap-x-11 { column-gap: 2.75rem; }
+    .gap-y-11 { row-gap: 2.75rem; }
+    .gap-12 { gap: 3rem; }
+    .gap-x-12 { column-gap: 3rem; }
+    .gap-y-12 { row-gap: 3rem; }
+    .gap-14 { gap: 3.5rem; }
+    .gap-x-14 { column-gap: 3.5rem; }
+    .gap-y-14 { row-gap: 3.5rem; }
+    .gap-16 { gap: 4rem; }
+    .gap-x-16 { column-gap: 4rem; }
+    .gap-y-16 { row-gap: 4rem; }
+    .gap-20 { gap: 5rem; }
+    .gap-x-20 { column-gap: 5rem; }
+    .gap-y-20 { row-gap: 5rem; }
+    .gap-24 { gap: 6rem; }
+    .gap-x-24 { column-gap: 6rem; }
+    .gap-y-24 { row-gap: 6rem; }
+    .gap-28 { gap: 7rem; }
+    .gap-x-28 { column-gap: 7rem; }
+    .gap-y-28 { row-gap: 7rem; }
+    .gap-32 { gap: 8rem; }
+    .gap-x-32 { column-gap: 8rem; }
+    .gap-y-32 { row-gap: 8rem; }
+    .gap-36 { gap: 9rem; }
+    .gap-x-36 { column-gap: 9rem; }
+    .gap-y-36 { row-gap: 9rem; }
+    .gap-40 { gap: 10rem; }
+    .gap-x-40 { column-gap: 10rem; }
+    .gap-y-40 { row-gap: 10rem; }
+    .gap-44 { gap: 11rem; }
+    .gap-x-44 { column-gap: 11rem; }
+    .gap-y-44 { row-gap: 11rem; }
+    .gap-48 { gap: 12rem; }
+    .gap-x-48 { column-gap: 12rem; }
+    .gap-y-48 { row-gap: 12rem; }
+    .gap-52 { gap: 13rem; }
+    .gap-x-52 { column-gap: 13rem; }
+    .gap-y-52 { row-gap: 13rem; }
+    .gap-56 { gap: 14rem; }
+    .gap-x-56 { column-gap: 14rem; }
+    .gap-y-56 { row-gap: 14rem; }
+    .gap-60 { gap: 15rem; }
+    .gap-x-60 { column-gap: 15rem; }
+    .gap-y-60 { row-gap: 15rem; }
+    .gap-64 { gap: 16rem; }
+    .gap-x-64 { column-gap: 16rem; }
+    .gap-y-64 { row-gap: 16rem; }
+    .gap-72 { gap: 18rem; }
+    .gap-x-72 { column-gap: 18rem; }
+    .gap-y-72 { row-gap: 18rem; }
+    .gap-80 { gap: 20rem; }
+    .gap-x-80 { column-gap: 20rem; }
+    .gap-y-80 { row-gap: 20rem; }
+    .gap-96 { gap: 24rem; }
+    .gap-x-96 { column-gap: 24rem; }
+    .gap-y-96 { row-gap: 24rem; }
+  </style>
 </head>
 <body class="text-white min-h-screen">
   <div id="app"></div>
   <div id="alertContainer"></div>
 
   <script>
-    // Google Maps API bootstrap
-    (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
-        key: "AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg",
-        v: "weekly",
-    });
-
+    // Site data with 24 Thai locations and detailed battery metrics
     let sites = [
       { 
         id: 1, 
-        name: 'สถานีไฟฟ้า น่าน 1', 
-        lat: 17.01, 
-        lng: 99.82, 
+        name: 'สถานีไฟฟ้า เชียงราย 2', 
+        lat: 19.91, 
+        lng: 99.84, 
         status: 'good', 
         battery: 95, 
         temp: 28, 
@@ -36,29 +1157,10 @@
         stateOfCharge: 95,
         stateOfHealth: 98,
         ambientTemp: 28,
-        province: 'น่าน' 
-      },
-      { 
-        id: 2, 
-        name: 'สถานีไฟฟ้า เชียงราย 2', 
-        lat: 19.91, 
-        lng: 99.84, 
-        status: 'good', 
-        battery: 90, 
-        temp: 27, 
-        voltage: 125.0, 
-        current: 315.0,
-        voltagePerCell: 2.50,
-        internalResistance: 2200,
-        currentPerString: 315.0,
-        voltagePerString: 125.0,
-        stateOfCharge: 90,
-        stateOfHealth: 96,
-        ambientTemp: 27,
         province: 'เชียงราย' 
       },
       { 
-        id: 3, 
+        id: 2, 
         name: 'สถานีไฟฟ้า ลำปาง 3', 
         lat: 18.29, 
         lng: 99.49, 
@@ -77,99 +1179,114 @@
         province: 'ลำปาง' 
       },
       { 
+        id: 3, 
+        name: 'สถานีไฟฟ้า พิษณุโลก 6', 
+        lat: 16.82, 
+        lng: 100.27, 
+        status: 'warning', 
+        battery: 78, 
+        temp: 32, 
+        voltage: 125.0, 
+        current: 273.0,
+        voltagePerCell: 2.50,
+        internalResistance: 4500,
+        currentPerString: 273.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 78,
+        stateOfHealth: 85,
+        ambientTemp: 32,
+        province: 'พิษณุโลก' 
+      },
+      { 
         id: 4, 
-        name: 'สถานีไฟฟ้า น่าน', 
-        lat: 13.3611, 
-        lng: 100.9847, 
+        name: 'สถานีไฟฟ้า น่าน 1', 
+        lat: 17.01, 
+        lng: 99.82, 
         status: 'good', 
-        battery: 88, 
-        temp: 29, 
-        voltage: 48.1, 
-        current: 12.0, 
-        power: 577,
-        voltagePerCell: 3.2,
-        internalResistance: 120,
-        currentPerString: 12.0,
-        voltagePerString: 96.2,
-        stateOfCharge: 88,
+        battery: 90, 
+        temp: 27, 
+        voltage: 125.0, 
+        current: 315.0,
+        voltagePerCell: 2.50,
+        internalResistance: 2200,
+        currentPerString: 315.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 90,
         stateOfHealth: 96,
-        ambientTemp: 29,
+        ambientTemp: 27,
         province: 'น่าน' 
       },
       { 
         id: 5, 
-        name: 'สถานีไฟฟ้า ท่าวุ้ง', 
-        lat: 16.4322, 
-        lng: 102.8236, 
+        name: 'สถานีไฟฟ้าท่าวุ้ง', 
+        lat: 14.96, 
+        lng: 100.87, 
         status: 'critical', 
-        battery: 45, 
-        temp: 38, 
-        voltage: 48.1, 
-        current: 8.5, 
-        power: 398,
-        voltagePerCell: 2.6,
-        internalResistance: 1200,
-        currentPerString: 8.5,
-        voltagePerString: 83.6,
-        stateOfCharge: 45,
-        stateOfHealth: 65,
-        ambientTemp: 38,
-        province: 'ท่าวุ้ง' 
+        battery: 40, 
+        temp: 35, 
+        voltage: 125.0, 
+        current: 140.0,
+        voltagePerCell: 2.50,
+        internalResistance: 5000,
+        currentPerString: 140.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 40,
+        stateOfHealth: 75,
+        ambientTemp: 35,
+        province: 'ลพบุรี' 
       },
       { 
         id: 6, 
-        name: 'สถานีไฟฟ้า ชนแดน', 
-        lat: 7.0087, 
-        lng: 100.4653, 
+        name: 'สถานีไฟฟ้าชนแดน', 
+        lat: 14.14, 
+        lng: 101.1, 
         status: 'good', 
-        battery: 91, 
+        battery: 88, 
         temp: 30, 
-        voltage: 48.3, 
-        current: 11.5, 
-        power: 555,
-        voltagePerCell: 3.2,
-        internalResistance: 110,
-        currentPerString: 11.5,
-        voltagePerString: 96.6,
-        stateOfCharge: 91,
-        stateOfHealth: 97,
+        voltage: 125.0, 
+        current: 308.0,
+        voltagePerCell: 2.50,
+        internalResistance: 2100,
+        currentPerString: 308.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 88,
+        stateOfHealth: 95,
         ambientTemp: 30,
-        province: 'ชนแดน' 
+        province: 'ชัยนาท' 
       },
       { 
         id: 7, 
         name: 'สถานีไฟฟ้า ชัยนาท', 
-        lat: 14.9799, 
-        lng: 102.0977, 
+        lat: 15.18, 
+        lng: 100.12, 
         status: 'good', 
-        battery: 89, 
-        temp: 27, 
-        voltage: 48.0, 
-        current: 12.2, 
-        power: 586,
-        voltagePerCell: 3.2,
-        internalResistance: 95,
-        currentPerString: 12.2,
-        stateOfCharge: 89,
-        stateOfHealth: 94,
-        ambientTemp: 27,
+        battery: 92, 
+        temp: 29, 
+        voltage: 125.0, 
+        current: 322.0,
+        voltagePerCell: 2.50,
+        internalResistance: 2000,
+        currentPerString: 322.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 92,
+        stateOfHealth: 97,
+        ambientTemp: 29,
         province: 'ชัยนาท' 
       },
       { 
         id: 8, 
-        name: 'สถานีไฟฟ้า อุดรธานี', 
-        lat: 17.4138, 
-        lng: 102.7872, 
+        name: 'สถานีไฟฟ้า อุดรธานี 3', 
+        lat: 17.41, 
+        lng: 102.79, 
         status: 'warning', 
         battery: 72, 
         temp: 33, 
-        voltage: 47.7, 
-        current: 9.8, 
-        power: 467,
-        voltagePerCell: 2.9,
-        internalResistance: 380,
-        currentPerString: 9.8,
-        voltagePerString: 93.4,
+        voltage: 125.0, 
+        current: 252.0,
+        voltagePerCell: 2.50,
+        internalResistance: 4000,
+        currentPerString: 252.0,
+        voltagePerString: 125.0,
         stateOfCharge: 72,
         stateOfHealth: 82,
         ambientTemp: 33,
@@ -177,424 +1294,416 @@
       },
       { 
         id: 9, 
-        name: 'สถานีไฟฟ้า ขอนแก่น', 
-        lat: 9.1382, 
-        lng: 99.3331, 
-        status: 'good', 
-        battery: 94, 
-        temp: 28, 
-        voltage: 48.2, 
-        current: 12.8, 
-        power: 617,
-        voltagePerCell: 3.2,
-        internalResistance: 85,
-        currentPerString: 12.8,
-        stateOfCharge: 94,
-        stateOfHealth: 99,
-        ambientTemp: 28,
+        name: 'สถานีไฟฟ้า ขอนแก่น 3', 
+        lat: 16.43, 
+        lng: 102.82, 
+        status: 'critical', 
+        battery: 45, 
+        temp: 38, 
+        voltage: 125.0, 
+        current: 157.5,
+        voltagePerCell: 2.50,
+        internalResistance: 5000,
+        currentPerString: 157.5,
+        voltagePerString: 125.0,
+        stateOfCharge: 45,
+        stateOfHealth: 65,
+        ambientTemp: 38,
         province: 'ขอนแก่น' 
       },
       { 
         id: 10, 
         name: 'สถานีไฟฟ้า โพนพิสัย', 
-        lat: 19.9105, 
-        lng: 99.8406, 
+        lat: 17.9, 
+        lng: 102.1, 
         status: 'good', 
-        battery: 87, 
-        temp: 25, 
-        voltage: 48.1, 
-        current: 11.9, 
-        power: 572,
-        voltagePerCell: 3.2,
-        internalResistance: 130,
-        currentPerString: 11.9,
-        voltagePerString: 96.2,
-        stateOfCharge: 87,
-        stateOfHealth: 93,
-        ambientTemp: 25,
-        province: 'โพนพิสัย' 
+        battery: 85, 
+        temp: 31, 
+        voltage: 125.0, 
+        current: 297.5,
+        voltagePerCell: 2.50,
+        internalResistance: 2400,
+        currentPerString: 297.5,
+        voltagePerString: 125.0,
+        stateOfCharge: 85,
+        stateOfHealth: 94,
+        ambientTemp: 31,
+        province: 'บึงกาฬ' 
       },
       { 
         id: 11, 
         name: 'สถานีไฟฟ้า บรบือ', 
-        lat: 12.6814, 
-        lng: 101.2816, 
+        lat: 15.7, 
+        lng: 103.1, 
         status: 'good', 
-        battery: 93, 
-        temp: 27, 
-        voltage: 48.3, 
-        current: 12.6, 
-        power: 609,
-        voltagePerCell: 3.2,
-        internalResistance: 100,
-        currentPerString: 12.6,
-        stateOfCharge: 93,
-        stateOfHealth: 98,
-        ambientTemp: 27,
-        province: 'บรบือ' 
+        battery: 87, 
+        temp: 32, 
+        voltage: 125.0, 
+        current: 304.5,
+        voltagePerCell: 2.50,
+        internalResistance: 2200,
+        currentPerString: 304.5,
+        voltagePerString: 125.0,
+        stateOfCharge: 87,
+        stateOfHealth: 93,
+        ambientTemp: 32,
+        province: 'มหาสารคาม' 
       },
       { 
         id: 12, 
         name: 'สถานีไฟฟ้า วาปีปทุม', 
-        lat: 14.3692, 
-        lng: 100.5877, 
+        lat: 16.3, 
+        lng: 103.9, 
         status: 'warning', 
         battery: 68, 
-        temp: 35, 
-        voltage: 47.4, 
-        current: 9.2, 
-        power: 436,
-        voltagePerCell: 2.8,
-        internalResistance: 520,
-        currentPerString: 9.2,
-        voltagePerString: 90.4,
+        temp: 34, 
+        voltage: 125.0, 
+        current: 238.0,
+        voltagePerCell: 2.50,
+        internalResistance: 4500,
+        currentPerString: 238.0,
+        voltagePerString: 125.0,
         stateOfCharge: 68,
-        stateOfHealth: 78,
-        ambientTemp: 35,
-        province: 'วาปีปทุม' 
+        stateOfHealth: 80,
+        ambientTemp: 34,
+        province: 'อำนาจเจริญ' 
       },
       { 
         id: 13, 
         name: 'สถานีไฟฟ้า เขื่องใน', 
-        lat: 8.0863, 
-        lng: 98.9063, 
+        lat: 15.0, 
+        lng: 103.1, 
         status: 'good', 
-        battery: 90, 
-        temp: 29, 
-        voltage: 48.0, 
-        current: 11.7, 
-        power: 562,
-        voltagePerCell: 3.0,
-        internalResistance: 150,
-        currentPerString: 11.7,
-        stateOfCharge: 90,
-        stateOfHealth: 95,
-        ambientTemp: 29,
-        province: 'เขื่องใน' 
+        battery: 91, 
+        temp: 30, 
+        voltage: 125.0, 
+        current: 318.5,
+        voltagePerCell: 2.50,
+        internalResistance: 2100,
+        currentPerString: 318.5,
+        voltagePerString: 125.0,
+        stateOfCharge: 91,
+        stateOfHealth: 96,
+        ambientTemp: 30,
+        province: 'อุบลราชธานี' 
       },
       { 
         id: 14, 
         name: 'สถานีไฟฟ้า โรจนะ 3', 
-        lat: 8.4304, 
-        lng: 99.9631, 
+        lat: 14.37, 
+        lng: 100.59, 
         status: 'good', 
-        battery: 85, 
-        temp: 30, 
-        voltage: 47.9, 
-        current: 11.3, 
-        power: 541,
-        voltagePerCell: 3.0,
-        internalResistance: 200,
-        currentPerString: 11.3,
-        stateOfCharge: 85,
-        stateOfHealth: 88,
-        ambientTemp: 30,
-        province: 'โรจนะ 3' 
+        battery: 88, 
+        temp: 29, 
+        voltage: 125.0, 
+        current: 308.0,
+        voltagePerCell: 2.50,
+        internalResistance: 2300,
+        currentPerString: 308.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 88,
+        stateOfHealth: 94,
+        ambientTemp: 29,
+        province: 'พระนครศรีอยุธยา' 
       },
       { 
         id: 15, 
         name: 'สถานีไฟฟ้า โรจนะ 4', 
-        lat: 18.2888, 
-        lng: 99.4919, 
+        lat: 14.37, 
+        lng: 100.59, 
         status: 'critical', 
         battery: 42, 
         temp: 39, 
-        voltage: 46.5, 
-        current: 7.8, 
-        power: 363,
-        voltagePerCell: 2.5,
-        internalResistance: 1500,
-        currentPerString: 7.8,
+        voltage: 125.0, 
+        current: 147.0,
+        voltagePerCell: 2.50,
+        internalResistance: 5500,
+        currentPerString: 147.0,
+        voltagePerString: 125.0,
         stateOfCharge: 42,
         stateOfHealth: 60,
         ambientTemp: 39,
-        province: 'โรจนะ 4' 
+        province: 'พระนครศรีอยุธยา' 
       },
       { 
         id: 16, 
         name: 'สถานีไฟฟ้า บางพระครู', 
-        lat: 13.8199, 
-        lng: 100.0376, 
+        lat: 13.76, 
+        lng: 100.50, 
         status: 'good', 
-        battery: 88, 
+        battery: 90, 
         temp: 28, 
-        voltage: 48.1, 
-        current: 12.1, 
-        power: 582,
-        voltagePerCell: 3.2,
-        internalResistance: 115,
-        currentPerString: 12.1,
-        stateOfCharge: 88,
-        stateOfHealth: 96,
+        voltage: 125.0, 
+        current: 315.0,
+        voltagePerCell: 2.50,
+        internalResistance: 2000,
+        currentPerString: 315.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 90,
+        stateOfHealth: 95,
         ambientTemp: 28,
-        province: 'บางพระครู' 
+        province: 'สมุทรปราการ' 
       },
       { 
         id: 17, 
-        name: 'สถานีไฟฟ้า สมุทรสาคร', 
-        lat: 12.5683, 
-        lng: 99.9577, 
+        name: 'สถานีไฟฟ้า สมุทรสาคร 7', 
+        lat: 13.5, 
+        lng: 100.25, 
         status: 'good', 
-        battery: 91, 
-        temp: 29, 
-        voltage: 48.2, 
-        current: 11.8, 
-        power: 569,
-        voltagePerCell: 3.2,
-        internalResistance: 105,
-        currentPerString: 11.8,
-        stateOfCharge: 91,
-        stateOfHealth: 97,
-        ambientTemp: 29,
+        battery: 86, 
+        temp: 30, 
+        voltage: 125.0, 
+        current: 301.0,
+        voltagePerCell: 2.50,
+        internalResistance: 2200,
+        currentPerString: 301.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 86,
+        stateOfHealth: 93,
+        ambientTemp: 30,
         province: 'สมุทรสาคร' 
       },
       { 
         id: 18, 
-        name: 'สถานีไฟฟ้า สามพราน', 
-        lat: 14.0227, 
-        lng: 99.5328, 
+        name: 'สถานีไฟฟ้า สามพราน 4', 
+        lat: 13.7, 
+        lng: 99.95, 
         status: 'warning', 
         battery: 75, 
         temp: 31, 
-        voltage: 47.6, 
-        current: 10.5, 
-        power: 500,
-        voltagePerCell: 2.9,
-        internalResistance: 320,
-        currentPerString: 10.5,
+        voltage: 125.0, 
+        current: 262.5,
+        voltagePerCell: 2.50,
+        internalResistance: 4200,
+        currentPerString: 262.5,
+        voltagePerString: 125.0,
         stateOfCharge: 75,
-        stateOfHealth: 84,
+        stateOfHealth: 83,
         ambientTemp: 31,
-        province: 'สามพราน' 
+        province: 'นครปฐม' 
       },
       { 
         id: 19, 
-        name: 'สถานีไฟฟ้า ถลาง', 
-        lat: 16.8214, 
-        lng: 100.2659, 
+        name: 'สถานีไฟฟ้า ถลาง 2', 
+        lat: 8.1, 
+        lng: 98.4, 
         status: 'good', 
-        battery: 86, 
-        temp: 28, 
-        voltage: 48.0, 
-        current: 11.6, 
-        power: 557,
-        voltagePerCell: 3.2,
-        internalResistance: 125,
-        currentPerString: 11.6,
-        stateOfCharge: 86,
-        stateOfHealth: 92,
-        ambientTemp: 28,
-        province: 'ถลาง' 
+        battery: 89, 
+        temp: 32, 
+        voltage: 125.0, 
+        current: 311.5,
+        voltagePerCell: 2.50,
+        internalResistance: 2100,
+        currentPerString: 311.5,
+        voltagePerString: 125.0,
+        stateOfCharge: 89,
+        stateOfHealth: 94,
+        ambientTemp: 32,
+        province: 'ภูเก็ต' 
       },
       { 
         id: 20, 
-        name: 'สถานีไฟฟ้า ภูเก็ต', 
-        lat: 15.6950, 
-        lng: 100.1378, 
-        status: 'good', 
-        battery: 89, 
-        temp: 30, 
-        voltage: 48.1, 
-        current: 12.0, 
-        power: 577,
-        voltagePerCell: 3.2,
-        internalResistance: 110,
-        currentPerString: 12.0,
-        stateOfCharge: 89,
-        stateOfHealth: 95,
-        ambientTemp: 30,
+        name: 'สถานีไฟฟ้า ภูเก็ต 3', 
+        lat: 7.88, 
+        lng: 98.39, 
+        status: 'warning', 
+        battery: 68, 
+        temp: 34, 
+        voltage: 125.0, 
+        current: 238.0,
+        voltagePerCell: 2.50,
+        internalResistance: 4500,
+        currentPerString: 238.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 68,
+        stateOfHealth: 82,
+        ambientTemp: 34,
         province: 'ภูเก็ต' 
       },
       { 
         id: 21, 
-        name: 'สถานีไฟฟ้า กระบี่', 
-        lat: 15.2286, 
-        lng: 104.8564, 
+        name: 'สถานีไฟฟ้า กระบี่ 1', 
+        lat: 8.09, 
+        lng: 98.91, 
         status: 'good', 
         battery: 92, 
-        temp: 27, 
-        voltage: 48.2, 
-        current: 12.3, 
-        power: 593,
-        voltagePerCell: 3.2,
-        internalResistance: 95,
-        currentPerString: 12.3,
+        temp: 30, 
+        voltage: 125.0, 
+        current: 322.0,
+        voltagePerCell: 2.50,
+        internalResistance: 2000,
+        currentPerString: 322.0,
+        voltagePerString: 125.0,
         stateOfCharge: 92,
         stateOfHealth: 96,
-        ambientTemp: 27,
+        ambientTemp: 30,
         province: 'กระบี่' 
       },
       { 
         id: 22, 
-        name: 'สถานีไฟฟ้า หาดใหญ่', 
-        lat: 7.5563, 
-        lng: 99.6114, 
+        name: 'สถานีไฟฟ้า หาดใหญ่ 2', 
+        lat: 7.01, 
+        lng: 100.47, 
         status: 'warning', 
         battery: 70, 
-        temp: 34, 
-        voltage: 47.5, 
-        current: 9.5, 
-        power: 451,
-        voltagePerCell: 2.8,
-        internalResistance: 420,
-        currentPerString: 9.5,
+        temp: 35, 
+        voltage: 125.0, 
+        current: 245.0,
+        voltagePerCell: 2.50,
+        internalResistance: 4100,
+        currentPerString: 245.0,
+        voltagePerString: 125.0,
         stateOfCharge: 70,
-        stateOfHealth: 80,
-        ambientTemp: 34,
-        province: 'หาดใหญ่' 
+        stateOfHealth: 81,
+        ambientTemp: 35,
+        province: 'สงขลา' 
       },
       { 
         id: 23, 
         name: 'สถานีไฟฟ้า ฉลุง', 
-        lat: 15.0000, 
-        lng: 103.1000, 
+        lat: 7.2, 
+        lng: 100.5, 
         status: 'good', 
-        battery: 87, 
+        battery: 88, 
         temp: 29, 
-        voltage: 48.0, 
-        current: 11.9, 
-        power: 571,
-        voltagePerCell: 3.2,
-        internalResistance: 120,
-        currentPerString: 11.9,
-        stateOfCharge: 87,
-        stateOfHealth: 93,
+        voltage: 125.0, 
+        current: 308.0,
+        voltagePerCell: 2.50,
+        internalResistance: 2100,
+        currentPerString: 308.0,
+        voltagePerString: 125.0,
+        stateOfCharge: 88,
+        stateOfHealth: 95,
         ambientTemp: 29,
-        province: 'ฉลุง' 
+        province: 'สตูล' 
       },
       { 
         id: 24, 
-        name: 'สถานีไฟฟ้า ปัตตานี', 
-        lat: 17.0078, 
-        lng: 99.8236, 
-        status: 'good', 
-        battery: 90, 
-        temp: 27, 
-        voltage: 48.1, 
-        current: 12.2, 
-        power: 587,
-        voltagePerCell: 3.2,
-        internalResistance: 90,
-        currentPerString: 12.2,
-        stateOfCharge: 90,
-        stateOfHealth: 94,
-        ambientTemp: 27,
+        name: 'สถานีไฟฟ้า ปัตตานี 2', 
+        lat: 6.7, 
+        lng: 101.25, 
+        status: 'warning', 
+        battery: 73, 
+        temp: 33, 
+        voltage: 125.0, 
+        current: 255.5,
+        voltagePerCell: 2.50,
+        internalResistance: 3900,
+        currentPerString: 255.5,
+        voltagePerString: 125.0,
+        stateOfCharge: 73,
+        stateOfHealth: 88,
+        ambientTemp: 33,
         province: 'ปัตตานี' 
       }
     ];
 
-    async function fetchData() {
-      try {
-        const response = await fetch('http://127.0.0.1:5001/api/bms');
-        const data = await response.json();
-        // Merge API data with default sites if needed
-        const apiSites = data.map(site => ({
-          ...site,
-          lat: parseFloat(site.lat),
-          lng: parseFloat(site.lng)
-        }));
-        
-        // If API returns new sites, replace current sites with API data
-        if (apiSites.length > 0) {
-          sites = apiSites;
-        }
-        render();
-      } catch (error) {
-        console.error('Error fetching site data:', error);
-        showAlert('Failed to load site data from the database. Using default data.', 'info');
-        // Sites will remain with default values if API fails
-      }
+    const BATTERY_SPEC = {
+      voltageString: 125,
+      cells: 60,
+      capacityAh: 350,
+      voltagePerCell: parseFloat((125 / 60).toFixed(2))
+    };
+
+    function normalizeSiteMetrics(site) {
+      const normalized = { ...site };
+      const soc = normalized.stateOfCharge ?? normalized.battery ?? 100;
+      const loadFactor = Math.max(0, Math.min(1, soc / 100));
+      const nominalDischarge = BATTERY_SPEC.capacityAh * 0.4; // 40% of capacity as nominal operating current
+      const current = parseFloat((nominalDischarge * loadFactor).toFixed(1));
+
+      normalized.stateOfCharge = soc;
+      normalized.battery = soc;
+      normalized.temp = normalized.temp ?? normalized.ambientTemp;
+      normalized.voltagePerCell = parseFloat(BATTERY_SPEC.voltagePerCell.toFixed(2));
+      normalized.voltagePerString = BATTERY_SPEC.voltageString;
+      normalized.voltage = BATTERY_SPEC.voltageString;
+      normalized.currentPerString = current;
+      normalized.current = current;
+      normalized.power = parseFloat(((BATTERY_SPEC.voltageString * current) / 1000).toFixed(1));
+
+      return normalized;
     }
 
-const BATTERY_SPEC = {
-  voltageString: 125,
-  cells: 60,
-  capacityAh: 350,
-  voltagePerCell: parseFloat((125 / 60).toFixed(2))
-};
+    sites = sites.map(normalizeSiteMetrics);
 
-function normalizeSiteMetrics(site) {
-  const normalized = { ...site };
-  const soc = normalized.stateOfCharge ?? normalized.battery ?? 100;
-  const loadFactor = Math.max(0, Math.min(1, soc / 100));
-  const nominalDischarge = BATTERY_SPEC.capacityAh * 0.4; // 40% of capacity as nominal operating current
-  const current = parseFloat((nominalDischarge * loadFactor).toFixed(1));
+    function getBatterySpecLabel() {
+      return `Li-ion ${BATTERY_SPEC.voltageString}VDC (${BATTERY_SPEC.cells} Cells)`;
+    }
 
-  normalized.stateOfCharge = soc;
-  normalized.battery = soc;
-  normalized.temp = normalized.temp ?? normalized.ambientTemp;
-  normalized.voltagePerCell = parseFloat(BATTERY_SPEC.voltagePerCell.toFixed(2));
-  normalized.voltagePerString = BATTERY_SPEC.voltageString;
-  normalized.voltage = BATTERY_SPEC.voltageString;
-  normalized.currentPerString = current;
-  normalized.current = current;
-  normalized.power = parseFloat(((BATTERY_SPEC.voltageString * current) / 1000).toFixed(1));
+    function getBatteryCapacityLabel() {
+      return `${BATTERY_SPEC.capacityAh} Ah`;
+    }
 
-  return normalized;
-}
+    let currentPage = 'home';
+    let selectedSite = null;
+    let nextId = 25;
+    let hasRunInitialHealthCheck = false;
+    const ALERT_COOLDOWN_MS = 120000;
+    const alertHistory = {};
+    let currentFilter = 'all';
 
-function initializeSites() {
-  sites = sites.map(normalizeSiteMetrics);
-}
+    // Province regions mapping
+    const provinceRegions = {
+      north: ['เชียงราย', 'ลำปาง', 'น่าน', 'แพร่', 'แม่ฮ่องสอน', 'อุตรดิตถ์'],
+      northeast: ['ขอนแก่น', 'อุดรธานี', 'โพนพิสัย', 'บรบือ', 'เขื่องใน', 'โรจนะ 3', 'โรจนะ 4', 'สกลนคร', 'บุรีรัมย์', 'ศรีสะเกษ'],
+      central: ['พิษณุโลก', 'ชนแดน', 'ชัยนาท', 'ท่าวุ้ง', 'บางพระครู', 'สมุทรสาคร', 'สามพราน', 'นครสวรรค์', 'อ่างทอง', 'สิงห์บุรี'],
+      east: ['ชลบุรี', 'ระยอง', 'จันทบุรี', 'ตราด'],
+      south: ['ถลาง', 'ภูเก็ต', 'กระบี่', 'หาดใหญ่', 'ฉลุง', 'ปัตตานี', 'สุราษฎร์ธานี', 'นครศรีธรรมราช', 'พัทลุง', 'สงขลา'],
+      west: ['กำแพงเพชร', 'ตาก', 'ประจวบคีรีขันธ์', 'ระนอง', 'เพชรบุรี', 'ปราจีนบุรี']
+    };
 
-// Initialize sites with default data
-initializeSites();
+    // CSS-based map positioning constants
+    const MAP_POSITIONS = {
+      'น่าน': { x: 25, y: 15 },
+      'เชียงราย': { x: 20, y: 20 },
+      'ลำปาง': { x: 23, y: 18 },
+      'พิษณุโลก': { x: 45, y: 35 },
+      'ท่าวุ้ง': { x: 38, y: 42 },
+      'ชนแดน': { x: 52, y: 40 },
+      'ชัยนาท': { x: 35, y: 48 },
+      'อุดรธานี': { x: 65, y: 25 },
+      'ขอนแก่น': { x: 60, y: 38 },
+      'โพนพิสัย': { x: 75, y: 22 },
+      'บรบือ': { x: 68, y: 35 },
+      'เขื่องใน': { x: 58, y: 45 },
+      'โรจนะ 3': { x: 55, y: 42 },
+      'โรจนะ 4': { x: 70, y: 28 },
+      'บางพระครู': { x: 42, y: 52 },
+      'สมุทรสาคร': { x: 38, y: 55 },
+      'สามพราน': { x: 40, y: 58 },
+      'ถลาง': { x: 48, y: 75 },
+      'ภูเก็ต': { x: 45, y: 78 },
+      'กระบี่': { x: 52, y: 82 },
+      'หาดใหญ่': { x: 58, y: 85 },
+      'ฉลุง': { x: 50, y: 88 },
+      'ปัตตานี': { x: 65, y: 87 },
+      'วาปีปทุม': { x: 62, y: 38 }
+    };
 
-function getBatterySpecLabel() {
-  return `Li-ion ${BATTERY_SPEC.voltageString}VDC (${BATTERY_SPEC.cells} Cells)`;
-}
+    // Thailand center coordinates
+    const THAILAND_CENTER = { lat: 13.7563, lng: 100.5018 };
 
-function getBatteryCapacityLabel() {
-  return `${BATTERY_SPEC.capacityAh} Ah`;
-}
+    // Alert system
+    function showAlert(message, type = 'info') {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertId = 'alert-' + Date.now();
 
-let currentPage = 'home';
-let selectedSite = null;
-let nextId = 25;
-let hasRunInitialHealthCheck = false;
-const ALERT_COOLDOWN_MS = 120000;
-const alertHistory = {};
-let currentFilter = 'all';
-let map = null;
-let detailMap = null;
-let markers = [];
-let markerCluster = null;
-let AdvancedMarker = null;
-let supportsClustering = false;
+      const alertColors = {
+        success: 'bg-green-500',
+        warning: 'bg-yellow-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500'
+      };
 
-// Province regions mapping
-const provinceRegions = {
-  north: ['เชียงราย', 'ลำปาง', 'น่าน', 'แพร่', 'แม่ฮ่องสอน', 'อุตรดิตถ์'],
-  northeast: ['ขอนแก่น', 'อุดรธานี', 'โพนพิสัย', 'บรบือ', 'เขื่องใน', 'โรจนะ 3', 'โรจนะ 4', 'สกลนคร', 'บุรีรัมย์', 'ศรีสะเกษ'],
-  central: ['พิษณุโลก', 'ชนแดน', 'ชัยนาท', 'ท่าวุ้ง', 'บางพระครู', 'สมุทรสาคร', 'สามพราน', 'นครสวรรค์', 'อ่างทอง', 'สิงห์บุรี'],
-  east: ['ชลบุรี', 'ระยอง', 'จันทบุรี', 'ตราด'],
-  south: ['ถลาง', 'ภูเก็ต', 'กระบี่', 'หาดใหญ่', 'ฉลุง', 'ปัตตานี', 'สุราษฎร์ธานี', 'นครศรีธรรมราช', 'พัทลุง', 'สงขลา'],
-  west: ['กำแพงเพชร', 'ตาก', 'ประจวบคีรีขันธ์', 'ระนอง', 'เพชรบุรี', 'ปราจีนบุรี']
-};
+      const alertIcons = {
+        success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>',
+        warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>',
+        error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>',
+        info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'
+      };
 
-// Thailand center coordinates
-const THAILAND_CENTER = { lat: 13.7563, lng: 100.5018 };
-
-// Alert system
-function showAlert(message, type = 'info') {
-  const alertContainer = document.getElementById('alertContainer');
-  const alertId = 'alert-' + Date.now();
-
-  const alertColors = {
-    success: 'bg-green-500',
-    warning: 'bg-yellow-500',
-    error: 'bg-red-500',
-    info: 'bg-blue-500'
-  };
-
-  const alertIcons = {
-    success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>',
-    warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>',
-    error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>',
-    info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'
-  };
-
-  const alertHTML = `
+      const alertHTML = `
     <div id="${alertId}" class="alert-notification glass-card rounded-lg p-4 mb-3 max-w-sm">
       <div class="flex items-start gap-3">
         <div class="${alertColors[type]} p-2 rounded-lg">
@@ -614,21 +1723,21 @@ function showAlert(message, type = 'info') {
     </div>
   `;
 
-  alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+      alertContainer.insertAdjacentHTML('beforeend', alertHTML);
 
-  // Auto-remove after 5 seconds
-  setTimeout(() => {
-    closeAlert(alertId);
-  }, 5000);
-}
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        closeAlert(alertId);
+      }, 5000);
+    }
 
-function closeAlert(alertId) {
-  const alert = document.getElementById(alertId);
-  if (alert) {
-    alert.style.animation = 'slideIn 0.3s ease-out reverse';
-    setTimeout(() => alert.remove(), 300);
-  }
-}
+    function closeAlert(alertId) {
+      const alert = document.getElementById(alertId);
+      if (alert) {
+        alert.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => alert.remove(), 300);
+      }
+    }
 
     function shouldTriggerAlert(key) {
       const now = Date.now();
@@ -750,11 +1859,11 @@ function closeAlert(alertId) {
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium mb-1">State of Charge (%)</label>
+                    <label class="block text-sm font-medium mb-1">State of Charge (%)
                     <input type="number" id="battery" min="0" max="100" required class="form-input w-full" placeholder="95">
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1">State of Health (%)</label>
+                    <label class="block text-sm font-medium mb-1">State of Health (%)
                     <input type="number" id="stateOfHealth" min="0" max="100" required class="form-input w-full" placeholder="98">
                   </div>
                 </div>
@@ -964,222 +2073,9 @@ function closeAlert(alertId) {
 
     // Map positioning for provinces
     function getProvincePosition(province) {
-      const positions = {
-        'เชียงราย': { x: 25, y: 20 },
-        'ลำปาง': { x: 30, y: 18 },
-        'น่าน': { x: 20, y: 15 },
-        'พิษณุโลก': { x: 45, y: 35 },
-        'ท่าวุ้ง': { x: 38, y: 42 },
-        'ชนแดน': { x: 52, y: 40 },
-        'ชัยนาท': { x: 35, y: 48 },
-        'อุดรธานี': { x: 65, y: 25 },
-        'ขอนแก่น': { x: 60, y: 38 },
-        'โพนพิสัย': { x: 75, y: 22 },
-        'บรบือ': { x: 68, y: 35 },
-        'เขื่องใน': { x: 58, y: 45 },
-        'โรจนะ 3': { x: 55, y: 42 },
-        'โรจนะ 4': { x: 70, y: 28 },
-        'บางพระครู': { x: 42, y: 52 },
-        'สมุทรสาคร': { x: 38, y: 55 },
-        'สามพราน': { x: 40, y: 58 },
-        'ถลาง': { x: 48, y: 75 },
-        'ภูเก็ต': { x: 45, y: 78 },
-        'กระบี่': { x: 52, y: 82 },
-        'หาดใหญ่': { x: 58, y: 85 },
-        'ฉลุง': { x: 50, y: 88 },
-        'ปัตตานี': { x: 65, y: 87 },
-        'วาปีปทุม': { x: 62, y: 38 },
-        'สุราษฎร์ธานี': { x: 55, y: 35 }
-      };
-      return positions[province] || { x: 50, y: 50 };
+      return MAP_POSITIONS[province] || { x: 50, y: 50 };
     }
 
-    // Initialize and add the map
-    async function initMap() {
-      const mapContainer = document.getElementById('map');
-      if (!mapContainer) return;
-
-      markers.forEach(marker => marker.map = null);
-      markers = [];
-      if (markerCluster && typeof markerCluster.clearMarkers === 'function') {
-        markerCluster.clearMarkers();
-      }
-      markerCluster = null;
-
-      const { Map } = await google.maps.importLibrary("maps");
-      const markerLib = await google.maps.importLibrary("marker");
-      AdvancedMarker = markerLib.AdvancedMarkerElement;
-
-      if (!AdvancedMarker) {
-        console.error('AdvancedMarkerElement failed to load.');
-        return;
-      }
-
-      map = new Map(
-        mapContainer,
-        {
-          zoom: 6.5,
-          center: THAILAND_CENTER,
-          styles: [
-            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-            {
-              featureType: "administrative",
-              elementType: "geometry",
-              stylers: [{ visibility: "off" }]
-            },
-            {
-              featureType: "administrative.country",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#4a5568" }, { weight: 1 }]
-            },
-            {
-              featureType: "administrative.province",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#4a5568" }, { weight: 0.5 }]
-            },
-            {
-              featureType: "water",
-              elementType: "geometry",
-              stylers: [{ color: "#172a38" }]
-            },
-            {
-              featureType: "landscape.natural",
-              elementType: "geometry",
-              stylers: [{ color: "#1a202c" }]
-            }
-          ]
-        }
-      );
-
-      supportsClustering = Boolean(window.markerClusterer?.MarkerClusterer);
-      syncMapMarkers();
-      if (!hasRunInitialHealthCheck) {
-        hasRunInitialHealthCheck = true;
-        checkBatteryFailures();
-      }
-    }
-
-    function syncMapMarkers() {
-      if (!map || !AdvancedMarker) return;
-
-      const markerSites = getFilteredSites();
-      const activeSites = markerSites.length ? markerSites : sites;
-
-      markers.forEach(marker => marker.map = null);
-      markers = activeSites.map(site => createMapMarker(site)).filter(Boolean);
-
-      if (supportsClustering) {
-        markerCluster = new markerClusterer.MarkerClusterer({
-          map,
-          markers,
-          renderer: {
-            render: ({ count, position }) => new AdvancedMarker({
-              position,
-              content: createClusterContent(count),
-              zIndex: 100 + count
-            })
-          }
-        });
-      } else {
-        markers.forEach(marker => marker.map = map);
-      }
-    }
-
-    function createMapMarker(site) {
-      if (!AdvancedMarker) return null;
-
-      const marker = new AdvancedMarker({
-        position: { lat: site.lat, lng: site.lng },
-        title: site.name,
-        content: createMarkerElement(site),
-        map: supportsClustering ? null : map
-      });
-
-      marker.addListener("click", () => {
-        showDetail(site.id);
-      });
-
-      return marker;
-    }
-
-    function createClusterContent(count) {
-      const cluster = document.createElement('div');
-      cluster.className = 'cluster-marker';
-      cluster.innerHTML = `<span>${count}</span>`;
-      return cluster;
-    }
-
-    async function initDetailMap() {
-      if (!selectedSite) return;
-
-      const detailContainer = document.getElementById('detailMap');
-      if (!detailContainer) return;
-
-      const { Map } = await google.maps.importLibrary("maps");
-      const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-
-      detailMap = new Map(
-        detailContainer,
-        {
-          zoom: 10,
-          center: { lat: selectedSite.lat, lng: selectedSite.lng },
-          styles: [
-            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-            {
-              featureType: "administrative",
-              elementType: "geometry",
-              stylers: [{ visibility: "off" }]
-            },
-            {
-              featureType: "administrative.country",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#4a5568" }, { weight: 1 }]
-            },
-            {
-              featureType: "administrative.province",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#4a5568" }, { weight: 0.5 }]
-            },
-            {
-              featureType: "water",
-              elementType: "geometry",
-              stylers: [{ color: "#172a38" }]
-            },
-            {
-              featureType: "landscape.natural",
-              elementType: "geometry",
-              stylers: [{ color: "#1a202c" }]
-            }
-          ]
-        }
-      );
-
-      new AdvancedMarkerElement({
-        position: { lat: selectedSite.lat, lng: selectedSite.lng },
-        map: detailMap,
-        title: selectedSite.name,
-        content: createMarkerElement(selectedSite)
-      });
-
-      sites
-        .filter(site => site.id !== selectedSite.id)
-        .forEach(site => {
-          new AdvancedMarkerElement({
-            position: { lat: site.lat, lng: site.lng },
-            map: detailMap,
-            title: site.name,
-            content: createMarkerElement(site)
-          });
-        });
-    }
-
-    // CSS-based Battery Map Functions (no external APIs)
-
-    // Render battery pins on CSS map
     function renderBatteryPins() {
       const pinContainer = document.getElementById('batteryPinContainer');
       if (!pinContainer) return;
@@ -1188,34 +2084,155 @@ function closeAlert(alertId) {
       const displaySites = filteredSites.length ? filteredSites : sites;
       
       pinContainer.innerHTML = '';
-      pinContainer.style.position = 'absolute';
-      pinContainer.style.top = '0';
-      pinContainer.style.left = '0';
-      pinContainer.style.width = '100%';
-      pinContainer.style.height = '100%';
-      pinContainer.style.pointerEvents = 'none';
-      pinContainer.style.zIndex = '15';
-      
       displaySites.forEach(site => {
         const position = getProvincePosition(site.province);
         const pin = document.createElement('div');
-        pin.className = `enhanced-battery-pin ${site.status === 'critical' ? 'alerting' : ''}`;
-        pin.style.position = 'absolute';
-        pin.style.left = position.x + '%';
-        pin.style.top = position.y + '%';
-        pin.style.transform = 'translate(-50%, -100%)';
+        pin.className = `battery-pin ${site.battery < 30 ? 'alerting' : ''}`;
         pin.setAttribute('data-site-id', site.id);
-        pin.style.cursor = 'pointer';
-        pin.style.pointerEvents = 'auto';
-        pin.onclick = () => showDetail(site.id);
+        pin.style.left = `${position.x}%`;
+        pin.style.top = `${position.y}%`;
         pin.innerHTML = renderBatteryPin(site);
+        pin.addEventListener('click', () => {
+          showDetail(site.id);
+        });
         pinContainer.appendChild(pin);
       });
-      
-      if (!hasRunInitialHealthCheck) {
-        hasRunInitialHealthCheck = true;
-        checkBatteryFailures();
+    }
+
+    function parseSqlData(sql) {
+      const lines = sql.split('\n');
+      const data = [];
+      let isInserting = false;
+      for (const line of lines) {
+        if (line.trim().startsWith('INSERT')) {
+          isInserting = true;
+          continue;
+        }
+        if (isInserting) {
+          if (line.trim().endsWith(';')) {
+            isInserting = false;
+          }
+          const values = line.trim().replace(/\(|\)|;/g, '').split(',');
+          if (values.length > 1) {
+            data.push({
+              substation: values[0].trim().replace(/'/g, ''),
+              substation_code: values[1].trim().replace(/'/g, ''),
+              area: values[2].trim().replace(/'/g, ''),
+              voltage_per_cell: parseFloat(values[3]),
+              temperature_per_cell: parseFloat(values[4]),
+              internal_resistance_per_cell: parseFloat(values[5]),
+              current_per_string: parseFloat(values[6]),
+              voltage_per_string: parseFloat(values[7]),
+              state_of_charge: parseFloat(values[8]),
+              state_of_health: parseFloat(values[9]),
+              ambient_temperature: parseFloat(values[10]),
+            });
+          }
+        }
       }
+      return data;
+    }
+
+    function renderDbViewerPage() {
+      const sqlContent = `-- Battery Management System Table Schema
+CREATE TABLE IF NOT EXISTS public.bms (
+    id SERIAL PRIMARY KEY,
+    substation VARCHAR(255),
+    substation_code VARCHAR(10),
+    area VARCHAR(50),
+    voltage_per_cell NUMERIC(10, 3),
+    temperature_per_cell NUMERIC(10, 3),
+    internal_resistance_per_cell NUMERIC(10, 3),
+    current_per_string NUMERIC(10, 3),
+    voltage_per_string NUMERIC(10, 3),
+    state_of_charge NUMERIC(5, 2),      -- SoC (%)
+    state_of_health NUMERIC(5, 2),      -- SoH (%)
+    ambient_temperature NUMERIC(10, 3),
+    recorded_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Insert all 24 electrical substations in Thailand
+INSERT INTO public.bms (substation, substation_code, area, voltage_per_cell, temperature_per_cell, 
+                       internal_resistance_per_cell, current_per_string, voltage_per_string, 
+                       state_of_charge, state_of_health, ambient_temperature) 
+VALUES 
+    ('สถานีไฟฟ้า เชียงราย 2', 'CHI002', 'Northern', 2.50, 28.0, 2500.0, 332.5, 125.0, 95.0, 98.0, 28.0),
+    ('สถานีไฟฟ้า ลำปาง 3', 'LAM003', 'Northern', 2.50, 32.0, 4800.0, 157.5, 125.0, 45.0, 85.0, 32.0),
+    ('สถานีไฟฟ้า พิษณุโลก 6', 'PHI006', 'Central', 2.50, 32.0, 4500.0, 273.0, 125.0, 78.0, 85.0, 32.0),
+    ('สถานีไฟฟ้า น่าน 1', 'NAN001', 'Northern', 2.50, 27.0, 2200.0, 315.0, 125.0, 90.0, 96.0, 27.0),
+    ('สถานีไฟฟ้า ท่าวุ้ง', 'TAW004', 'Central', 2.50, 35.0, 5000.0, 140.0, 125.0, 40.0, 75.0, 35.0),
+    ('สถานีไฟฟ้า ชนแดน', 'CHN005', 'Central', 2.50, 30.0, 2100.0, 308.0, 125.0, 88.0, 95.0, 30.0),
+    ('สถานีไฟฟ้า ชัยนาท', 'CHA006', 'Central', 2.50, 29.0, 2000.0, 322.0, 125.0, 92.0, 97.0, 29.0),
+    ('สถานีไฟฟ้า อุดรธานี 3', 'UDN003', 'Northeast', 2.50, 33.0, 4000.0, 252.0, 125.0, 72.0, 82.0, 33.0),
+    ('สถานีไฟฟ้า ขอนแก่น 3', 'KKN003', 'Northeast', 2.50, 38.0, 5000.0, 157.5, 125.0, 45.0, 65.0, 38.0),
+    ('สถานีไฟฟ้า โพนพิสัย', 'PNP001', 'Northeast', 2.50, 31.0, 2400.0, 297.5, 125.0, 85.0, 94.0, 31.0),
+    ('สถานีไฟฟ้า บรบือ', 'BRB001', 'Northeast', 2.50, 32.0, 2200.0, 304.5, 125.0, 87.0, 93.0, 32.0),
+    ('สถานีไฟฟ้า วาปีปทุม', 'WPI001', 'Northeast', 2.50, 34.0, 4500.0, 238.0, 125.0, 68.0, 80.0, 34.0),
+    ('สถานีไฟฟ้า เขื่องใน', 'KNG001', 'Northeast', 2.50, 30.0, 2100.0, 318.5, 125.0, 91.0, 96.0, 30.0),
+    ('สถานีไฟฟ้า โรจนะ 3', 'ROJ003', 'Central', 2.50, 29.0, 2300.0, 308.0, 125.0, 88.0, 94.0, 29.0),
+    ('สถานีไฟฟ้า โรจนะ 4', 'ROJ004', 'Central', 2.50, 39.0, 5500.0, 147.0, 125.0, 42.0, 60.0, 39.0),
+    ('สถานีไฟฟ้า บางพระครู', 'BPK001', 'Central', 2.50, 28.0, 2000.0, 315.0, 125.0, 90.0, 95.0, 28.0),
+    ('สถานีไฟฟ้า สมุทรสาคร 7', 'SMT007', 'Central', 2.50, 30.0, 2200.0, 301.0, 125.0, 86.0, 93.0, 30.0),
+    ('สถานีไฟฟ้า สามพราน 4', 'SPN004', 'Central', 2.50, 31.0, 4200.0, 262.5, 125.0, 75.0, 83.0, 31.0),
+    ('สถานีไฟฟ้า ถลาง 2', 'TLG002', 'South', 2.50, 32.0, 2100.0, 311.5, 125.0, 89.0, 94.0, 32.0),
+    ('สถานีไฟฟ้า ภูเก็ต 3', 'PHK003', 'South', 2.50, 34.0, 4500.0, 238.0, 125.0, 68.0, 82.0, 34.0),
+    ('สถานีไฟฟ้า กระบี่ 1', 'KBI001', 'South', 2.50, 30.0, 2000.0, 322.0, 125.0, 92.0, 96.0, 30.0),
+    ('สถานีไฟฟ้า หาดใหญ่ 2', 'HDT002', 'South', 2.50, 35.0, 4100.0, 245.0, 125.0, 70.0, 81.0, 35.0),
+    ('สถานีไฟฟ้า ฉลุง', 'CLG001', 'South', 2.50, 29.0, 2100.0, 308.0, 125.0, 88.0, 95.0, 29.0),
+    ('สถานีไฟฟ้า ปัตตานี 2', 'PTN002', 'South', 2.50, 33.0, 3900.0, 255.5, 125.0, 73.0, 88.0, 33.0);`;
+      const data = parseSqlData(sqlContent);
+
+      return `
+        <div class="header-bg p-4">
+          <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <h1 class="text-2xl font-bold">BMS Data</h1>
+            <button onclick="goBack()" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              <span>Back to Dashboard</span>
+            </button>
+          </div>
+        </div>
+        <div class="max-w-7xl mx-auto p-6">
+          <div class="glass-card rounded-xl p-4 lg:p-6 overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="text-gray-400 uppercase tracking-wide text-xs border-b border-slate-700">
+                <tr>
+                  <th class="py-2 text-left">Substation</th>
+                  <th class="py-2 text-left">Code</th>
+                  <th class="py-2 text-left">Area</th>
+                  <th class="py-2 text-left">Voltage/Cell</th>
+                  <th class="py-2 text-left">Temp/Cell</th>
+                  <th class="py-2 text-left">IR/Cell</th>
+                  <th class="py-2 text-left">Current/String</th>
+                  <th class="py-2 text-left">Voltage/String</th>
+                  <th class="py-2 text-left">SoC</th>
+                  <th class="py-2 text-left">SoH</th>
+                  <th class="py-2 text-left">Ambient Temp</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.map(row => `
+                  <tr class="border-b border-slate-800/70 last:border-none">
+                    <td class="py-3 pr-6">${row.substation}</td>
+                    <td class="py-3 pr-6">${row.substation_code}</td>
+                    <td class="py-3 pr-6">${row.area}</td>
+                    <td class="py-3 pr-6">${row.voltage_per_cell}</td>
+                    <td class="py-3 pr-6">${row.temperature_per_cell}</td>
+                    <td class="py-3 pr-6">${row.internal_resistance_per_cell}</td>
+                    <td class="py-3 pr-6">${row.current_per_string}</td>
+                    <td class="py-3 pr-6">${row.voltage_per_string}</td>
+                    <td class="py-3 pr-6">${row.state_of_charge}</td>
+                    <td class="py-3 pr-6">${row.state_of_health}</td>
+                    <td class="py-3 pr-6">${row.ambient_temperature}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
 
     function renderHomePage() {
@@ -1267,12 +2284,6 @@ function closeAlert(alertId) {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                 </svg>
                 <span class="font-semibold">Check Alerts</span>
-              </button>
-              <button onclick="window.open('http://127.0.0.1:5001/api/db-viewer', '_blank')" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 1.1.9 2 2 2h12a2 2 0 002-2V7M9 21h6M12 17V7"/>
-                </svg>
-                <span class="font-semibold">DB Viewer</span>
               </button>
               <button onclick="exportToCSV()" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1496,8 +2507,23 @@ function closeAlert(alertId) {
                 Site Location - Thailand
               </h2>
               <div class="map-container rounded-lg overflow-hidden relative" style="height: 400px;">
-                <div id="detailMap"></div>
-                <div class="map-overlay"></div>
+                <div class="thailand-map">
+                  <div class="battery-pin-container">
+                    <div class="battery-pin" style="left: ${getProvincePosition(selectedSite.province).x}%; top: ${getProvincePosition(selectedSite.province).y}%;">
+                      ${renderBatteryPin(selectedSite)}
+                      <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap pointer-events-none z-20">
+                        <div class="glass-card rounded-lg px-3 py-2 text-center shadow-lg">
+                          <div class="font-bold text-sm text-white">${selectedSite.name}</div>
+                          <div class="text-xs text-gray-300 mt-1">
+                            SoC: <span class="font-bold ${getStatusColor(selectedSite.status)}">${selectedSite.stateOfCharge}%</span>
+                          </div>
+                          <div class="text-xs text-gray-400">${selectedSite.province}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="map-overlay"></div>
+                </div>
               </div>
             </div>
 
@@ -1575,7 +2601,7 @@ function closeAlert(alertId) {
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-gray-400 font-semibold">Current per String</h3>
                   <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002 2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002 2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 002 2m0 0V5a2 2 0 012-2h2a2 2 0 012-2"/>
                   </svg>
                 </div>
                 <div class="text-4xl font-bold mb-2">${selectedSite.currentPerString}</div>
@@ -1597,7 +2623,7 @@ function closeAlert(alertId) {
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-gray-400 font-semibold">Ambient Temp</h3>
                   <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002 2m0 0V9a2 2 0 012-2h2a2 2 0 012-2m0 0V9a2 2 0 012-2h2a2 2 0 012-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002 2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 002 2m0 0V5a2 2 0 012-2h2a2 2 0 012-2"/>
                   </svg>
                 </div>
                 <div class="text-4xl font-bold mb-2">${selectedSite.ambientTemp}°</div>
@@ -1665,49 +2691,25 @@ function closeAlert(alertId) {
                   </div>
                 </div>
               </div>
-
-              <div class="glass-card rounded-xl p-6">
-                <h3 class="text-xl font-bold mb-4">Recent Alerts</h3>
-                <div class="space-y-3">
-                  ${selectedSite.status === 'critical' ? `
-                    <div class="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                      <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                      </svg>
-                      <div>
-                        <div class="font-semibold text-red-400">Critical Battery Level</div>
-                        <div class="text-sm text-gray-400">Battery below 50%, immediate attention required</div>
-                        <div class="text-xs text-gray-500 mt-1">5 minutes ago</div>
-                      </div>
-                    </div>
-                  ` : selectedSite.status === 'warning' ? `
-                    <div class="flex items-start gap-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                      <svg class="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                      </svg>
-                      <div>
-                        <div class="font-semibold text-yellow-400">Battery Level Warning</div>
-                        <div class="text-sm text-gray-400">Battery below 80%, monitoring required</div>
-                        <div class="text-xs text-gray-500 mt-1">15 minutes ago</div>
-                      </div>
-                    </div>
-                  ` : `
-                    <div class="flex items-start gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-                      <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                      </svg>
-                      <div>
-                        <div class="font-semibold text-green-400">System Operating Normal</div>
-                        <div class="text-sm text-gray-400">All parameters within normal range</div>
-                        <div class="text-xs text-gray-500 mt-1">Updated 2 minutes ago</div>
-                      </div>
-                    </div>
-                  `}
-                </div>
-              </div>
             </div>
+          </div>
         </div>
       `;
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      if (currentPage === 'home') {
+        app.innerHTML = renderHomePage();
+        renderBatteryPins();
+      } else if (currentPage === 'detail') {
+        app.innerHTML = renderDetailPage();
+      }
+    }
+
+    function showHome() {
+      currentPage = 'home';
+      render();
     }
 
     function showDetail(siteId) {
@@ -1716,38 +2718,17 @@ function closeAlert(alertId) {
       render();
     }
 
-    function showHome() {
-      currentPage = 'home';
-      selectedSite = null;
-      render();
-    }
-
     function render() {
       const app = document.getElementById('app');
-      app.innerHTML = currentPage === 'home' ? renderHomePage() : renderDetailPage();
-
       if (currentPage === 'home') {
-        setTimeout(() => {
-          initMap();
-        }, 60);
-      } else {
-        setTimeout(() => {
-          initDetailMap();
-        }, 100);
+        app.innerHTML = renderHomePage();
+        renderBatteryPins();
+      } else if (currentPage === 'detail') {
+        app.innerHTML = renderDetailPage();
       }
     }
 
-    // Initial render
-    fetchData(); // Try to load from API first
-    setTimeout(() => {
-      // If API fails, render with default data
-      if (sites.length === 0) {
-        render();
-      }
-    }, 2000); // Wait 2 seconds for API before falling back
-
-    // Auto-check for battery failures every 30 seconds
-    setInterval(checkBatteryFailures, 30000);
+    render();
   </script>
 </body>
 </html>

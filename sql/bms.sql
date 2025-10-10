@@ -1,17 +1,46 @@
-CREATE TABLE public.bms (
+-- Battery Management System Table Schema
+CREATE TABLE IF NOT EXISTS public.bms (
     id SERIAL PRIMARY KEY,
     substation VARCHAR(255),
     substation_code VARCHAR(10),
     area VARCHAR(50),
-    state_of_charge NUMERIC(5, 2),
-    -- SoC (%)
-    state_of_health NUMERIC(5, 2),
-    -- SoH (%)
-    current_per_string NUMERIC(10, 3),
-    voltage_per_string NUMERIC(10, 3),
     voltage_per_cell NUMERIC(10, 3),
     temperature_per_cell NUMERIC(10, 3),
     internal_resistance_per_cell NUMERIC(10, 3),
+    current_per_string NUMERIC(10, 3),
+    voltage_per_string NUMERIC(10, 3),
+    state_of_charge NUMERIC(5, 2),      -- SoC (%)
+    state_of_health NUMERIC(5, 2),      -- SoH (%)
     ambient_temperature NUMERIC(10, 3),
     recorded_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Insert all 24 electrical substations in Thailand
+INSERT INTO public.bms (substation, substation_code, area, voltage_per_cell, temperature_per_cell, 
+                       internal_resistance_per_cell, current_per_string, voltage_per_string, 
+                       state_of_charge, state_of_health, ambient_temperature) 
+VALUES 
+    ('สถานีไฟฟ้า เชียงราย 2', 'CHI002', 'Northern', 2.50, 28.0, 2500.0, 332.5, 125.0, 95.0, 98.0, 28.0),
+    ('สถานีไฟฟ้า ลำปาง 3', 'LAM003', 'Northern', 2.50, 32.0, 4800.0, 157.5, 125.0, 45.0, 85.0, 32.0),
+    ('สถานีไฟฟ้า พิษณุโลก 6', 'PHI006', 'Central', 2.50, 32.0, 4500.0, 273.0, 125.0, 78.0, 85.0, 32.0),
+    ('สถานีไฟฟ้า น่าน 1', 'NAN001', 'Northern', 2.50, 27.0, 2200.0, 315.0, 125.0, 90.0, 96.0, 27.0),
+    ('สถานีไฟฟ้า ท่าวุ้ง', 'TAW004', 'Central', 2.50, 35.0, 5000.0, 140.0, 125.0, 40.0, 75.0, 35.0),
+    ('สถานีไฟฟ้า ชนแดน', 'CHN005', 'Central', 2.50, 30.0, 2100.0, 308.0, 125.0, 88.0, 95.0, 30.0),
+    ('สถานีไฟฟ้า ชัยนาท', 'CHA006', 'Central', 2.50, 29.0, 2000.0, 322.0, 125.0, 92.0, 97.0, 29.0),
+    ('สถานีไฟฟ้า อุดรธานี 3', 'UDN003', 'Northeast', 2.50, 33.0, 4000.0, 252.0, 125.0, 72.0, 82.0, 33.0),
+    ('สถานีไฟฟ้า ขอนแก่น 3', 'KKN003', 'Northeast', 2.50, 38.0, 5000.0, 157.5, 125.0, 45.0, 65.0, 38.0),
+    ('สถานีไฟฟ้า โพนพิสัย', 'PNP001', 'Northeast', 2.50, 31.0, 2400.0, 297.5, 125.0, 85.0, 94.0, 31.0),
+    ('สถานีไฟฟ้า บรบือ', 'BRB001', 'Northeast', 2.50, 32.0, 2200.0, 304.5, 125.0, 87.0, 93.0, 32.0),
+    ('สถานีไฟฟ้า วาปีปทุม', 'WPI001', 'Northeast', 2.50, 34.0, 4500.0, 238.0, 125.0, 68.0, 80.0, 34.0),
+    ('สถานีไฟฟ้า เขื่องใน', 'KNG001', 'Northeast', 2.50, 30.0, 2100.0, 318.5, 125.0, 91.0, 96.0, 30.0),
+    ('สถานีไฟฟ้า โรจนะ 3', 'ROJ003', 'Central', 2.50, 29.0, 2300.0, 308.0, 125.0, 88.0, 94.0, 29.0),
+    ('สถานีไฟฟ้า โรจนะ 4', 'ROJ004', 'Central', 2.50, 39.0, 5500.0, 147.0, 125.0, 42.0, 60.0, 39.0),
+    ('สถานีไฟฟ้า บางพระครู', 'BPK001', 'Central', 2.50, 28.0, 2000.0, 315.0, 125.0, 90.0, 95.0, 28.0),
+    ('สถานีไฟฟ้า สมุทรสาคร 7', 'SMT007', 'Central', 2.50, 30.0, 2200.0, 301.0, 125.0, 86.0, 93.0, 30.0),
+    ('สถานีไฟฟ้า สามพราน 4', 'SPN004', 'Central', 2.50, 31.0, 4200.0, 262.5, 125.0, 75.0, 83.0, 31.0),
+    ('สถานีไฟฟ้า ถลาง 2', 'TLG002', 'South', 2.50, 32.0, 2100.0, 311.5, 125.0, 89.0, 94.0, 32.0),
+    ('สถานีไฟฟ้า ภูเก็ต 3', 'PHK003', 'South', 2.50, 34.0, 4500.0, 238.0, 125.0, 68.0, 82.0, 34.0),
+    ('สถานีไฟฟ้า กระบี่ 1', 'KBI001', 'South', 2.50, 30.0, 2000.0, 322.0, 125.0, 92.0, 96.0, 30.0),
+    ('สถานีไฟฟ้า หาดใหญ่ 2', 'HDT002', 'South', 2.50, 35.0, 4100.0, 245.0, 125.0, 70.0, 81.0, 35.0),
+    ('สถานีไฟฟ้า ฉลุง', 'CLG001', 'South', 2.50, 29.0, 2100.0, 308.0, 125.0, 88.0, 95.0, 29.0),
+    ('สถานีไฟฟ้า ปัตตานี 2', 'PTN002', 'South', 2.50, 33.0, 3900.0, 255.5, 125.0, 73.0, 88.0, 33.0);
