@@ -2339,22 +2339,8 @@
           console.log('Clicked battery icon:', siteId, site.name); // Debug log
           showDetail(siteId);
         });
-        
-        // Add click handler
-        pinGroup.addEventListener('click', (e) => {
-          e.stopPropagation();
-          console.log('Clicked pin:', siteId, site.name); // Debug log
-          showDetail(siteId);
-        });
 
-        // Also add click handler to individual elements
-        [circle, path, text].forEach(element => {
-          element.addEventListener('click', (e) => {
-            e.stopPropagation();
-            console.log('Clicked element:', siteId, site.name); // Debug log
-            showDetail(siteId);
-          });
-        });
+        
         
         svgPins.appendChild(pinGroup);
       });
