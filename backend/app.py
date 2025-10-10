@@ -72,5 +72,25 @@ def db_viewer():
         return f"An error occurred: {e}"
 
 
+@app.route('/api/update-names')
+def update_names():
+    if os.path.exists('update_done.flag'):
+        return "Update has already been performed."
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE bms SET substation = 'สถานีไฟฟ้า..' || substation;")
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        with open('update_done.flag', 'w') as f:
+            f.write('done')
+
+        return "Site names updated successfully."
+    except Exception as e:
+        return f"An error occurred: {e}"
+
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

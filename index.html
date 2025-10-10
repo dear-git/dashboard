@@ -953,7 +953,6 @@ function closeAlert(alertId) {
         {
           zoom: 6.5,
           center: THAILAND_CENTER,
-          mapId: 'BATTERY_MONITORING_MAP',
           styles: [
             { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
             { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
@@ -1059,7 +1058,6 @@ function closeAlert(alertId) {
         {
           zoom: 10,
           center: { lat: selectedSite.lat, lng: selectedSite.lng },
-          mapId: 'BATTERY_DETAIL_MAP',
           styles: [
             { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
             { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
@@ -1111,7 +1109,47 @@ function closeAlert(alertId) {
           });
         });
     }
-    
+
+    // CSS-based Battery Map Functions (no external APIs)
+
+    // Render battery pins on CSS map
+    function renderBatteryPins() {
+      const pinContainer = document.getElementById('batteryPinContainer');
+      if (!pinContainer) return;
+
+      const filteredSites = getFilteredSites();
+      const displaySites = filteredSites.length ? filteredSites : sites;
+      
+      pinContainer.innerHTML = '';
+      pinContainer.style.position = 'absolute';
+      pinContainer.style.top = '0';
+      pinContainer.style.left = '0';
+      pinContainer.style.width = '100%';
+      pinContainer.style.height = '100%';
+      pinContainer.style.pointerEvents = 'none';
+      pinContainer.style.zIndex = '15';
+      
+      displaySites.forEach(site => {
+        const position = getProvincePosition(site.province);
+        const pin = document.createElement('div');
+        pin.className = `enhanced-battery-pin ${site.status === 'critical' ? 'alerting' : ''}`;
+        pin.style.position = 'absolute';
+        pin.style.left = position.x + '%';
+        pin.style.top = position.y + '%';
+        pin.style.transform = 'translate(-50%, -100%)';
+        pin.setAttribute('data-site-id', site.id);
+        pin.style.cursor = 'pointer';
+        pin.style.pointerEvents = 'auto';
+        pin.onclick = () => showDetail(site.id);
+        pin.innerHTML = renderBatteryPin(site);
+        pinContainer.appendChild(pin);
+      });
+      
+      if (!hasRunInitialHealthCheck) {
+        hasRunInitialHealthCheck = true;
+        checkBatteryFailures();
+      }
+    }
 
     function renderHomePage() {
       const filteredSites = getFilteredSites();
@@ -1623,12 +1661,8 @@ function closeAlert(alertId) {
 
       if (currentPage === 'home') {
         setTimeout(() => {
-          initMap();
+          renderBatteryPins();
         }, 60);
-      } else {
-        setTimeout(() => {
-          initDetailMap();
-        }, 100);
       }
     }
 

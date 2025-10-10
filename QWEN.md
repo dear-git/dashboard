@@ -53,10 +53,19 @@ The application follows these conventions:
 - Tailwind CSS is loaded via CDN for styling
 - Google Maps API is dynamically loaded via CDN
 - Vanilla JavaScript is used without any frameworks
-- Thai names and locations are used for the battery sites
+- Sites are electrical substations with names in the format 'สถานีไฟฟ้า [Province] [Number]'
 - Color-coded status system: green (≥80%), yellow (60-79%), red (<60%)
-- Metric measurements include State of Charge (SoC), State of Health (SoH), voltage per cell, internal resistance, current per string, voltage per string, and ambient temperature
-- Derived metrics assume a 125 VDC string built from 60 cells (~2.08 V per cell) with a nominal 350 Ah capacity
+- Enhanced Battery Metrics:
+  - Voltage per Cell: 1.5-2.5V (±0.2% accuracy)
+  - Temperature: 0-99.5°C (±1.0°C accuracy)
+  - Internal Resistance: 100-60000 µΩ (±2.0% accuracy)
+  - Current per String: 0-700A (±2.0% accuracy)
+  - Voltage per String: 20-200V (±2.0% accuracy)
+  - State of Charge: 0-100%
+  - State of Health: 0-100%
+  - Ambient Temperature: 0-99.5°C (±1.0°C accuracy)
+- Standardized 125 VDC / 350 Ah OPzV gel battery system across all sites
+- Substations include: น่าน 1, เชียงราย 2, ลำปาง 3, พิษณุโลก 6, ท่าวุ้ง, ชนแดน, ชัยนาท, อุดรธานี 3, ขอนแก่น 3, โพนพิสัย, บรบือ, วาปีปทุม, เขื่องใน, โรจนะ 3, โรจนะ 4, บางพระครู, สมุทรสาคร 7, สามพราน 4, ถลาง 2, ภูเก็ต 3, กระบี่ 1, หาดใหญ่ 2
 
 ## Key Components
 
@@ -83,26 +92,3 @@ The application uses Google Maps JavaScript API to display battery locations wit
 - **Critical (Red)**: State of charge <60%
 
 The status is reflected in both the map pins and detailed views.
- site name substation[
- เชียงราย 2
- ลำปาง 3
- พิษณุโลก 6
- น่าน 1
- ท่าวุ้ง
- ชนแดน
- ชัยนาท
- อุดรธานี 3
- ขอนแก่น 3
- โพนพิสัย
- บรบือ
- วาปีปทุม
- เขื่องใน
- โรจนะ 3
- โรจนะ 4
- บางพระครู
- สมุทรสาคร 7
- สามพราน 4
- ถลาง 2
- ภูเก็ต 3
- กระบี่ 1
- หาดใหญ่ 2]
