@@ -185,6 +185,7 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
+      background-color: #1e293b; /* Fallback color if image fails to load */
       position: relative;
       overflow: hidden;
     }
@@ -2094,22 +2095,67 @@
       return 'central'; // default
     }
 
-    function getMapPosition(lat, lng) {
-      // Thailand boundaries - adjusted for the specific map image
-      const lat_max = 21.5;
-      const lat_min = 5.0;
-      const lon_max = 106.0;
-      const lon_min = 96.0;
+        function getMapPosition(lat, lng) {
+      // Thailand coordinates optimized for thailand-map.png
+      const lat_max = 20.5;   // Northern boundary
+      const lat_min = 5.5;    // Southern boundary  
+      const lon_max = 105.5;  // Eastern boundary
+      const lon_min = 97.0;   // Western boundary
 
-      // Convert latitude/longitude to percentage position on map
+      // Convert lat/lng to map percentage coordinates
       let x = ((lng - lon_min) / (lon_max - lon_min)) * 100;
       let y = ((lat_max - lat) / (lat_max - lat_min)) * 100;
 
-      // Fine-tune positioning to match the map image better
-      x = Math.max(5, Math.min(95, x)); // Keep within bounds
-      y = Math.max(5, Math.min(95, y)); // Keep within bounds
+      // Province-specific adjustments for accurate placement on thailand-map.png
+      if (lat > 18 && lng < 100) {           // Northwest (เชียงราย, ลำปาง, น่าน)
+        x = x * 0.88 + 4; y = y * 0.82 + 6;
+      } else if (lat > 17 && lng >= 100) {     // Northeast (อุดรธานี, ขอนแก่น)
+        x = x * 0.92 + 5; y = y * 0.86 + 6;
+      } else if (lat >= 15.5 && lat <= 17.5) {  // Central (พิษณุโลก, ชัยนาท, ท่าวุ้ง, ชนแดน)
+        x = x * 0.89 + 5; y = y * 0.84 + 6;
+      } else if (lat < 13 && lng > 100) {      // South East (สงขลา, ฉลุง, ปัตตานี)
+        x = x * 0.87 + 6; y = y * 0.83 + 8;
+      } else if (lat < 13 && lng <= 100) {     // South West (กระบี่, ภูเก็ต, ถลาง)
+        x = x * 0.85 + 5; y = y * 0.81 + 8;
+      } else {                                // Other regions
+        x = x * 0.90 + 5; y = y * 0.86 + 6;
+      }
+
+      // Keep icons within visible map bounds
+      x = Math.max(3, Math.min(97, x));
+      y = Math.max(3, Math.min(97, y));
 
       return { x, y };
+    }
+
+    // Alternative function with potential adjustment factors for better alignment
+    function getMapPositionAdjusted(lat, lng) {
+      // The base calculation
+      // Using slightly adjusted bounds to better fit the Thailand map image
+      const lat_max = 20.5;  // Northernmost point of Thailand
+      const lat_min = 5.5;   // Southernmost point of Thailand  
+      const lon_max = 105.8; // Easternmost point of Thailand
+      const lon_min = 97.2;  // Westernmost point of Thailand
+
+      // Calculate the position as a percentage within the bounding box
+      let x = ((lng - lon_min) / (lon_max - lon_min)) * 100;
+      let y = ((lat_max - lat) / (lat_max - lat_min)) * 100;
+
+      // Apply adjustment factors to fine-tune alignment with the background image
+      // These values can be fine-tuned based on actual visual alignment
+      // For example, if markers appear shifted left, increase x_adjustment
+      // If markers appear shifted down, increase y_adjustment (since y=0 is top)
+      const x_adjustment = 0; // Horizontal offset in %
+      const y_adjustment = 0; // Vertical offset in %
+      
+      let adjusted_x = x + x_adjustment;
+      let adjusted_y = y + y_adjustment;
+      
+      // Keep within bounds after adjustment
+      adjusted_x = Math.max(0, Math.min(100, adjusted_x));
+      adjusted_y = Math.max(0, Math.min(100, adjusted_y));
+      
+      return { x: adjusted_x, y: adjusted_y };
     }
 
     function renderBatteryPins() {
@@ -2121,7 +2167,7 @@
       
       pinContainer.innerHTML = '';
       displaySites.forEach(site => {
-        const position = getMapPosition(site.lat, site.lng);
+        const position = getMapPositionAdjusted(site.lat, site.lng);
         const pin = document.createElement('div');
         pin.className = `battery-pin ${site.battery < 30 ? 'alerting' : ''}`;
         pin.setAttribute('data-site-id', site.id);
@@ -2320,6 +2366,12 @@ VALUES
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                 </svg>
                 <span class="font-semibold">Check Alerts</span>
+              </button>
+              <button onclick="window.open('./db_view.html', '_blank')" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 1.1.9 2 2 2h12a2 2 0 002-2V7M9 21h6M12 17V7"/>
+                </svg>
+                <span class="font-semibold">DB Viewer</span>
               </button>
               <button onclick="exportToCSV()" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2545,7 +2597,7 @@ VALUES
               <div class="map-container rounded-lg overflow-hidden relative" style="height: 400px;">
                 <div class="thailand-map">
                   <div class="battery-pin-container">
-                    <div class="battery-pin" style="left: ${getMapPosition(selectedSite.lat, selectedSite.lng).x}%; top: ${getMapPosition(selectedSite.lat, selectedSite.lng).y}%;\">
+                    <div class=\"battery-pin\" style=\"left: ${getMapPositionAdjusted(selectedSite.lat, selectedSite.lng).x}%; top: ${getMapPositionAdjusted(selectedSite.lat, selectedSite.lng).y}%;\\\">
                       ${renderBatteryPin(selectedSite)}
                       <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap pointer-events-none z-20">
                         <div class="glass-card rounded-lg px-3 py-2 text-center shadow-lg">
