@@ -2260,32 +2260,85 @@
         pinGroup.setAttribute('data-site-id', siteId);
         pinGroup.setAttribute('transform', `translate(${position.x}, ${position.y})`);
         
-        // Create pin circle
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('r', '12');
-        circle.setAttribute('fill', statusColor);
-        circle.setAttribute('stroke', '#fff');
-        circle.setAttribute('stroke-width', '2');
-        circle.setAttribute('opacity', site.status === 'critical' ? '0.8' : '0.9');
+        // Create battery icon
+        const batteryGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        batteryGroup.setAttribute('class', 'battery-icon');
         
-        // Create pin marker (triangle)
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', 'M0,-25 L8,-9 L-8,-9 Z');
-        path.setAttribute('fill', statusColor);
-        path.setAttribute('stroke', '#fff');
-        path.setAttribute('stroke-width', '2');
+        // Battery outline
+        const batteryOutline = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        batteryOutline.setAttribute('x', '-15');
+        batteryOutline.setAttribute('y', '-25');
+        batteryOutline.setAttribute('width', '30');
+        batteryOutline.setAttribute('height', '40');
+        batteryOutline.setAttribute('rx', '3');
+        batteryOutline.setAttribute('ry', '3');
+        batteryOutline.setAttribute('fill', 'none');
+        batteryOutline.setAttribute('stroke', '#fff');
+        batteryOutline.setAttribute('stroke-width', '2');
         
-        // Create number label
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('class', 'label');
-        text.setAttribute('x', '16');
-        text.setAttribute('y', '-12');
-        text.textContent = site.id;
+        // Battery cap (positive terminal)
+        const batteryCap = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        batteryCap.setAttribute('x', '8');
+        batteryCap.setAttribute('y', '-30');
+        batteryCap.setAttribute('width', '6');
+        batteryCap.setAttribute('height', '8');
+        batteryCap.setAttribute('rx', '1');
+        batteryCap.setAttribute('ry', '1');
+        batteryCap.setAttribute('fill', '#fff');
+        
+        // Battery fill based on state of charge
+        const fillHeight = (site.stateOfCharge / 100) * 34; // 34 is the inner height minus padding
+        const fillColor = site.status === 'good' ? '#22c55e' : 
+                         site.status === 'warning' ? '#eab308' : '#ef4444';
+        
+        const batteryFill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        batteryFill.setAttribute('x', '-12');
+        batteryFill.setAttribute('y', `${12 - fillHeight}`); // Position from bottom
+        batteryFill.setAttribute('width', '24');
+        batteryFill.setAttribute('height', fillHeight.toString());
+        batteryFill.setAttribute('fill', fillColor);
+        batteryFill.setAttribute('rx', '2');
+        batteryFill.setAttribute('ry', '2');
+        
+        // Add elements to battery group
+        batteryGroup.appendChild(batteryOutline);
+        batteryGroup.appendChild(batteryCap);
+        batteryGroup.appendChild(batteryFill);
+        
+        // Create site label
+        const nameLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        nameLabel.setAttribute('class', 'label');
+        nameLabel.setAttribute('x', '0');
+        nameLabel.setAttribute('y', '25');
+        nameLabel.setAttribute('text-anchor', 'middle');
+        nameLabel.setAttribute('font-size', '10px');
+        nameLabel.setAttribute('fill', '#fff');
+        nameLabel.setAttribute('font-weight', 'bold');
+        nameLabel.textContent = site.province; // Show abbreviated province name
         
         // Add elements to pin group
-        pinGroup.appendChild(circle);
-        pinGroup.appendChild(path);
-        pinGroup.appendChild(text);
+        pinGroup.appendChild(batteryGroup);
+        pinGroup.appendChild(nameLabel);
+        
+        // Add hover effect
+        pinGroup.style.cursor = 'pointer';
+        pinGroup.style.transition = 'transform 0.2s ease';
+        
+        // Add hover effect
+        pinGroup.addEventListener('mouseenter', () => {
+          pinGroup.style.transform = 'scale(1.2)';
+        });
+        
+        pinGroup.addEventListener('mouseleave', () => {
+          pinGroup.style.transform = 'scale(1)';
+        });
+        
+        // Add click handler
+        pinGroup.addEventListener('click', (e) => {
+          e.stopPropagation();
+          console.log('Clicked battery icon:', siteId, site.name); // Debug log
+          showDetail(siteId);
+        });
         
         // Add click handler
         pinGroup.addEventListener('click', (e) => {
