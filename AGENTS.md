@@ -8,6 +8,7 @@ Install-free preview works by opening `index.html` directly in a browser. For a 
 
 ## Coding Style & Naming Conventions
 Use two-space indentation for HTML, CSS, and JavaScript, matching the current formatting. Favor Tailwind utility classes over bespoke CSS unless a style is reused extensively. Declare immutable values in `UPPER_SNAKE_CASE`, runtime objects in `camelCase`, and string-literal statuses as lowercase (`good`, `warning`, `critical`). Group related helper functions and keep site metadata alphabetized by `id` to ease diff reviews.
+Centralize pack characteristics in `BATTERY_SPEC` (125 VDC, 350 Ah, 60 cells) and derive voltage/current/power values from that helper rather than sprinkling literals.
 
 ## Testing Guidelines
 Automated tests are not yet wired up, so rely on targeted manual passes. Before opening a pull request, load the dashboard, clear the console, interact with at least three site pins (one per status), verify alert toasts animate, and export a CSV to confirm data integrity. Re-run the local server in an incognito window when tweaking CDN dependencies to catch caching issues.

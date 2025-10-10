@@ -15,6 +15,7 @@ The application is built as a single-page application using HTML, CSS, and vanil
 - Interactive Thailand map with 24 battery site locations
 - Color-coded battery pins indicating status (green=good, yellow=warning, red=critical)
 - Real-time battery metrics including state of charge, state of health, voltage, current, temperature, and internal resistance
+- Standardized 125 VDC / 350 Ah (60-cell) pack model applied across all sites
 - Detailed view for each battery site with comprehensive metrics
 - Alert system for critical and warning conditions
 - Add new battery asset functionality
@@ -52,6 +53,7 @@ The application follows these conventions:
 - Thai names and locations are used for the battery sites
 - Color-coded status system: green (≥80%), yellow (60-79%), red (<60%)
 - Metric measurements include State of Charge (SoC), State of Health (SoH), voltage per cell, internal resistance, current per string, voltage per string, and ambient temperature
+- Derived metrics assume a 125 VDC string built from 60 cells (~2.08 V per cell) with a nominal 350 Ah capacity
 
 ## Key Components
 
