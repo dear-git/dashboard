@@ -26,12 +26,12 @@ The application is built as a single-page application using HTML, CSS, and vanil
 
 ## File Structure
 
-- `index.html`: Main application file containing all HTML, CSS, and JavaScript
+- `index.html`: Main application file containing all HTML, CSS, and JavaScript (now implements full client-side routing)
 - `README.md`: Basic project description
 - `.gitignore`: Git ignore file for macOS specific files
 - `QWEN.md`: This documentation file
-- `detail.html`: Detailed view for individual battery sites
-- `db_view.html`: Database view of all monitoring data
+- `detail.html`: Original detailed view page (now integrated as virtual page in index.html)
+- `db_view.html`: Database view of all monitoring data (navigates to index.html with parameters for GitHub Pages compatibility)
 - `sql/bms.sql`: SQL schema and data for the battery management system
 - `sql/db_viewer.html`: Alternative database viewer
 - `file/thailand-map.png`: Background map image
@@ -50,6 +50,22 @@ Alternatively, you can serve it via a local web server:
 - Using Python: `python -m http.server 8000`
 - Using Node.js: `npx serve .`
 - Using PHP: `php -S localhost:8000`
+
+## GitHub Pages Deployment
+
+The application has been updated to work properly with GitHub Pages:
+
+1. All navigation now uses client-side routing instead of file-based navigation
+2. URL parameters are used to control page state (e.g., `?page=detail&id=5`)
+3. Browser history is properly managed with pushState API
+4. The application detects URL parameters on load to show the correct page
+5. Separate HTML files (detail.html, db_view.html) are now virtual pages within the single index.html
+
+To deploy to GitHub Pages:
+1. Push your code to a GitHub repository
+2. Go to repository Settings → Pages
+3. Set source to "Deploy from a branch" or "GitHub Actions"
+4. The application will be accessible at https://username.github.io/repository-name/
 
 ## Development Conventions
 
@@ -76,10 +92,12 @@ The application follows these conventions:
 ## Key Components
 
 1. **Home Page**: Shows an overview map of Thailand with all battery sites
-2. **Detail Page**: Shows detailed metrics for a selected battery site
-3. **Alert System**: Automatically detects and reports battery issues
-4. **Data Export**: Exports all battery data to a CSV file
-5. **Asset Management**: Allows adding new battery assets to the system
+2. **Detail Page**: Shows detailed metrics for a selected battery site (virtual page within SPA)
+3. **Database View**: Shows all monitoring data in table format (virtual page within SPA)
+4. **Alert System**: Automatically detects and reports battery issues
+5. **Data Export**: Exports all battery data to a CSV file
+6. **Asset Management**: Allows adding new battery assets to the system
+7. **Client-Side Routing**: URL-based navigation using pushState API for GitHub Pages compatibility
 
 ## Google Maps Integration
 

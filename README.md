@@ -196,3 +196,15 @@ dashboard/
 ---
 
 **Last Updated**: Automated documentation generation from current HTML implementation
+
+## 🌐 Static Site Generation & Deployment
+
+- Supported generators (static output): Hugo, Gatsby, Next.js (static export), Nuxt.js (static generate), Eleventy, Vite (static builds), SvelteKit (static adapter).
+- Front-end frameworks (when exported to static HTML/CSS/JS): React, Angular, Vue.js. CSS frameworks like Bootstrap are supported.
+- GitHub Pages publishing methods:
+  - Direct branch publishing: configure Pages to serve from `gh-pages`, `main` (root), or `docs/` in repository settings.
+  - Typical flow for generators: build to `dist/` or `out/`, then push build output to the publishing branch.
+- This repo (plain static site):
+  - No build required. Ensure `index.html`, `detail.html`, `db_view.html`, and `file/` are present at repo root (or in `docs/`).
+  - In GitHub → Settings → Pages: Source → Deploy from a branch → choose `main` and `/ (root)` (or `docs/`).
+  - Use relative paths like `./detail.html` and `./db_view.html` to work under the repository subpath on Pages.
