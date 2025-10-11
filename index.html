@@ -188,6 +188,11 @@
       transform: translate(-50%, -100%) scale(1.2);
       filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
     }
+
+    /* Heart pin subtle interactions */
+    .heart-pin svg { transition: transform 0.2s ease, filter 0.2s ease; }
+    .heart-pin:hover svg { transform: scale(1.1); filter: drop-shadow(0 2px 6px rgba(225, 29, 72, 0.6)); }
+    .heart-pin:active svg { transform: scale(0.98); }
     
     /* Mobile touch enhancement */
     @media (hover: none) and (pointer: coarse) {
@@ -2363,12 +2368,12 @@
     function createHeartPin(lat, lng, onClick) {
       const pos = getMapPosition(lat, lng);
       const pin = document.createElement('div');
-      pin.className = 'battery-pin';
+      pin.className = 'battery-pin heart-pin';
       pin.style.left = `${pos.x}px`;
       pin.style.top = `${pos.y}px`;
       pin.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
-          <path fill="#e11d48" d="M462.3 62.7c-54.5-46.4-136-38.3-186.4 13.5L256 96.6l-19.9-20.3C185.7 24.4 104.2 16.3 49.7 62.7-16.6 118.2-10.6 215.5 43 270.4l193 199.8c11.8 12.2 31.1 12.2 42.9 0l193-199.8c53.6-54.9 59.6-152.2-9.6-207.7z"/>
+          <path class="heart-path" fill="#e11d48" d="M462.3 62.7c-54.5-46.4-136-38.3-186.4 13.5L256 96.6l-19.9-20.3C185.7 24.4 104.2 16.3 49.7 62.7-16.6 118.2-10.6 215.5 43 270.4l193 199.8c11.8 12.2 31.1 12.2 42.9 0l193-199.8c53.6-54.9 59.6-152.2-9.6-207.7z"/>
         </svg>`;
       pin.addEventListener('click', () => { if (typeof onClick === 'function') onClick(); });
       return pin;
@@ -2410,11 +2415,19 @@
       return 'central'; // default
     }
 
-    // Render a demo heart pin near Chiang Mai onto the main map container
-    function renderDemoHeartPin() {
+    // Render a heart pin for a specific site id (defaults to first 'good' site)
+    function renderSiteHeartPin(siteId) {
       const container = document.querySelector('.thailand-map');
-      if (!container) return;
-      const heart = createHeartPin(18.7883, 98.9853, () => alert('Heart pin clicked!'));
+      if (!container || !Array.isArray(sites) || !sites.length) return;
+      let site = null;
+      if (typeof siteId === 'number') {
+        site = sites.find(s => parseInt(s.id) === siteId);
+      }
+      if (!site) {
+        site = sites.find(s => s.status === 'good') || sites[0];
+      }
+      if (!site) return;
+      const heart = createHeartPin(site.lat, site.lng, () => showDetail(parseInt(site.id)));
       container.appendChild(heart);
     }
 
@@ -3349,8 +3362,8 @@
         console.log('Rendering home page');
         app.innerHTML = renderHomePage();
         renderBatteryPins();
-        // Add demo heart pin as a clickable marker
-        try { renderDemoHeartPin(); } catch (e) { console.warn('Heart pin render failed:', e); }
+        // Add a site-based heart pin (defaults to first 'good' site)
+        try { renderSiteHeartPin(); } catch (e) { console.warn('Heart pin render failed:', e); }
       } else if (currentPage === 'detail') {
         console.log('Rendering detail page');
         if (!selectedSite) {
@@ -3530,8 +3543,13 @@
     })();
     
     // Delegated navigation: click or key on any element with data-site-id
+    // Skip SVG elements since they have their own handlers
     document.addEventListener('click', function(e) {
-      // Check if the target or its ancestor has data-site-id attribute
+      // Skip SVG elements since they have their own handlers
+      if (e.target.closest('svg') || e.target.tagName === 'svg') {
+        return;
+      }
+      
       const target = e.target.closest('[data-site-id]');
       if (target) {
         const sid = target.getAttribute('data-site-id');
@@ -3544,7 +3562,11 @@
     document.addEventListener('keydown', function(e) {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       
-      // Check if the target or its ancestor has data-site-id attribute
+      // Skip SVG elements since they have their own handlers
+      if (e.target.closest('svg') || e.target.tagName === 'svg') {
+        return;
+      }
+      
       const target = e.target.closest('[data-site-id]');
       if (target) {
         e.preventDefault();
