@@ -642,6 +642,11 @@
       filter: brightness(1.2) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
       box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); /* Subtle blue glow */
     }
+    
+    .pin-clicked {
+      transform: scale(0.95);
+      filter: brightness(0.8) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+    }
 
   </style>
   <style>
@@ -2585,9 +2590,7 @@
         
         // SIMPLIFIED AND RELIABLE CLICK HANDLER
         pinGroup.addEventListener('click', (e) => {
-          console.log('Click event detected on pinGroup for siteId:', siteId); // New log
           e.stopPropagation();
-          e.preventDefault();
           
           // Clear any active tooltips
           const tooltip = document.getElementById('tooltip');
