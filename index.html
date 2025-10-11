@@ -2601,7 +2601,7 @@
         pinGroup.appendChild(pinText);
         pinGroup.appendChild(nameLabel);
         
-        // SIMPLIFIED AND RELIABLE CLICK HANDLER
+        // ENHANCED AND RELIABLE CLICK HANDLER
         pinGroup.addEventListener('click', (e) => {
           e.stopPropagation();
           
@@ -2624,6 +2624,7 @@
         
         // Add touch support for mobile
         pinGroup.addEventListener('touchstart', (e) => {
+          e.preventDefault(); // Prevent default touch behavior
           pinGroup.classList.add('pin-clicked'); // Add click feedback on touch start
         });
         
@@ -2632,7 +2633,11 @@
           e.stopPropagation();
           console.log('Battery touched - ID:', siteId, 'Name:', site.name);
           pinGroup.classList.remove('pin-clicked'); // Remove click feedback on touch end
-          showDetail(siteId);
+          
+          // Add a small delay to allow visual feedback before navigating
+          setTimeout(() => {
+            showDetail(siteId);
+          }, 50);
         });
         
         // Add keyboard support
@@ -2643,10 +2648,21 @@
             pinGroup.classList.add('pin-clicked'); // Add click feedback on keydown
             setTimeout(() => {
               pinGroup.classList.remove('pin-clicked');
+              showDetail(siteId);
             }, 200);
-            showDetail(siteId);
           }
         });
+        
+        // Ensure the entire pin group is clickable with a larger touch area
+        const pinBackground = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        pinBackground.setAttribute('cx', '0');
+        pinBackground.setAttribute('cy', '0');
+        pinBackground.setAttribute('r', '30'); // Larger touch area
+        pinBackground.setAttribute('fill', 'transparent'); // Make it invisible
+        pinBackground.setAttribute('class', 'pin-touch-area'); // For identification if needed
+        
+        // Insert as the first child so it's behind other elements
+        pinGroup.insertBefore(pinBackground, pinGroup.firstChild);
         
         // Removed redundant individual element click handlers, as pinGroup handles the click.))
         
