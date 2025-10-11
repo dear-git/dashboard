@@ -1,11 +1,9 @@
 # Repository Guidelines
 
-This document guides contributors working on the single‑page dashboard in this repository.
-
 ## Project Structure & Module Organization
-- Single page app: all markup, Tailwind utility styling, and vanilla JS live in `index.html`.
-- Assets (images, media, exports) live in `file/` and are referenced via relative paths (e.g., `file/logo.png`).
-- Add small data fixtures and UI helpers inside the `<script>` block of `index.html` with brief inline comments. Keep related helpers grouped and site metadata alphabetized by `id`.
+- Single‑page app: all HTML, Tailwind utilities, and vanilla JS live in `index.html`.
+- Assets reside in `file/` (e.g., `file/logo.png`, exports). Use relative paths.
+- Small data fixtures and UI helpers go inside the `<script>` of `index.html`. Keep related helpers grouped and site metadata alphabetized by `id`.
 
 ## Build, Test, and Development Commands
 - Local preview: open `index.html` directly in a browser.
@@ -14,13 +12,13 @@ This document guides contributors working on the single‑page dashboard in this
 
 ## Coding Style & Naming Conventions
 - Indentation: 2 spaces for HTML, CSS, and JS.
-- Prefer Tailwind utilities over custom CSS; add bespoke CSS only for widely reused patterns.
+- Prefer Tailwind utilities; add bespoke CSS only for widely reused patterns.
 - Naming: constants `UPPER_SNAKE_CASE`, runtime objects `camelCase`, status strings lowercase (`good`, `warning`, `critical`).
-- Centralize battery math in `BATTERY_SPEC` (125 VDC, 350 Ah, 60 cells). Derive voltage/current/power from it—avoid magic numbers.
+- Centralize battery math in `BATTERY_SPEC` (125 VDC, 350 Ah, 60 cells). Derive voltage/current/power—avoid magic numbers.
 
 ## Testing Guidelines
 - No automated tests yet. Do targeted manual passes:
-  - Load the dashboard, clear console errors.
+  - Load the dashboard and confirm no console errors.
   - Interact with at least three site pins (one per status).
   - Verify alert toasts animate.
   - Export a CSV and spot‑check data integrity.
@@ -33,3 +31,4 @@ This document guides contributors working on the single‑page dashboard in this
 ## Security & Configuration Tips
 - Do not commit production Google Maps keys. The checked‑in key is a placeholder—rotate if exposed.
 - Scrub sensitive site identifiers in exports/screenshots; keep anonymized Thai province naming consistent in `sites`.
+
