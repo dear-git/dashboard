@@ -2784,6 +2784,9 @@
                     <g id="batteryPins"></g>
                   </svg>
                   <div id="tooltip" class="tooltip"></div>
+                  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500/20 backdrop-blur-sm border border-blue-400/50 text-blue-200 px-4 py-2 rounded-lg shadow-lg animate-pulse text-sm font-semibold pointer-events-none z-30">
+                    Click on any battery pin for details
+                  </div>
                 </div>
                   <div class="province-marker province-south" style="top: 75%; left: 48%;" title="ถลาง">ถลา</div>
                   <div class="province-marker province-south" style="top: 78%; left: 45%;" title="ภูเก็ต">ภูเก</div>
@@ -2818,7 +2821,7 @@
           <div class="glass-card rounded-xl p-4 lg:p-6 overflow-x-auto">
             <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
               <h3 class="font-bold text-lg">Site Metrics Overview</h3>
-              <span class="text-sm text-gray-400">Click a pin or row to view details</span>
+              <span class="text-sm text-gray-400">Click on any battery pin on map to view detailed information</span>
             </div>
             <table class="min-w-full text-sm">
               <thead class="text-gray-400 uppercase tracking-wide text-xs border-b border-slate-700">
@@ -2901,7 +2904,7 @@
                 </svg>
                 Site Location - Thailand
               </h2>
-              <p class="text-gray-400 text-sm mb-3">Click a pin or row to view details</p>
+              <p class="text-gray-400 text-sm mb-3">Click on any battery pin on map to view detailed information</p>
               <div class="map-container rounded-lg overflow-hidden relative" style="height: 400px;">
                 <div class="thailand-map">
                   <div class="battery-pin-container">
@@ -3306,7 +3309,7 @@
         <div class="max-w-7xl mx-auto p-6">
           <div class="glass-card rounded-xl p-6 overflow-x-auto">
             <h2 class="text-2xl font-bold mb-1">Database Records</h2>
-            <p class="text-gray-400 text-sm mb-4">Click a pin or row to view details</p>
+            <p class="text-gray-400 text-sm mb-4">Click on any battery pin on map to view detailed information</p>
             <table class="min-w-full text-sm">
               <thead class="text-gray-400 uppercase tracking-wide text-xs border-b border-slate-700">
                 <tr>
@@ -3362,10 +3365,8 @@
     }
 
     function showDetail(siteId) {
-      console.log('showDetail called with siteId:', siteId);
       // Prevent recursive calls
       if (processingShowDetail) {
-        console.log('showDetail already processing, skipping');
         return;
       }
       
