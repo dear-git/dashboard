@@ -2386,10 +2386,14 @@
         pinGroup.setAttribute('data-title', `${site.name} - SoC: ${site.stateOfCharge}% - Status: ${site.status}`);
         pinGroup.setAttribute('data-site-id', siteId);
         pinGroup.setAttribute('transform', `translate(${position.x}, ${position.y})`);
+        pinGroup.setAttribute('role', 'button');
+        pinGroup.setAttribute('tabindex', '0');
+        pinGroup.setAttribute('aria-label', `Battery ${siteId}: ${site.name} — view details`);
         
         // Create battery icon
         const batteryGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         batteryGroup.setAttribute('class', 'battery-icon');
+        batteryGroup.setAttribute('data-site-id', siteId);
         
         // Battery outline
         const batteryOutline = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -2548,6 +2552,7 @@
                 element.style.filter = 'brightness(1)';
                 sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
                 sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+                // Let event bubble to group for unified behavior, then navigate
                 showDetail(siteId);
               }, 50);
             }, 150);
@@ -2813,7 +2818,7 @@
           <div class="glass-card rounded-xl p-4 lg:p-6 overflow-x-auto">
             <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
               <h3 class="font-bold text-lg">Site Metrics Overview</h3>
-              <span class="text-sm text-gray-400">Click any row to drill into the detailed dashboard</span>
+              <span class="text-sm text-gray-400">Click a pin or row to view details</span>
             </div>
             <table class="min-w-full text-sm">
               <thead class="text-gray-400 uppercase tracking-wide text-xs border-b border-slate-700">
@@ -2896,7 +2901,7 @@
                 </svg>
                 Site Location - Thailand
               </h2>
-              <p class="text-gray-400 text-sm mb-3">Click any battery pin or table row to view detailed information.</p>
+              <p class="text-gray-400 text-sm mb-3">Click a pin or row to view details</p>
               <div class="map-container rounded-lg overflow-hidden relative" style="height: 400px;">
                 <div class="thailand-map">
                   <div class="battery-pin-container">
@@ -3301,7 +3306,7 @@
         <div class="max-w-7xl mx-auto p-6">
           <div class="glass-card rounded-xl p-6 overflow-x-auto">
             <h2 class="text-2xl font-bold mb-1">Database Records</h2>
-            <p class="text-gray-400 text-sm mb-4">Click any battery pin or table row to view detailed information.</p>
+            <p class="text-gray-400 text-sm mb-4">Click a pin or row to view details</p>
             <table class="min-w-full text-sm">
               <thead class="text-gray-400 uppercase tracking-wide text-xs border-b border-slate-700">
                 <tr>
@@ -3433,6 +3438,29 @@
       }
     })();
     
+    // Delegated navigation: click or key on any element with data-site-id
+    document.addEventListener('click', function(e) {
+      const target = e.target.closest('[data-site-id]');
+      if (target) {
+        const sid = target.getAttribute('data-site-id');
+        if (sid != null) {
+          showDetail(sid);
+        }
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const target = e.target.closest('[data-site-id]');
+      if (target) {
+        e.preventDefault();
+        const sid = target.getAttribute('data-site-id');
+        if (sid != null) {
+          showDetail(sid);
+        }
+      }
+    });
+
     // Listen for browser back/forward navigation
     window.addEventListener('popstate', function(event) {
       checkUrlParams();
