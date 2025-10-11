@@ -1,59 +1,52 @@
-# Battery Monitoring System - Thailand Dashboard
+# Thailand Battery Monitoring Dashboard - QWEN Context
 
 ## Project Overview
 
-This is a battery monitoring dashboard application that provides real-time visualization of battery status across 24 locations throughout Thailand. The dashboard features an interactive map with custom battery pin markers that indicate the status of each battery site and provides detailed monitoring metrics when selected.
+This is a comprehensive battery monitoring dashboard application that provides real-time visualization of battery status across 24 locations throughout Thailand. The dashboard features an interactive map with custom battery pin markers that indicate the status of each battery site and provides detailed monitoring metrics when selected.
 
-The application is built as a single-page application using HTML, CSS, and vanilla JavaScript with the following technologies:
+The application is built as a modern single-page application using HTML, CSS, and vanilla JavaScript with the following technologies:
 
 - Tailwind CSS (via CDN)
-- Google Maps JavaScript API
+- SVG-based interactive Thailand map
 - Custom animations and styling using CSS
 - Glass morphism UI design with gradient backgrounds
+- Client-side routing for GitHub Pages compatibility
+- Responsive design for all device sizes
 
 ## Key Features
 
-- Interactive Thailand map with 24 battery site locations
-- Color-coded battery pins indicating status (green=good, yellow=warning, red=critical)
-- Real-time battery metrics including state of charge, state of health, voltage, current, temperature, and internal resistance
-- Standardized 125 VDC / 350 Ah (60-cell) pack model applied across all sites
-- Detailed view for each battery site with comprehensive metrics
-- Alert system for critical and warning conditions
-- Add new battery asset functionality
-- Export data to CSV functionality
-- Automatic battery failure detection and alerting
-- Responsive design with glass-morphism UI elements
+- **Interactive Thailand Map**: Visualize battery sites across all regions of Thailand
+- **Real-time Monitoring**: Track SoC, SoH, voltage, current, temperature, and resistance
+- **Multi-page SPA**: Single-page application with virtual routing for all pages
+- **Modern UI**: Glass morphism design with animated elements
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Alert System**: Automatic failure detection and warnings
+- **Data Export**: Export all metrics to CSV format
+- **Asset Management**: Add new battery sites dynamically
+- **GitHub Pages Optimized**: Fully compatible with static site hosting
 
 ## File Structure
 
-- `index.html`: Main application file containing all HTML, CSS, and JavaScript (now implements full client-side routing)
-- `README.md`: Basic project description
-- `.gitignore`: Git ignore file for macOS specific files
-- `QWEN.md`: This documentation file
-- `detail.html`: Original detailed view page (now integrated as virtual page in index.html)
-- `db_view.html`: Database view of all monitoring data (navigates to index.html with parameters for GitHub Pages compatibility)
-- `sql/bms.sql`: SQL schema and data for the battery management system
-- `sql/db_viewer.html`: Alternative database viewer
-- `file/thailand-map.png`: Background map image
-- `file/thai.jpg`: Additional map image
-
-## Building and Running
-
-This is a static HTML application that can be run directly in any modern web browser:
-
-1. Simply open `index.html` in a web browser
-2. The application will automatically load and initialize
-3. An internet connection is required to load external dependencies (Tailwind CSS CDN and Google Maps API)
-
-Alternatively, you can serve it via a local web server:
-
-- Using Python: `python -m http.server 8000`
-- Using Node.js: `npx serve .`
-- Using PHP: `php -S localhost:8000`
+```
+├── index.html                    # Main SPA with all pages (home, detail, database)
+├── detail.html                   # Original detail page (now virtual page in SPA)
+├── db_view.html                  # Database view (now virtual page in SPA)
+├── package.json                  # Node.js dependencies and scripts
+├── README.md                     # Main project documentation
+├── QWEN.md                       # This documentation file
+├── DEPLOYMENT.md                 # Deployment guide
+├── sql/
+│   ├── bms.sql                   # Database schema
+│   └── db_viewer.html            # SQL-based viewer
+├── file/
+│   ├── thailand-map.png          # Map background
+│   └── thai.jpg                  # Additional assets
+└── .gitignore                    # Git ignore file
+```
 
 ## GitHub Pages Deployment
 
-The application has been updated to work properly with GitHub Pages:
+The application has been optimized to work seamlessly with GitHub Pages:
 
 1. All navigation now uses client-side routing instead of file-based navigation
 2. URL parameters are used to control page state (e.g., `?page=detail&id=5`)
@@ -64,16 +57,36 @@ The application has been updated to work properly with GitHub Pages:
 To deploy to GitHub Pages:
 1. Push your code to a GitHub repository
 2. Go to repository Settings → Pages
-3. Set source to "Deploy from a branch" or "GitHub Actions"
+3. Set source to "Deploy from a branch"
 4. The application will be accessible at https://username.github.io/repository-name/
+
+## Development and Build Process
+
+### Prerequisites
+- Node.js (optional, for development server tools)
+
+### Local Development
+```bash
+# Install development dependencies
+npm install
+
+# Start development server
+npm start
+
+# Or with live reload
+npm run dev
+```
+
+### Static File Generation
+The application is already optimized for static hosting and requires no build process. All code is contained in static HTML/CSS/JS files that can be served directly.
 
 ## Development Conventions
 
 The application follows these conventions:
 
-- All code is contained in a single HTML file for simplicity
+- All code is contained in a single HTML file for simplicity (index.html)
 - Tailwind CSS is loaded via CDN for styling
-- Google Maps API is dynamically loaded via CDN
+- SVG is used for map visualization
 - Vanilla JavaScript is used without any frameworks
 - Sites are electrical substations with names in the format 'สถานีไฟฟ้า [Province] [Number]'
 - Color-coded status system: green (≥80%), yellow (60-79%), red (<60%)
@@ -98,40 +111,32 @@ The application follows these conventions:
 5. **Data Export**: Exports all battery data to a CSV file
 6. **Asset Management**: Allows adding new battery assets to the system
 7. **Client-Side Routing**: URL-based navigation using pushState API for GitHub Pages compatibility
+8. **Interactive Map**: SVG-based Thailand map with custom battery pin markers
 
-## Google Maps Integration
-
-The application uses Google Maps JavaScript API to display battery locations with:
-
-- Custom styling for the map to match the dark theme
-- Custom battery pin markers with animation effects
-- Automatic zoom and centering on Thailand
-- Detailed view with zoomed map when a specific site is selected
-- Marker clustering and highlighting on hover
-
-## Battery Status Indicators
-
-- **Good (Green)**: State of charge ≥80%
-- **Warning (Yellow)**: State of charge 60-79%
-- **Critical (Red)**: State of charge <60%
-
-The status is reflected in both the map pins and detailed views.
-
-## Technical Implementation
+## Architecture & Technical Implementation
 
 ### Architecture
-- **Single Page Application**: All HTML, CSS, and JavaScript in `index.html`
+- **Single Page Application**: All HTML, CSS, and JavaScript in `index.html` with virtual routing
 - **Styling**: Tailwind CSS with custom animations and glass morphism effects
-- **Mapping**: Pure CSS-based Thailand map (no external map dependencies)
+- **Mapping**: SVG-based Thailand map (fully self-contained, no external dependencies)
 - **State Management**: Vanilla JavaScript with reactive rendering
 - **Data Structure**: Array of site objects with comprehensive battery metrics
+- **Routing**: Client-side routing with URL parameter handling
 
 ### Key Components
-- **Battery Pins**: Interactive map markers with hover tooltips and click interactions
+- **Battery Pins**: Interactive SVG map markers with hover tooltips and click interactions
 - **Province Filters**: Clickable region labels for filtered site views
 - **Alert System**: Notification system with customizable cooldown periods
 - **Export Module**: CSV generation with timestamp and complete metrics
 - **Asset Management**: Modal forms for adding new battery sites
+- **Animation Effects**: Custom CSS animations for status indicators and pin movements
+
+### Client-Side Routing Implementation
+The application implements virtual routing using:
+- `URLSearchParams` to read page parameters
+- `window.history.pushState()` to update URLs without page reloads
+- `popstate` event listener to handle browser back/forward navigation
+- Virtual pages that render different content based on URL parameters
 
 ### Monitoring Logic
 ```javascript
