@@ -521,6 +521,15 @@
     }
   </style>
   <style>
+    /* Button-like affordance for interactive map pins */
+    svg .pin { cursor: pointer; }
+    svg .pin:focus { outline: none; }
+    svg .pin:focus-visible { filter: drop-shadow(0 0 6px rgba(96,165,250,0.9)); }
+    svg .battery-icon { transition: transform .12s ease, filter .12s ease; transform-box: fill-box; transform-origin: center; }
+    svg .pin:hover .battery-icon { transform: scale(1.03); filter: brightness(1.15); }
+    svg .pin:active .battery-icon { transform: scale(0.97); }
+  </style>
+  <style>
     /* Minimal Tailwind CSS implementation for production */
     /*! tailwindcss v3.3.0 | MIT License | https://tailwindcss.com */
     /*
