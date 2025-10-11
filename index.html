@@ -1750,6 +1750,60 @@
     const alertHistory = {};
     let currentFilter = 'all';
 
+    // Check URL parameters on load to determine initial page
+    function checkUrlParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const page = urlParams.get('page');
+      const id = urlParams.get('id');
+      
+      if (page === 'detail' && id) {
+        currentPage = 'detail';
+        // Find the site by ID and set it as selected
+        const siteId = parseInt(id);
+        selectedSite = sites.find(s => parseInt(s.id) === siteId);
+        if (!selectedSite) {
+          console.error('Site not found with ID:', id);
+          currentPage = 'home'; // Fallback to home if site not found
+        }
+      } else if (page === 'database') {
+        currentPage = 'database';
+      } else if (page === 'home') {
+        currentPage = 'home';
+      } else {
+        // Check for legacy/detail URLs that might include an ID
+        if (id) {
+          currentPage = 'detail';
+          const siteId = parseInt(id);
+          selectedSite = sites.find(s => parseInt(s.id) === siteId);
+          if (!selectedSite) {
+            console.error('Site not found with ID:', id);
+            currentPage = 'home'; // Fallback to home if site not found
+          }
+        }
+      }
+    }
+
+    // Update URL when navigating between pages
+    function updateUrl(page, id = null) {
+      let newUrl = window.location.pathname;
+      const params = new URLSearchParams();
+      
+      if (page === 'detail' && id) {
+        params.set('page', 'detail');
+        params.set('id', id);
+      } else if (page === 'database') {
+        params.set('page', 'database');
+      } else if (page === 'home') {
+        // For home, don't add any parameters
+      }
+      
+      if (params.toString()) {
+        newUrl += '?' + params.toString();
+      }
+      
+      window.history.pushState({}, '', newUrl);
+    }
+
     // Province regions mapping
     const provinceRegions = {
       north: ['เชียงราย', 'ลำปาง', 'น่าน', 'แพร่', 'แม่ฮ่องสอน', 'อุตรดิตถ์'],
@@ -3292,6 +3346,7 @@ VALUES
 
     function showHome() {
       currentPage = 'home';
+      updateUrl('home');
       render();
     }
 
@@ -3320,12 +3375,14 @@ VALUES
       }
       console.log('Navigating to detail page for:', selectedSite.name);
       currentPage = 'detail';
+      updateUrl('detail', selectedSite.id);
       render();
       console.log('Detail page rendered for:', selectedSite.name);
     }
 
     function showDatabase() {
       currentPage = 'database';
+      updateUrl('database');
       render();
     }
 
@@ -3339,7 +3396,15 @@ VALUES
       }
     }
 
+    // Initialize by checking URL parameters
+    checkUrlParams();
     render();
+    
+    // Listen for browser back/forward navigation
+    window.addEventListener('popstate', function(event) {
+      checkUrlParams();
+      render();
+    });
   </script>
 </body>
 </html>

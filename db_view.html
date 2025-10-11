@@ -584,10 +584,10 @@
           if (!existing || !existing.length) {
             sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
           }
-          // For GitHub Pages compatibility, open detail in new window but with proper path
-          // In a full SPA implementation, this would navigate internally
-          const detailUrl = window.location.href.replace('db_view.html', 'detail.html');
-          window.location.href = `${detailUrl}?id=${site.id}`;
+          // For GitHub Pages compatibility with SPA approach
+          // Navigate to main dashboard with detail page and site ID
+          const dashboardUrl = window.location.href.replace('db_view.html', 'index.html');
+          window.location.href = `${dashboardUrl}?page=detail&id=${site.id}`;
         });
         
         row.innerHTML = `
@@ -616,8 +616,8 @@
     }
 
     function goBack() {
-      // Prefer navigating back to dashboard in same tab
-      window.location.href = 'index.html';
+      // Navigate back to dashboard with proper path for GitHub Pages
+      window.location.href = './index.html';
     }
 
     // Initialize the table when the page loads
