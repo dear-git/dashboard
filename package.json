@@ -1,0 +1,37 @@
+{
+  "name": "thailand-battery-monitoring-dashboard",
+  "version": "1.0.0",
+  "description": "A comprehensive battery monitoring dashboard for electrical substations across Thailand",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server -o",
+    "dev": "live-server --open=index.html",
+    "build": "echo 'No build step required for this static site'",
+    "test": "echo 'No tests specified for this static site'",
+    "deploy": "gh-pages -d ."
+  },
+  "keywords": [
+    "battery",
+    "monitoring",
+    "dashboard",
+    "thailand",
+    "energy",
+    "static",
+    "web",
+    "html",
+    "css",
+    "javascript"
+  ],
+  "author": "Battery Monitoring System Team",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2",
+    "gh-pages": "^6.1.1"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
