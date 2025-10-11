@@ -449,8 +449,10 @@
   </div>
 
   <script>
-    // Mock data for all 24 sites
-    const sites = [
+    // Prefer sessionStorage data injected by the dashboard/DB viewer
+    const sessionSites = JSON.parse(sessionStorage.getItem('bmsSitesData') || 'null');
+    // Mock data for all 24 sites (fallback)
+    const sites = (Array.isArray(sessionSites) && sessionSites.length ? sessionSites : [
       { id: 1, name: 'สถานีไฟฟ้า เชียงราย 2', lat: 19.91, lng: 99.84, status: 'good', stateOfCharge: 95, stateOfHealth: 98, ambientTemp: 28, voltagePerCell: 2.50, internalResistance: 2500, currentPerString: 332.5, voltagePerString: 125.0, province: 'เชียงราย', region: 'North' },
       { id: 2, name: 'สถานีไฟฟ้า ลำปาง 3', lat: 18.29, lng: 99.49, status: 'critical', stateOfCharge: 45, stateOfHealth: 85, ambientTemp: 32, voltagePerCell: 2.50, internalResistance: 4800, currentPerString: 157.5, voltagePerString: 125.0, province: 'ลำปาง', region: 'North' },
       { id: 3, name: 'สถานีไฟฟ้า พิษณุโลก 6', lat: 16.82, lng: 100.27, status: 'warning', stateOfCharge: 78, stateOfHealth: 85, ambientTemp: 32, voltagePerCell: 2.50, internalResistance: 4500, currentPerString: 273.0, voltagePerString: 125.0, province: 'พิษณุโลก', region: 'Central' },
@@ -475,18 +477,20 @@
       { id: 22, name: 'สถานีไฟฟ้า หาดใหญ่ 2', lat: 7.01, lng: 100.47, status: 'warning', stateOfCharge: 70, stateOfHealth: 81, ambientTemp: 35, voltagePerCell: 2.50, internalResistance: 4100, currentPerString: 245.0, voltagePerString: 125.0, province: 'สงขลา', region: 'South' },
       { id: 23, name: 'สถานีไฟฟ้า ฉลุง', lat: 7.24, lng: 100.64, status: 'good', stateOfCharge: 88, stateOfHealth: 95, ambientTemp: 29, voltagePerCell: 2.50, internalResistance: 2100, currentPerString: 308.0, voltagePerString: 125.0, province: 'สตูล', region: 'South' },
       { id: 24, name: 'สถานีไฟฟ้า ปัตตานี 2', lat: 6.86, lng: 101.25, status: 'warning', stateOfCharge: 73, stateOfHealth: 88, ambientTemp: 33, voltagePerCell: 2.50, internalResistance: 3900, currentPerString: 255.5, voltagePerString: 125.0, province: 'ปัตตานี', region: 'South' }
-    ];
+    ]);
 
-    // Get site ID from URL parameter
-    function getSiteIdFromUrl() {
+    // Get site ID from URL parameter or sessionStorage
+    function getSiteId() {
       const urlParams = new URLSearchParams(window.location.search);
-      return parseInt(urlParams.get('id')) || 1;
+      const fromUrl = urlParams.get('id');
+      const fromSession = sessionStorage.getItem('bmsSelectedSiteId');
+      return parseInt(fromUrl || fromSession || '1');
     }
 
     // Load site data
     function loadSiteData() {
-      const siteId = getSiteIdFromUrl();
-      const site = sites.find(s => s.id === siteId);
+      const siteId = getSiteId();
+      const site = sites.find(s => String(s.id) === String(siteId));
 
       if (!site) {
         alert('Site not found');

@@ -30,6 +30,12 @@ The application is built as a single-page application using HTML, CSS, and vanil
 - `README.md`: Basic project description
 - `.gitignore`: Git ignore file for macOS specific files
 - `QWEN.md`: This documentation file
+- `detail.html`: Detailed view for individual battery sites
+- `db_view.html`: Database view of all monitoring data
+- `sql/bms.sql`: SQL schema and data for the battery management system
+- `sql/db_viewer.html`: Alternative database viewer
+- `file/thailand-map.png`: Background map image
+- `file/thai.jpg`: Additional map image
 
 ## Building and Running
 
@@ -92,3 +98,91 @@ The application uses Google Maps JavaScript API to display battery locations wit
 - **Critical (Red)**: State of charge <60%
 
 The status is reflected in both the map pins and detailed views.
+
+## Technical Implementation
+
+### Architecture
+- **Single Page Application**: All HTML, CSS, and JavaScript in `index.html`
+- **Styling**: Tailwind CSS with custom animations and glass morphism effects
+- **Mapping**: Pure CSS-based Thailand map (no external map dependencies)
+- **State Management**: Vanilla JavaScript with reactive rendering
+- **Data Structure**: Array of site objects with comprehensive battery metrics
+
+### Key Components
+- **Battery Pins**: Interactive map markers with hover tooltips and click interactions
+- **Province Filters**: Clickable region labels for filtered site views
+- **Alert System**: Notification system with customizable cooldown periods
+- **Export Module**: CSV generation with timestamp and complete metrics
+- **Asset Management**: Modal forms for adding new battery sites
+
+### Monitoring Logic
+```javascript
+// Alert thresholds
+- Critical: SoC < 30%
+- Warning: SoC < 50%, Temp > 40°C, SoH < 70%, Resistance > 500µΩ
+- Good: SoC ≥ 80%
+```
+
+## Data Model
+
+Each battery site includes:
+```javascript
+{
+  id: number,                    // Unique identifier
+  name: string,                  // Site name (Thai)
+  province: string,              // Thai province
+  lat: number, lng: number,     // Coordinates (for future mapping)
+  status: 'good'|'warning'|'critical',
+  battery: number,               // Legacy field (SoC %)
+  temp: number,                  // Temperature (°C)
+  voltage: number,               // System voltage (125V)
+  current: number,               // Current (A)
+  power: number,                 // Power (W)
+  voltagePerCell: number,        // Cell voltage (~2.08V)
+  internalResistance: number,    // Resistance (µΩ)
+  currentPerString: number,      // String current (A)
+  voltagePerString: number,      // String voltage (125V)
+  stateOfCharge: number,         // SoC (%)
+  stateOfHealth: number,         // SoH (%)
+  ambientTemp: number           // Ambient temperature (°C)
+}
+```
+
+## SQL Schema
+
+The application includes a SQL schema for the battery management system:
+
+```sql
+-- Battery Management System Table Schema
+CREATE TABLE IF NOT EXISTS public.bms (
+    id SERIAL PRIMARY KEY,
+    substation VARCHAR(255),
+    substation_code VARCHAR(10),
+    area VARCHAR(50),
+    voltage_per_cell NUMERIC(10, 3),
+    temperature_per_cell NUMERIC(10, 3),
+    internal_resistance_per_cell NUMERIC(10, 3),
+    current_per_string NUMERIC(10, 3),
+    voltage_per_string NUMERIC(10, 3),
+    state_of_charge NUMERIC(5, 2),      -- SoC (%)
+    state_of_health NUMERIC(5, 2),      -- SoH (%)
+    ambient_temperature NUMERIC(10, 3),
+    recorded_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+## Database Viewers
+
+Two database viewer implementations are provided:
+1. `sql/db_viewer.html` - Standalone database schema and sample viewer
+2. `db_view.html` - Data table viewer with integration from the main app
+
+## Province Regions
+
+The dashboard organizes sites by Thai geographic regions:
+- **ภาคเหนือ (North)**: สถานีไฟฟ้าเชียงราย 2, สถานีไฟฟ้าลำปาง 3, สถานีไฟฟ้าน่าน 1
+- **ภาคอีสาน (Northeast)**: สถานีไฟฟ้าอุดรธานี 3, สถานีไฟฟ้าขอนแก่น 3, สถานีไฟฟ้าโพนพิสัย, etc.
+- **ภาคกลาง (Central)**: สถานีไฟฟ้าพิษณุโลก 6, สถานีไฟฟ้าชนแดน, สถานีไฟฟ้าชัยนาท, etc.
+- **ภาคตะวันออก (East)**: Region support available
+- **ภาคตะวันตก (West)**: Region support available
+- **ภาคใต้ (South)**: สถานีไฟฟ้าถลาง 2, สถานีไฟฟ้าภูเก็ต 3, สถานีไฟฟ้ากระบี่ 1, etc.

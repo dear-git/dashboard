@@ -577,6 +577,12 @@
       sites.forEach(site => {
         const row = document.createElement('tr');
         row.className = `${getStatusClass(site.status)} group cursor-pointer border-b border-slate-800/70 last:border-none hover:bg-slate-800/40 transition-colors`;
+        row.addEventListener('click', () => {
+          // Persist selected site for the detail view
+          sessionStorage.setItem('bmsSelectedSiteId', String(site.id));
+          // Open detail page in a new tab/window
+          window.open('detail.html', '_blank');
+        });
         
         row.innerHTML = `
           <td class="py-3 pr-6 font-semibold">\${site.id}</td>
@@ -604,13 +610,8 @@
     }
 
     function goBack() {
-      window.close();
-      // If window.close() doesn't work (due to browser security), open main dashboard
-      if (window.opener) {
-        window.opener.location.href = 'index.html';
-      } else {
-        window.location.href = 'index.html';
-      }
+      // Prefer navigating back to dashboard in same tab
+      window.location.href = 'index.html';
     }
 
     // Initialize the table when the page loads

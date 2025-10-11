@@ -2135,9 +2135,11 @@
         </div>
       `;
       
-      // Add click event listener
+      // Add click event listener: open detail.html in new tab and persist selection
       pin.addEventListener('click', () => {
-        showDetail(site.id);
+        sessionStorage.setItem('bmsSelectedSiteId', String(site.id));
+        sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+        window.open(`detail.html?id=${site.id}`, '_blank');
       });
       
       return pin;
@@ -2375,10 +2377,10 @@
 
             // Navigate to detail page (use detail.html for standalone page)
             console.log('📍 Navigate to details:', site.name, '| SoC:', site.stateOfCharge + '%');
-            // Option 1: Open detail.html in same window
-            window.location.href = `detail.html?id=${siteId}`;
-            // Option 2: Use internal detail page (uncomment below and comment above)
-            // showDetail(siteId);
+            // Open in new tab and persist selection
+            sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
+            sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+            window.open(`detail.html?id=${siteId}`, '_blank');
           }, 300);
         });
         
@@ -2393,7 +2395,9 @@
           e.stopPropagation();
           console.log('Battery touched - ID:', siteId, 'Name:', site.name);
           pinGroup.style.transform = 'scale(1)';
-          window.location.href = `detail.html?id=${siteId}`;
+          sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
+          sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+          window.open(`detail.html?id=${siteId}`, '_blank');
         });
         
         // Add keyboard support
@@ -2405,7 +2409,9 @@
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             console.log('Battery keyboard activated - ID:', siteId);
-            window.location.href = `detail.html?id=${siteId}`;
+            sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
+            sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+            window.open(`detail.html?id=${siteId}`, '_blank');
           }
         });
         
@@ -2428,7 +2434,9 @@
 
               setTimeout(() => {
                 element.style.filter = 'brightness(1)';
-                window.location.href = `detail.html?id=${siteId}`;
+                sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
+                sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+                window.open(`detail.html?id=${siteId}`, '_blank');
               }, 50);
             }, 150);
           });
