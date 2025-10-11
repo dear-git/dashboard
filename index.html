@@ -202,10 +202,11 @@
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 24px; /* Adjust icon size */
-      padding: 0;
+      font-size: 28px; /* Slightly larger icon for better visibility */
+      padding: 8px; /* Increased padding for larger touch target */
+      border-radius: 50%; /* Make it circular for a button feel */
       z-index: 10;
-      transition: transform 0.2s ease, filter 0.2s ease;
+      transition: transform 0.2s ease, filter 0.2s ease, background-color 0.2s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -214,11 +215,13 @@
     }
 
     .battery-pin-fa:hover {
+      background-color: rgba(59, 130, 246, 0.2); /* Subtle background on hover */
       transform: scale(1.2);
       filter: brightness(1.3) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
     }
 
     .battery-pin-fa:active {
+      background-color: rgba(59, 130, 246, 0.3); /* More prominent background on active */
       transform: scale(0.95);
       filter: brightness(0.9);
     }
