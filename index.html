@@ -48,6 +48,72 @@
       overflow-x: hidden;
     }
     
+    /* Mobile responsiveness improvements */
+    @media (max-width: 768px) {
+      body {
+        font-size: 14px;
+      }
+      
+      .map-container {
+        aspect-ratio: 1057 / 720;
+        max-height: 500px;
+      }
+      
+      .header-bg {
+        padding: 1rem;
+      }
+      
+      .text-3xl {
+        font-size: 1.5rem; /* 24px */
+      }
+      
+      .text-2xl {
+        font-size: 1.25rem; /* 20px */
+      }
+      
+      .text-xl {
+        font-size: 1.125rem; /* 18px */
+      }
+      
+      .p-6 {
+        padding: 1rem;
+      }
+      
+      .p-4 {
+        padding: 0.75rem;
+      }
+      
+      .gap-6 {
+        gap: 1rem;
+      }
+      
+      .gap-4 {
+        gap: 0.75rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .map-container {
+        max-height: 400px;
+      }
+      
+      .text-3xl {
+        font-size: 1.25rem; /* 20px */
+      }
+      
+      .text-2xl {
+        font-size: 1.125rem; /* 18px */
+      }
+      
+      .p-6 {
+        padding: 0.75rem;
+      }
+      
+      .gap-6 {
+        gap: 0.75rem;
+      }
+    }
+    
     /* Animated grid pattern background */
     body::before {
       content: '';
@@ -97,7 +163,7 @@
         rgba(15, 23, 42, 0.1) 75%,
         rgba(15, 23, 42, 0.05) 100%);
       z-index: 1;
-      pointer-events: none;
+      pointer-events: none; /* ensure the overlay never blocks clicks */
     }
     
     .battery-pin {
@@ -107,7 +173,11 @@
       transition: all 0.3s ease;
       animation: float 2.5s ease-in-out infinite;
       filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-      z-index: 10;
+      z-index: 10; /* above overlay */
+      /* Improve touch targets for mobile */
+      min-width: 32px;
+      min-height: 48px;
+      padding: 4px;
     }
     
     .battery-pin:hover {
@@ -115,6 +185,19 @@
       animation: none;
       transform: translate(-50%, -100%) scale(1.2);
       filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+    }
+    
+    /* Mobile touch enhancement */
+    @media (hover: none) and (pointer: coarse) {
+      .battery-pin {
+        min-width: 40px;
+        min-height: 56px;
+        padding: 8px;
+      }
+      
+      .battery-pin:hover {
+        transform: translate(-50%, -100%) scale(1.1);
+      }
     }
     
     .battery-pin.alerting {
@@ -428,7 +511,7 @@
       backdrop-filter: blur(2px);
     }
 
-    /* SVG-based map styles */
+    /* Enhanced SVG-based map styles with mobile touch improvements */
     .svg-wrap {
       position: relative;
       width: 100%;
@@ -444,6 +527,19 @@
     .pin {
       cursor: pointer;
       transition: transform 0.2s ease, filter 0.2s ease;
+      /* Improve touch targets for mobile */
+      min-width: 32px;
+      min-height: 48px;
+      padding: 4px;
+    }
+    
+    /* Mobile touch enhancement */
+    @media (hover: none) and (pointer: coarse) {
+      .pin {
+        min-width: 40px;
+        min-height: 56px;
+        padding: 8px;
+      }
     }
     
     .pin:hover {
@@ -472,6 +568,7 @@
       font-weight: bold;
     }
 
+    /* Tooltip styles with mobile-friendly positioning */
     .tooltip {
       display: none;
       position: absolute;
@@ -485,6 +582,18 @@
       pointer-events: none;
       backdrop-filter: blur(4px);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+      max-width: 200px;
+      text-align: center;
+    }
+    
+    /* Mobile tooltip adjustment */
+    @media (max-width: 768px) {
+      .tooltip {
+        font-size: 11px;
+        padding: 6px 10px;
+        max-width: 180px;
+      }
     }
 
         .battery-pin-container {
@@ -532,11 +641,6 @@
       box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); /* Subtle blue glow */
     }
 
-    .button-like-icon:active {
-      transform: scale(0.95);
-      filter: brightness(0.9) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
-      box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
-    }
   </style>
   <style>
     /* Button-like affordance for interactive map pins */
@@ -2481,13 +2585,18 @@
         // SIMPLIFIED AND RELIABLE CLICK HANDLER
         pinGroup.addEventListener('click', (e) => {
           e.stopPropagation();
-          e.preventDefault();
           
           // Clear any active tooltips
           const tooltip = document.getElementById('tooltip');
           if (tooltip) tooltip.style.display = 'none';
 
           console.log('🔋 BATTERY CLICKED:', `${siteId} - ${site.name} (${site.stateOfCharge}%)`);
+
+          // Add temporary click feedback class
+          pinGroup.classList.add('pin-clicked');
+          setTimeout(() => {
+            pinGroup.classList.remove('pin-clicked');
+          }, 200); // Remove after 200ms for a quick visual feedback
 
           // Use internal routing for GitHub Pages compatibility
           console.log('📍 Navigate to details:', site.name, '| SoC:', site.stateOfCharge + '%');
@@ -2496,51 +2605,31 @@
         
         // Add touch support for mobile
         pinGroup.addEventListener('touchstart', (e) => {
-          e.preventDefault();
-          // No need for inline style transform, CSS :active will handle it
+          pinGroup.classList.add('pin-clicked'); // Add click feedback on touch start
         });
         
         pinGroup.addEventListener('touchend', (e) => {
           e.preventDefault();
           e.stopPropagation();
           console.log('Battery touched - ID:', siteId, 'Name:', site.name);
-          sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
-          sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+          pinGroup.classList.remove('pin-clicked'); // Remove click feedback on touch end
           showDetail(siteId);
         });
         
         // Add keyboard support
-        pinGroup.setAttribute('tabindex', '0');
-        pinGroup.setAttribute('role', 'button');
-        pinGroup.setAttribute('aria-label', `Battery ${siteId}: ${site.name} - Click for details`);
-        
         pinGroup.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             console.log('Battery keyboard activated - ID:', siteId);
-            sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
-            sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+            pinGroup.classList.add('pin-clicked'); // Add click feedback on keydown
+            setTimeout(() => {
+              pinGroup.classList.remove('pin-clicked');
+            }, 200);
             showDetail(siteId);
           }
         });
         
-        // SIMPLIFIED INDIVIDUAL ELEMENT CLICK HANDLERS (removed complex JS animations)
-        [batteryOutline, batteryCap, batteryFill, nameLabel].forEach(element => {
-          element.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            console.log('🔋 ELEMENT CLICKED:', siteId, '-', site.name, '| Part:', ['outline', 'cap', 'fill', 'label'][superElement ? superElement.indexOf(element) : 0]);
-            
-            const tooltip = document.getElementById('tooltip');
-            if (tooltip) tooltip.style.display = 'none';
-            
-            // No need for inline style filter/transform, CSS :active will handle it
-            sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
-            sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-            // Let event bubble to group for unified behavior, then navigate
-            showDetail(siteId);
-          });
-        });
+        // Removed redundant individual element click handlers, as pinGroup handles the click.))
         
         svgPins.appendChild(pinGroup);
       });
@@ -2707,6 +2796,16 @@
         </div>
 
         <div class="max-w-7xl mx-auto p-6 space-y-6">
+          <!-- User instruction for map interaction -->
+          <div class="glass-card rounded-xl p-4 text-center">
+            <p class="text-gray-300">
+              <svg class="w-5 h-5 inline mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span class="font-semibold">Click on any battery pin on the map below to view detailed information</span>
+              <span class="hidden sm:inline"> or browse the table below</span>
+            </p>
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <div class="glass-card rounded-xl p-5 flex flex-col gap-2">
               <div class="flex items-center justify-between text-gray-400 text-sm">
@@ -3424,6 +3523,7 @@
     
     // Delegated navigation: click or key on any element with data-site-id
     document.addEventListener('click', function(e) {
+      // Check if the target or its ancestor has data-site-id attribute
       const target = e.target.closest('[data-site-id]');
       if (target) {
         const sid = target.getAttribute('data-site-id');
@@ -3435,6 +3535,8 @@
 
     document.addEventListener('keydown', function(e) {
       if (e.key !== 'Enter' && e.key !== ' ') return;
+      
+      // Check if the target or its ancestor has data-site-id attribute
       const target = e.target.closest('[data-site-id]');
       if (target) {
         e.preventDefault();
