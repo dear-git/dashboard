@@ -1239,6 +1239,33 @@
     .gap-x-96 { column-gap: 24rem; }
     .gap-y-96 { row-gap: 24rem; }
   </style>
+  <script>
+    // GitHub Pages compatibility: redirect legacy SPA detail route to standalone page
+    (function() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const page = params.get('page');
+        const id = params.get('id');
+        if (page === 'detail' && id) {
+          // Persist selection and sites (if available later in boot)
+          // Defer until sites array exists, else redirect immediately with just the id
+          const redirect = () => {
+            try {
+              if (typeof sites !== 'undefined' && Array.isArray(sites) && sites.length) {
+                sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+              }
+            } catch (e) { /* ignore */ }
+            sessionStorage.setItem('bmsSelectedSiteId', String(id));
+            window.location.replace(`./detail.html?id=${id}`);
+          };
+          // Run after current tick to allow any inline data to load
+          setTimeout(redirect, 0);
+        }
+      } catch (e) {
+        // If anything fails, continue normal load
+      }
+    })();
+  </script>
 </head>
 <body class="text-white min-h-screen">
   <div id="app"></div>
@@ -3351,33 +3378,14 @@ VALUES
     }
 
     function showDetail(siteId) {
-      console.log('showDetail called with siteId:', siteId);
-      console.log('Type of siteId:', typeof siteId);
-      // Ensure siteId is an integer for comparison
-      const id = parseInt(siteId);
-      console.log('Parsed ID:', id, 'Type:', typeof id);
-      selectedSite = sites.find(s => {
-        const siteIdInt = parseInt(s.id);
-        console.log('Comparing with site ID:', siteIdInt, 'Match:', siteIdInt === id);
-        return siteIdInt === id;
-      });
-      console.log('selectedSite:', selectedSite);
-      if (!selectedSite) {
-        console.error('Site not found with ID:', siteId);
-        // Try to find by string comparison as fallback
-        selectedSite = sites.find(s => s.id == siteId);
-        if (!selectedSite) {
-          alert('Site not found with ID: ' + siteId);
-          return;
-        } else {
-          console.log('Found site with loose comparison:', selectedSite);
+      // Redirect to standalone detail page (GitHub Pages friendly)
+      try {
+        if (typeof sites !== 'undefined' && Array.isArray(sites) && sites.length) {
+          sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
         }
-      }
-      console.log('Navigating to detail page for:', selectedSite.name);
-      currentPage = 'detail';
-      updateUrl('detail', selectedSite.id);
-      render();
-      console.log('Detail page rendered for:', selectedSite.name);
+      } catch (e) { /* ignore */ }
+      sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
+      window.location.href = `./detail.html?id=${siteId}`;
     }
 
     function showDatabase() {

@@ -20,7 +20,9 @@
     "web",
     "html",
     "css",
-    "javascript"
+    "javascript",
+    "spa",
+    "github-pages"
   ],
   "author": "Battery Monitoring System Team",
   "license": "MIT",
@@ -33,5 +35,13 @@
     "> 1%",
     "last 2 versions",
     "not dead"
-  ]
+  ],
+  "homepage": "https://github.com/your-username/thailand-battery-monitoring-dashboard#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/thailand-battery-monitoring-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/thailand-battery-monitoring-dashboard/issues"
+  }
 }
