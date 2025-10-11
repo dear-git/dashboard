@@ -2460,7 +2460,7 @@
             console.log('Battery keyboard activated - ID:', siteId);
             sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
             sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-            window.open(`detail.html?id=${siteId}`, '_blank');
+            showDetail(siteId);
           }
         });
         
