@@ -2392,7 +2392,7 @@
           pinGroup.style.transform = 'scale(1)';
           sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
           sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-          window.location.href = `./detail.html?id=${siteId}`;
+          showDetail(siteId);
         });
         
         // Add keyboard support
@@ -2431,7 +2431,7 @@
                 element.style.filter = 'brightness(1)';
                 sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
                 sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-                window.location.href = `./detail.html?id=${siteId}`;
+                showDetail(siteId);
               }, 50);
             }, 150);
           });

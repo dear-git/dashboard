@@ -584,8 +584,10 @@
           if (!existing || !existing.length) {
             sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
           }
-          // Navigate to detail page in same tab (GitHub Pages friendly)
-          window.location.href = `./detail.html?id=${site.id}`;
+          // For GitHub Pages compatibility, open detail in new window but with proper path
+          // In a full SPA implementation, this would navigate internally
+          const detailUrl = window.location.href.replace('db_view.html', 'detail.html');
+          window.location.href = `${detailUrl}?id=${site.id}`;
         });
         
         row.innerHTML = `
