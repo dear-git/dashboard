@@ -2306,57 +2306,66 @@
     }
 
     function renderBatteryPin(site) {
-      const pinClass = site.status === 'good' ? 'pin-good' : 
-                       site.status === 'warning' ? 'pin-warning' : 'pin-critical';
-      
-      const statusIcon = site.status === 'good' ? '✓' : 
-                        site.status === 'warning' ? '!' : '⚠';
-      
+      let iconClass = 'fa-solid fa-battery-full'; // Default good status
+      let textColorClass = 'text-green-500';
+      if (site.status === 'warning') {
+        iconClass = 'fa-solid fa-battery-half';
+        textColorClass = 'text-yellow-500';
+      } else if (site.status === 'critical') {
+        iconClass = 'fa-solid fa-battery-empty';
+        textColorClass = 'text-red-500';
+      }
+
       return `
-        <div class="enhanced-battery-pin ${pinClass}">
-          <div class="battery-icon">
-            <div class="battery-body">
-              <div class="battery-fill ${pinClass}" style="height: ${site.stateOfCharge}%"></div>
-              <div class="battery-indicator">${statusIcon}</div>
-            </div>
-            <div class="battery-cap"></div>
-          </div>
-          <div class="site-name-label text-xs font-semibold mt-1">${site.name}</div>
-          <div class="site-info">
-            <div class="site-name">${site.name}</div>
-            <div class="site-status">${site.stateOfCharge}%</div>
-          </div>
-        </div>
+        <button class="icon-button battery-pin-fa ${textColorClass}" data-site-id="${site.id}" aria-label="Battery ${site.id}: ${site.name} - view details">
+          <i class="${iconClass}"></i>
+          <span class="site-name-label text-xs font-semibold mt-1">${site.name}</span>
+          <span class="site-info">
+            <span class="site-name">${site.name}</span>
+            <span class="site-status">${site.stateOfCharge}%</span>
+          </span>
+        </button>
       `;
     }
 
     // Create custom marker element (for static map)
     function createMarkerElement(site) {
-      const pinClass = site.status === 'good' ? 'pin-good' : 
-                       site.status === 'warning' ? 'pin-warning' : 'pin-critical';
-      
-      const pin = document.createElement("div");
-      pin.className = `battery-pin ${site.battery < 30 ? 'alerting' : ''}`;
-      pin.setAttribute('data-site-id', site.id);
-      pin.innerHTML = `
+      const pinContainer = document.createElement("div");
+      pinContainer.className = `battery-pin-container-fa ${site.battery < 30 ? 'alerting' : ''}`;
+      pinContainer.setAttribute('data-site-id', site.id);
+      pinContainer.style.position = 'absolute'; // Ensure absolute positioning
+      pinContainer.style.left = `${getMapPositionAdjusted(site.lat, site.lng).x}%`;
+      pinContainer.style.top = `${getMapPositionAdjusted(site.lat, site.lng).y}%`;
+      pinContainer.style.transform = 'translate(-50%, -50%)'; // Center the container
+      pinContainer.style.zIndex = '10'; // Ensure it's above the map
+
+      pinContainer.innerHTML = `
         ${renderBatteryPin(site)}
-        <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap pointer-events-none z-20">
-          <div class="glass-card rounded-lg px-3 py-2 text-center shadow-lg">
-            <div class="font-bold text-sm text-white">${site.name}</div>
-            <div class="text-xs text-gray-300 mt-1">
-              SoC: <span class="font-bold ${getStatusColor(site.status)}">${site.stateOfCharge}%</span>
-            </div>
-            <div class="text-xs text-gray-400">${site.province}</div>
-            <div class="text-xs text-blue-400 mt-1 font-semibold">Click for details →</div>
-          </div>
-        </div>
       `;
+
+      // Add click event listener to the button inside the container
+      const button = pinContainer.querySelector('.battery-pin-fa');
+      if (button) {
+        button.addEventListener('click', () => {
+          showDetail(site.id);
+        });
+      }
       
-      // Add click event listener: use internal routing (GitHub Pages friendly)
-      pin.addEventListener('click', () => {
-        showDetail(site.id);
-      });
-      
+      return pinContainer;
+    }
+
+    // Heart icon pin using inline SVG for special markers
+    function createHeartPin(lat, lng, onClick) {
+      const pos = getMapPosition(lat, lng);
+      const pin = document.createElement('div');
+      pin.className = 'battery-pin';
+      pin.style.left = `${pos.x}px`;
+      pin.style.top = `${pos.y}px`;
+      pin.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+          <path fill="#e11d48" d="M462.3 62.7c-54.5-46.4-136-38.3-186.4 13.5L256 96.6l-19.9-20.3C185.7 24.4 104.2 16.3 49.7 62.7-16.6 118.2-10.6 215.5 43 270.4l193 199.8c11.8 12.2 31.1 12.2 42.9 0l193-199.8c53.6-54.9 59.6-152.2-9.6-207.7z"/>
+        </svg>`;
+      pin.addEventListener('click', () => { if (typeof onClick === 'function') onClick(); });
       return pin;
     }
 
@@ -2394,6 +2403,14 @@
         }
       }
       return 'central'; // default
+    }
+
+    // Render a demo heart pin near Chiang Mai onto the main map container
+    function renderDemoHeartPin() {
+      const container = document.querySelector('.thailand-map');
+      if (!container) return;
+      const heart = createHeartPin(18.7883, 98.9853, () => alert('Heart pin clicked!'));
+      container.appendChild(heart);
     }
 
         function getMapPosition(lat, lng) {
@@ -2523,57 +2540,37 @@
         pinGroup.setAttribute('tabindex', '0');
         pinGroup.setAttribute('aria-label', `Battery ${siteId}: ${site.name} — view details`);
         
-        // Create battery icon
-        const batteryGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        batteryGroup.setAttribute('class', 'battery-icon');
-        batteryGroup.setAttribute('data-site-id', siteId);
+        // Create circle background for the pin
+        const pinCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        pinCircle.setAttribute('cx', '0');
+        pinCircle.setAttribute('cy', '0');
+        pinCircle.setAttribute('r', '25');
+        pinCircle.setAttribute('fill', statusColor);
+        pinCircle.setAttribute('stroke', '#fff');
+        pinCircle.setAttribute('stroke-width', '2');
+        pinCircle.setAttribute('stroke-opacity', '0.8');
         
-        // Battery outline
-        const batteryOutline = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        batteryOutline.setAttribute('x', '-15');
-        batteryOutline.setAttribute('y', '-25');
-        batteryOutline.setAttribute('width', '30');
-        batteryOutline.setAttribute('height', '40');
-        batteryOutline.setAttribute('rx', '3');
-        batteryOutline.setAttribute('ry', '3');
-        batteryOutline.setAttribute('fill', 'none');
-        batteryOutline.setAttribute('stroke', '#fff');
-        batteryOutline.setAttribute('stroke-width', '2');
+        // Create Font Awesome battery icon using SVG path (simplified representation)
+        const batteryPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        batteryPath.setAttribute('d', 'M16 4h-2V2h-4v2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z');
+        batteryPath.setAttribute('fill', '#fff');
+        batteryPath.setAttribute('transform', 'scale(0.8) translate(0, -5)');
         
-        // Battery cap (positive terminal)
-        const batteryCap = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        batteryCap.setAttribute('x', '8');
-        batteryCap.setAttribute('y', '-30');
-        batteryCap.setAttribute('width', '6');
-        batteryCap.setAttribute('height', '8');
-        batteryCap.setAttribute('rx', '1');
-        batteryCap.setAttribute('ry', '1');
-        batteryCap.setAttribute('fill', '#fff');
-        
-        // Battery fill based on state of charge
-        const fillHeight = (site.stateOfCharge / 100) * 34; // 34 is the inner height minus padding
-        const fillColor = site.status === 'good' ? '#22c55e' : 
-                         site.status === 'warning' ? '#eab308' : '#ef4444';
-        
-        const batteryFill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        batteryFill.setAttribute('x', '-12');
-        batteryFill.setAttribute('y', `${12 - fillHeight}`); // Position from bottom
-        batteryFill.setAttribute('width', '24');
-        batteryFill.setAttribute('height', fillHeight.toString());
-        batteryFill.setAttribute('fill', fillColor);
-        batteryFill.setAttribute('rx', '2');
-        batteryFill.setAttribute('ry', '2');
-        
-        // Add elements to battery group
-        batteryGroup.appendChild(batteryOutline);
-        batteryGroup.appendChild(batteryCap);
-        batteryGroup.appendChild(batteryFill);
+        // Create text for the battery percentage
+        const pinText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        pinText.setAttribute('x', '0');
+        pinText.setAttribute('y', '10');
+        pinText.setAttribute('text-anchor', 'middle');
+        pinText.setAttribute('fill', '#fff');
+        pinText.setAttribute('font-size', '10px');
+        pinText.setAttribute('font-weight', 'bold');
+        pinText.textContent = `${site.stateOfCharge}%`;
         
         // Create site label
         const nameLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         nameLabel.setAttribute('class', 'label');
         nameLabel.setAttribute('x', '0');
-        nameLabel.setAttribute('y', '25');
+        nameLabel.setAttribute('y', '35');
         nameLabel.setAttribute('text-anchor', 'middle');
         nameLabel.setAttribute('font-size', '10px');
         nameLabel.setAttribute('fill', '#fff');
@@ -2581,7 +2578,9 @@
         nameLabel.textContent = site.province; // Show abbreviated province name
         
         // Add elements to pin group
-        pinGroup.appendChild(batteryGroup);
+        pinGroup.appendChild(pinCircle);
+        pinGroup.appendChild(batteryPath);
+        pinGroup.appendChild(pinText);
         pinGroup.appendChild(nameLabel);
         
         // SIMPLIFIED AND RELIABLE CLICK HANDLER
@@ -3347,6 +3346,8 @@
         console.log('Rendering home page');
         app.innerHTML = renderHomePage();
         renderBatteryPins();
+        // Add demo heart pin as a clickable marker
+        try { renderDemoHeartPin(); } catch (e) { console.warn('Heart pin render failed:', e); }
       } else if (currentPage === 'detail') {
         console.log('Rendering detail page');
         if (!selectedSite) {
