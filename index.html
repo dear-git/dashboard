@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Battery Monitoring System - Thailand</title>
-<!-- NOTE: output.css is a generated file (e.g., by Tailwind). Do not edit directly. -->
-<link href="./output.css" rel="stylesheet">
   <style>
     @keyframes pulse {
       0%, 100% { opacity: 1; }
@@ -2663,7 +2661,7 @@ VALUES
                 </svg>
                 <span class="font-semibold">Check Alerts</span>
               </button>
-              <button onclick="sessionStorage.setItem('bmsSitesData', JSON.stringify(sites)); window.open('./db_view.html', '_blank')" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
+              <button onclick="showDatabase()" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 1.1.9 2 2 2h12a2 2 0 002-2V7M9 21h6M12 17V7"/>
                 </svg>
@@ -3318,6 +3316,11 @@ VALUES
       currentPage = 'detail';
       render();
       console.log('Detail page rendered for:', selectedSite.name);
+    }
+
+    function showDatabase() {
+      currentPage = 'database';
+      render();
     }
 
     function render() {
