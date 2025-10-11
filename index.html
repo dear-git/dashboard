@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Battery Monitoring System - Thailand</title>
     <!-- Include Font Awesome CDN for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <!-- Preload critical resources -->
+  <link rel="preload" href="./file/thailand-map.png" as="image">
   <style>
     @keyframes pulse {
       0%, 100% { opacity: 1; }
@@ -54,16 +56,12 @@
     @media (max-width: 768px) {
       body {
         font-size: 14px;
+        padding-top: env(safe-area-inset-top);
       }
       
-      .map-container {
-        aspect-ratio: 1057 / 720;
-        max-height: 500px;
-      }
+      .map-container { aspect-ratio: 1057 / 720; max-height: min(70vh, 520px); }
       
-      .header-bg {
-        padding: 1rem;
-      }
+      .header-bg { position: sticky; top: 0; padding: 0.75rem 1rem; z-index: 50; }
       
       .text-3xl {
         font-size: 1.5rem; /* 24px */
@@ -92,6 +90,26 @@
       .gap-4 {
         gap: 0.75rem;
       }
+      
+      /* Mobile battery pin improvements */
+      .pin {
+        min-width: 44px !important;  /* Larger touch target for mobile */
+        min-height: 44px !important;  /* Larger touch target for mobile */
+        cursor: pointer;
+      }
+      
+      .pin circle, .pin path, .pin text {
+        pointer-events: none;  /* Allow clicks to bubble up to the group */
+      }
+      
+      /* Adjust pin size for mobile */
+      svg .pin circle {
+        r: 28 !important;
+      }
+      
+      .pin-touch-area {
+        r: 35 !important;  /* Even larger touch area on mobile */
+      }
     }
     
     @media (max-width: 480px) {
@@ -113,6 +131,33 @@
       
       .gap-6 {
         gap: 0.75rem;
+      }
+      
+      /* Extra mobile optimizations */
+      .pin {
+        min-width: 50px !important;
+        min-height: 50px !important;
+      }
+      
+      svg .pin circle {
+        r: 30 !important;
+      }
+      
+      .pin-touch-area {
+        r: 40 !important;
+      }
+    }
+    
+    /* Mobile-specific UI enhancements */
+    @media (hover: none) and (pointer: coarse) {
+      /* These styles apply to touch devices */
+      .pin {
+        touch-action: manipulation;  /* Optimize for touch */
+      }
+      
+      .pin:hover {
+        transform: scale(1.15);  /* Keep hover effect as a touch feedback */
+        filter: brightness(1.2) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
       }
     }
     
@@ -146,102 +191,67 @@
       z-index: -1;
     }
     
-    /* Map container */
-    #map, #detailMap {
+    /* New HTML-based pin styles */
+    .battery-pin-container-fa {
       position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
+      /* Positioning handled by JS for now */
+      z-index: 10;
     }
-    
-    .map-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, 
-        rgba(15, 23, 42, 0.05) 0%, 
-        rgba(15, 23, 42, 0.1) 25%, 
-        rgba(15, 23, 42, 0.15) 50%,
-        rgba(15, 23, 42, 0.1) 75%,
-        rgba(15, 23, 42, 0.05) 100%);
-      z-index: 1;
-      pointer-events: none; /* ensure the overlay never blocks clicks */
-    }
-    
-    .battery-pin {
-      position: absolute;
-      transform: translate(-50%, -100%);
+
+    .battery-pin-fa {
+      background: none;
+      border: none;
       cursor: pointer;
+      font-size: 24px; /* Adjust icon size */
+      padding: 0;
+      z-index: 10;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: inherit; /* Inherit color from text-green-500 etc. */
+    }
+
+    .battery-pin-fa:hover {
+      transform: scale(1.2);
+      filter: brightness(1.3) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .battery-pin-fa:active {
+      transform: scale(0.95);
+      filter: brightness(0.9);
+    }
+
+    .battery-pin-fa .site-name-label {
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .battery-pin-fa .site-info {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
       transition: all 0.3s ease;
-      animation: float 2.5s ease-in-out infinite;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-      z-index: 10; /* above overlay */
-      /* Improve touch targets for mobile */
-      min-width: 32px;
-      min-height: 48px;
-      padding: 4px;
-    }
-    
-    .battery-pin:hover {
-      z-index: 100 !important;
-      animation: none;
-      transform: translate(-50%, -100%) scale(1.2);
-      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+      z-index: 20;
+      min-width: 80px;
+      text-align: center;
+      color: white;
     }
 
-    /* Heart pin subtle interactions */
-    .heart-pin svg { transition: transform 0.2s ease, filter 0.2s ease; }
-    .heart-pin:hover svg { transform: scale(1.1); filter: drop-shadow(0 2px 6px rgba(225, 29, 72, 0.6)); }
-    .heart-pin:active svg { transform: scale(0.98); }
-    
-    /* Mobile touch enhancement */
-    @media (hover: none) and (pointer: coarse) {
-      .battery-pin {
-        min-width: 40px;
-        min-height: 56px;
-        padding: 8px;
-      }
-      
-      .battery-pin:hover {
-        transform: translate(-50%, -100%) scale(1.1);
-      }
-    }
-    
-    .battery-pin.alerting {
-      animation: float 2.5s ease-in-out infinite, alertBlink 1s ease-in-out infinite;
-    }
-
-    .pin-circle {
-      width: 24px;
-      height: 24px;
-      border: 3px solid white;
-      border-radius: 50%;
-      display: block;
-      position: relative;
-      z-index: 2;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-    
-    .pin-stem {
-      width: 3px;
-      height: 12px;
-      display: block;
-      margin: 0 auto;
-      transform: translateY(-2px);
-      border-radius: 1.5px;
-    }
-    
-    .pin-good { 
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
-    }
-    .pin-warning { 
-      background: linear-gradient(135deg, #eab308, #ca8a04);
-      box-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
-    }
-    .pin-critical { 
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+    .battery-pin-fa:hover .site-info {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-2px);
     }
     
     /* Glass morphism effect for cards */
@@ -2525,190 +2535,32 @@
     }
 
     function renderBatteryPins() {
+      const mapContainer = document.getElementById('mapContainer'); // Get the div that contains the SVG
+      if (!mapContainer) return;
+
+      // Clear existing SVG pins
       const svgPins = document.getElementById('batteryPins');
-      if (!svgPins) return;
+      if (svgPins) svgPins.innerHTML = '';
+      
+      // Remove any previously rendered HTML pins (if any from previous attempts)
+      mapContainer.querySelectorAll('.battery-pin-container-fa').forEach(el => el.remove());
 
       const filteredSites = getFilteredSites();
       const displaySites = filteredSites.length ? filteredSites : sites;
       
-      svgPins.innerHTML = '';
       console.log('Rendering battery pins for sites:', displaySites);
       displaySites.forEach(site => {
-        // Ensure site.id is an integer
-        const siteId = parseInt(site.id);
+        const pinElement = createMarkerElement(site); // createMarkerElement now returns an HTML div with a button
         
-        const position = getMapPosition(site.lat, site.lng);
-        const statusColor = site.status === 'good' ? '#22c55e' : 
-                           site.status === 'warning' ? '#eab308' : '#ef4444';
-        
-        console.log('Creating pin for site:', siteId, site.name, 'at position:', position);
-        
-        // Validate position values
-        if (isNaN(position.x) || isNaN(position.y)) {
-          console.error('Invalid position for site:', siteId, site.name, position);
-          return;
-        }
-        
-        const pinGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        pinGroup.setAttribute('class', 'pin button-like-icon'); // Added button-like-icon class
-        pinGroup.setAttribute('data-title', `${site.name} - SoC: ${site.stateOfCharge}% - Status: ${site.status}`);
-        pinGroup.setAttribute('data-site-id', siteId);
-        pinGroup.setAttribute('transform', `translate(${position.x}, ${position.y})`);
-        pinGroup.setAttribute('role', 'button');
-        pinGroup.setAttribute('tabindex', '0');
-        pinGroup.setAttribute('aria-label', `Battery ${siteId}: ${site.name} — view details`);
-        
-        // Create circle background for the pin
-        const pinCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        pinCircle.setAttribute('cx', '0');
-        pinCircle.setAttribute('cy', '0');
-        pinCircle.setAttribute('r', '25');
-        pinCircle.setAttribute('fill', statusColor);
-        pinCircle.setAttribute('stroke', '#fff');
-        pinCircle.setAttribute('stroke-width', '2');
-        pinCircle.setAttribute('stroke-opacity', '0.8');
-        
-        // Create Font Awesome battery icon using SVG path (simplified representation)
-        const batteryPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        batteryPath.setAttribute('d', 'M16 4h-2V2h-4v2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z');
-        batteryPath.setAttribute('fill', '#fff');
-        batteryPath.setAttribute('transform', 'scale(0.8) translate(0, -5)');
-        
-        // Create text for the battery percentage
-        const pinText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        pinText.setAttribute('x', '0');
-        pinText.setAttribute('y', '10');
-        pinText.setAttribute('text-anchor', 'middle');
-        pinText.setAttribute('fill', '#fff');
-        pinText.setAttribute('font-size', '10px');
-        pinText.setAttribute('font-weight', 'bold');
-        pinText.textContent = `${site.stateOfCharge}%`;
-        
-        // Create site label
-        const nameLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        nameLabel.setAttribute('class', 'label');
-        nameLabel.setAttribute('x', '0');
-        nameLabel.setAttribute('y', '35');
-        nameLabel.setAttribute('text-anchor', 'middle');
-        nameLabel.setAttribute('font-size', '10px');
-        nameLabel.setAttribute('fill', '#fff');
-        nameLabel.setAttribute('font-weight', 'bold');
-        nameLabel.textContent = site.province; // Show abbreviated province name
-        
-        // Add elements to pin group
-        pinGroup.appendChild(pinCircle);
-        pinGroup.appendChild(batteryPath);
-        pinGroup.appendChild(pinText);
-        pinGroup.appendChild(nameLabel);
-        
-        // ENHANCED AND RELIABLE CLICK HANDLER
-        pinGroup.addEventListener('click', (e) => {
-          e.stopPropagation();
-          
-          // Clear any active tooltips
-          const tooltip = document.getElementById('tooltip');
-          if (tooltip) tooltip.style.display = 'none';
-
-          console.log('🔋 BATTERY CLICKED:', `${siteId} - ${site.name} (${site.stateOfCharge}%)`);
-
-          // Add temporary click feedback class
-          pinGroup.classList.add('pin-clicked');
-          setTimeout(() => {
-            pinGroup.classList.remove('pin-clicked');
-          }, 200); // Remove after 200ms for a quick visual feedback
-
-          // Use internal routing for GitHub Pages compatibility
-          console.log('📍 Navigate to details:', site.name, '| SoC:', site.stateOfCharge + '%');
-          showDetail(siteId);
-        });
-        
-        // Add touch support for mobile
-        pinGroup.addEventListener('touchstart', (e) => {
-          e.preventDefault(); // Prevent default touch behavior
-          pinGroup.classList.add('pin-clicked'); // Add click feedback on touch start
-        });
-        
-        pinGroup.addEventListener('touchend', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('Battery touched - ID:', siteId, 'Name:', site.name);
-          pinGroup.classList.remove('pin-clicked'); // Remove click feedback on touch end
-          
-          // Add a small delay to allow visual feedback before navigating
-          setTimeout(() => {
-            showDetail(siteId);
-          }, 50);
-        });
-        
-        // Add keyboard support
-        pinGroup.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            console.log('Battery keyboard activated - ID:', siteId);
-            pinGroup.classList.add('pin-clicked'); // Add click feedback on keydown
-            setTimeout(() => {
-              pinGroup.classList.remove('pin-clicked');
-              showDetail(siteId);
-            }, 200);
-          }
-        });
-        
-        // Ensure the entire pin group is clickable with a larger touch area
-        const pinBackground = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        pinBackground.setAttribute('cx', '0');
-        pinBackground.setAttribute('cy', '0');
-        pinBackground.setAttribute('r', '30'); // Larger touch area
-        pinBackground.setAttribute('fill', 'transparent'); // Make it invisible
-        pinBackground.setAttribute('class', 'pin-touch-area'); // For identification if needed
-        
-        // Insert as the first child so it's behind other elements
-        pinGroup.insertBefore(pinBackground, pinGroup.firstChild);
-        
-        // Removed redundant individual element click handlers, as pinGroup handles the click.))
-        
-        svgPins.appendChild(pinGroup);
+        // Append the HTML pin element to the mapContainer
+        mapContainer.appendChild(pinElement);
       });
 
       // Initialize SVG tooltips
       initializeSvgTooltips();
     }
 
-    function initializeSvgTooltips() {
-      const svg = document.getElementById('mapSvg');
-      const tooltip = document.getElementById('tooltip');
 
-      svg.addEventListener('mousemove', (e) => {
-        const target = e.target.closest('.pin');
-        if (target) {
-          tooltip.textContent = target.getAttribute('data-title') || '';
-          tooltip.style.display = 'block';
-          tooltip.style.left = e.pageX + 'px';
-          tooltip.style.top = e.pageY + 'px';
-        } else {
-          tooltip.style.display = 'none';
-        }
-      });
-
-      svg.addEventListener('mouseleave', () => {
-        tooltip.style.display = 'none';
-      });
-      
-      // Hide tooltip when clicking on a pin to avoid interference
-      svg.addEventListener('click', (e) => {
-        const target = e.target.closest('.pin');
-        if (target) {
-          tooltip.style.display = 'none';
-        }
-      });
-      
-      // Hide tooltip when clicking on a pin to avoid interference
-      svg.addEventListener('click', (e) => {
-        const target = e.target.closest('.pin');
-        if (target) {
-          tooltip.style.display = 'none';
-        }
-      });
-    }
 
     function parseSqlData(sql) {
       const lines = sql.split('\n');
