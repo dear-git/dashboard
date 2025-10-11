@@ -2351,30 +2351,30 @@
           // Clear any active tooltips
           const tooltip = document.getElementById('tooltip');
           if (tooltip) tooltip.style.display = 'none';
-          
-          console.log('🔋 BATTERY CLICKED:', `${siteId} - ${site.name} (${selectedSite.stateOfCharge}%)`);
-          
+
+          console.log('🔋 BATTERY CLICKED:', `${siteId} - ${site.name} (${site.stateOfCharge}%)`);
+
           // Enhanced multi-stage visual feedback
           pinGroup.style.filter = 'brightness(1.8) drop-shadow(0 0 15px rgba(255, 255, 255, 0.9))';
           pinGroup.style.transform = 'scale(1.3) rotate(3deg)';
-          
+
           setTimeout(() => {
             pinGroup.style.transform = 'scale(1.1) rotate(0deg)';
             pinGroup.style.filter = 'brightness(1.5) drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))';
           }, 120);
-          
+
           setTimeout(() => {
             pinGroup.style.transform = 'scale(0.95)';
             pinGroup.style.filter = 'brightness(1.3)';
           }, 240);
-          
+
           setTimeout(() => {
             pinGroup.style.transform = 'scale(1)';
             pinGroup.style.filter = 'brightness(1)';
             pinGroup.style.boxShadow = '';
-            
+
             // Navigate to detail page
-            console.log('📍 Navigate to details:', site.name, '| SoC:', selectedSite.stateOfCharge + '%');
+            console.log('📍 Navigate to details:', site.name, '| SoC:', site.stateOfCharge + '%');
             showDetail(siteId);
           }, 300);
         });
