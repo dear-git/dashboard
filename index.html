@@ -2135,11 +2135,11 @@
         </div>
       `;
       
-      // Add click event listener: open detail.html in new tab and persist selection
+      // Add click event listener: navigate to detail.html (GitHub Pages friendly)
       pin.addEventListener('click', () => {
         sessionStorage.setItem('bmsSelectedSiteId', String(site.id));
         sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-        window.open(`detail.html?id=${site.id}`, '_blank');
+        window.location.href = `./detail.html?id=${site.id}`;
       });
       
       return pin;
@@ -2377,10 +2377,10 @@
 
             // Navigate to detail page (use detail.html for standalone page)
             console.log('📍 Navigate to details:', site.name, '| SoC:', site.stateOfCharge + '%');
-            // Open in new tab and persist selection
+            // Persist selection and navigate in same tab (GitHub Pages friendly)
             sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
             sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-            window.open(`detail.html?id=${siteId}`, '_blank');
+            window.location.href = `./detail.html?id=${siteId}`;
           }, 300);
         });
         
@@ -2397,7 +2397,7 @@
           pinGroup.style.transform = 'scale(1)';
           sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
           sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-          window.open(`detail.html?id=${siteId}`, '_blank');
+          window.location.href = `./detail.html?id=${siteId}`;
         });
         
         // Add keyboard support
@@ -2436,7 +2436,7 @@
                 element.style.filter = 'brightness(1)';
                 sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
                 sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-                window.open(`detail.html?id=${siteId}`, '_blank');
+                window.location.href = `./detail.html?id=${siteId}`;
               }, 50);
             }, 150);
           });

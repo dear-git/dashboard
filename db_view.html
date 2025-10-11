@@ -580,8 +580,12 @@
         row.addEventListener('click', () => {
           // Persist selected site for the detail view
           sessionStorage.setItem('bmsSelectedSiteId', String(site.id));
-          // Open detail page in a new tab/window
-          window.open('detail.html', '_blank');
+          const existing = JSON.parse(sessionStorage.getItem('bmsSitesData') || '[]');
+          if (!existing || !existing.length) {
+            sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+          }
+          // Navigate to detail page in same tab (GitHub Pages friendly)
+          window.location.href = `./detail.html?id=${site.id}`;
         });
         
         row.innerHTML = `
