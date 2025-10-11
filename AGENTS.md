@@ -1,31 +1,35 @@
 # Repository Guidelines
 
+This document guides contributors working on the single‑page dashboard in this repository.
+
 ## Project Structure & Module Organization
-- Single-page dashboard: all markup, Tailwind utility styling, and vanilla JS live in `index.html`. Images/assets in `file/`.
-- Keep new data fixtures and UI helpers near existing ones inside the `<script>` block in `index.html` with brief inline comments.
-- Store large media or downloadable exports alongside images in `file/` and reference via relative paths.
+- Single page app: all markup, Tailwind utility styling, and vanilla JS live in `index.html`.
+- Assets (images, media, exports) live in `file/` and are referenced via relative paths (e.g., `file/logo.png`).
+- Add small data fixtures and UI helpers inside the `<script>` block of `index.html` with brief inline comments. Keep related helpers grouped and site metadata alphabetized by `id`.
 
 ## Build, Test, and Development Commands
-- Local preview (no install): open `index.html` directly in a browser.
-- Serve with headers mirroring prod: `python3 -m http.server 8000` then visit `http://localhost:8000`.
-- CDN dependencies: ensure network is active; when offline, use dev-tools overrides or local stubs before committing.
+- Local preview: open `index.html` directly in a browser.
+- Serve with prod‑like headers: `python3 -m http.server 8000` then visit `http://localhost:8000`.
+- CDN deps require network. When offline, use dev‑tools overrides or temporary local stubs; do not commit real keys.
 
 ## Coding Style & Naming Conventions
 - Indentation: 2 spaces for HTML, CSS, and JS.
-- Prefer Tailwind utilities over custom CSS; only add bespoke CSS for widely reused patterns.
+- Prefer Tailwind utilities over custom CSS; add bespoke CSS only for widely reused patterns.
 - Naming: constants `UPPER_SNAKE_CASE`, runtime objects `camelCase`, status strings lowercase (`good`, `warning`, `critical`).
-- Centralize battery math in `BATTERY_SPEC` (125 VDC, 350 Ah, 60 cells); derive voltage/current/power from it—avoid magic numbers.
-- Alphabetize site metadata by `id` to simplify diffs; group related helpers together.
+- Centralize battery math in `BATTERY_SPEC` (125 VDC, 350 Ah, 60 cells). Derive voltage/current/power from it—avoid magic numbers.
 
 ## Testing Guidelines
-- No automated tests yet; do targeted manual passes.
-- Before PRs: load the dashboard, clear console, interact with at least three site pins (one per status), verify alert toasts animate, and export a CSV to confirm data integrity.
-- When tweaking CDN deps, re-run the local server in an incognito window to avoid cache surprises.
+- No automated tests yet. Do targeted manual passes:
+  - Load the dashboard, clear console errors.
+  - Interact with at least three site pins (one per status).
+  - Verify alert toasts animate.
+  - Export a CSV and spot‑check data integrity.
+- For CDN changes, re‑run the local server in an incognito window to avoid cache.
 
 ## Commit & Pull Request Guidelines
-- Commit messages: short, imperative (e.g., "Refine alert animations", "Add Chiang Mai asset data"). Squash incidental assets if they directly support the change.
-- PRs: describe problem, solution, expected impact on battery metrics; include screenshots/screen recordings for UI changes; link tracker issues; note any manual checks skipped.
+- Commits: short, imperative (e.g., "Refine alert animations", "Add Chiang Mai asset data"). Squash incidental assets that directly support the change.
+- PRs: describe problem and solution, expected impact on battery metrics, screenshots/screen recordings for UI changes, linked issues, and note any manual checks skipped.
 
 ## Security & Configuration Tips
-- Do not commit production Google Maps keys. The checked-in key is a placeholder—rotate if exposed.
+- Do not commit production Google Maps keys. The checked‑in key is a placeholder—rotate if exposed.
 - Scrub sensitive site identifiers in exports/screenshots; keep anonymized Thai province naming consistent in `sites`.

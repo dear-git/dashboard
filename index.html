@@ -1762,6 +1762,35 @@
 
     sites = sites.map(normalizeSiteMetrics);
 
+    // Build deterministic, plausible mock detail data for a site
+    function buildDetailMock(site) {
+      const seed = parseInt(site.id) || 1;
+      const rand = (n) => {
+        // simple LCG for deterministic pseudo-randoms per site
+        let x = (seed * 9301 + 49297) % 233280;
+        return (x / 233280) * n;
+      };
+      const soc = site.stateOfCharge;
+      const base = Math.max(10, Math.min(95, soc));
+      const series = Array.from({ length: 24 }, (_, i) => {
+        const drift = Math.sin((i / 24) * Math.PI * 2) * 3;
+        const noise = (rand(6) - 3);
+        return Math.max(5, Math.min(100, Math.round(base + drift + noise)));
+      });
+      const maxCell = parseFloat((BATTERY_SPEC.voltagePerCell + rand(0.05)).toFixed(2));
+      const minCell = parseFloat((BATTERY_SPEC.voltagePerCell - rand(0.05)).toFixed(2));
+      const imbalance = Math.max(0.2, parseFloat(((maxCell - minCell) / BATTERY_SPEC.voltagePerCell * 100).toFixed(2)));
+      const powerKw = parseFloat(((site.voltagePerString || site.voltage) * (site.currentPerString || site.current) / 1000).toFixed(2));
+      const usableKWh = (BATTERY_SPEC.voltageString * BATTERY_SPEC.capacityAh) / 1000 * (soc / 100);
+      const runtimeHrs = powerKw > 0 ? parseFloat((usableKWh / powerKw).toFixed(1)) : null;
+      const alerts = [
+        { ts: 'Today 10:24', level: 'warning', text: 'Temperature drift above baseline' },
+        { ts: 'Yesterday 18:02', level: 'good', text: 'Equalization completed successfully' },
+        { ts: '2 days ago 07:45', level: 'critical', text: 'String 1 imbalance transient' }
+      ];
+      return { series, maxCell, minCell, imbalance, powerKw, runtimeHrs, alerts };
+    }
+
     function getBatterySpecLabel() {
       return `Li-ion ${BATTERY_SPEC.voltageString}VDC (${BATTERY_SPEC.cells} Cells)`;
     }
@@ -2852,7 +2881,7 @@
 
     function renderDetailPage() {
       if (!selectedSite) return '';
-      
+      const mock = buildDetailMock(selectedSite);
       const circumference = 2 * Math.PI * 112;
       const offset = circumference * (1 - selectedSite.stateOfCharge / 100);
 
@@ -3094,22 +3123,26 @@
                 </div>
               </div>
 
-              <!-- Performance Metrics -->
+              <!-- Performance Metrics + Mock Detail Data -->
               <div class="glass-card rounded-xl p-6">
                 <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                   <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                   </svg>
-                  Performance Metrics
+                  Performance & Telemetry
                 </h3>
                 <div class="space-y-3">
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Power Output</span>
-                    <div class="font-semibold">${((selectedSite.voltagePerString || selectedSite.voltage) * (selectedSite.currentPerString || selectedSite.current) / 1000).toFixed(2)} kW</div>
+                    <div class="font-semibold">${mock.powerKw} kW</div>
                   </div>
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Efficiency</span>
                     <div class="font-semibold">${((selectedSite.stateOfCharge / 100) * ((selectedSite.stateOfHealth || 95) / 100) * 100).toFixed(1)}%</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Est. Runtime</span>
+                    <div class="font-semibold">${mock.runtimeHrs ? mock.runtimeHrs + ' hrs' : '—'}</div>
                   </div>
                   <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Ambient Temperature</span>
@@ -3120,6 +3153,14 @@
                     <div class="font-semibold">${selectedSite.temp || selectedSite.ambientTemp}°C</div>
                   </div>
                   <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">Max/Min Cell</span>
+                    <div class="font-semibold">${mock.maxCell} V / ${mock.minCell} V</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
+                    <span class="text-gray-400">String Imbalance</span>
+                    <div class="font-semibold ${mock.imbalance < 1.5 ? 'text-green-400' : mock.imbalance < 3 ? 'text-yellow-400' : 'text-red-400'}">${mock.imbalance}%</div>
+                  </div>
+                  <div class="flex justify-between py-2 border-b border-slate-700">
                     <span class="text-gray-400">Charge Status</span>
                     <div class="font-semibold">${selectedSite.stateOfCharge >= 80 ? 'Charged' : selectedSite.stateOfCharge >= 30 ? 'Normal' : 'Low Charge'}</div>
                   </div>
@@ -3127,6 +3168,26 @@
                     <span class="text-gray-400">Health Status</span>
                     <div class="font-semibold ${(selectedSite.stateOfHealth || 95) >= 90 ? 'text-green-400' : 'text-yellow-400'}">${(selectedSite.stateOfHealth || 95) >= 90 ? 'Excellent' : 'Good'}</div>
                   </div>
+                </div>
+                <div class="mt-6">
+                  <h4 class="text-sm uppercase tracking-wide text-gray-400 mb-2">24h SoC Trend</h4>
+                  <div class="h-16 w-full relative">
+                    <svg viewBox="0 0 100 40" preserveAspectRatio="none" class="w-full h-full">
+                      <polyline fill="none" stroke="#60a5fa" stroke-width="2" points="${mock.series.map((v, i) => `${(i/23)*100},${40 - (v/100)*40}`).join(' ')}" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="mt-6">
+                  <h4 class="text-sm uppercase tracking-wide text-gray-400 mb-2">Recent Alerts</h4>
+                  <ul class="space-y-2">
+                    ${mock.alerts.map(a => `
+                      <li class="flex items-center justify-between px-3 py-2 rounded bg-slate-800/60">
+                        <span class="text-sm ${a.level === 'critical' ? 'text-red-400' : a.level === 'warning' ? 'text-yellow-400' : 'text-green-400'} capitalize">${a.level}</span>
+                        <span class="text-sm text-gray-300 flex-1 px-3">${a.text}</span>
+                        <span class="text-xs text-gray-400">${a.ts}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
                 </div>
               </div>
                 </div>
@@ -3321,15 +3382,30 @@
     }
 
     function showDetail(siteId) {
-      // Redirect to standalone detail page (GitHub Pages friendly)
-      try {
-        if (typeof sites !== 'undefined' && Array.isArray(sites) && sites.length) {
-          sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-        }
-      } catch (e) { /* ignore */ }
-      sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
-      // Use SPA routing
-      showDetail(siteId);
+      // Guard against recursive re-entry
+      if (currentPage === 'detail' && selectedSite && String(selectedSite.id) === String(siteId)) {
+        return;
+      }
+      const id = parseInt(siteId);
+      if (Number.isNaN(id)) {
+        console.error('Invalid siteId passed to showDetail:', siteId);
+        return;
+      }
+      const found = sites.find(s => parseInt(s.id) === id);
+      if (!found) {
+        console.error('Site not found with ID:', siteId);
+        return;
+      }
+      selectedSite = found;
+      currentPage = 'detail';
+      // Only update URL if it actually changes to avoid popstate loops
+      const params = new URLSearchParams(window.location.search);
+      const curPage = params.get('page');
+      const curId = params.get('id');
+      if (!(curPage === 'detail' && String(curId) === String(found.id))) {
+        updateUrl('detail', found.id);
+      }
+      render();
     }
 
     function showDatabase() {

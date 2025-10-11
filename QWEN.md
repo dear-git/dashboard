@@ -28,19 +28,19 @@ The application is built as a modern single-page application using HTML, CSS, an
 ## File Structure
 
 ```
-├── index.html                    # Main SPA with all pages (home, detail, database)
-├── detail.html                   # Original detail page (now virtual page in SPA)
-├── db_view.html                  # Database view (now virtual page in SPA)
+├── index.html                    # Single file application with all pages (home, detail, database)
 ├── package.json                  # Node.js dependencies and scripts
 ├── README.md                     # Main project documentation
 ├── QWEN.md                       # This documentation file
 ├── DEPLOYMENT.md                 # Deployment guide
 ├── sql/
 │   ├── bms.sql                   # Database schema
-│   └── db_viewer.html            # SQL-based viewer
+│   └── db_viewer.html            # SQL-based viewer (reference implementation)
 ├── file/
 │   ├── thailand-map.png          # Map background
 │   └── thai.jpg                  # Additional assets
+├── CNAME                         # Custom domain configuration
+├── LICENSE                       # Project license
 └── .gitignore                    # Git ignore file
 ```
 
