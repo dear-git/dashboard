@@ -2135,11 +2135,9 @@
         </div>
       `;
       
-      // Add click event listener: navigate to detail.html (GitHub Pages friendly)
+      // Add click event listener: use internal routing (GitHub Pages friendly)
       pin.addEventListener('click', () => {
-        sessionStorage.setItem('bmsSelectedSiteId', String(site.id));
-        sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-        window.location.href = `./detail.html?id=${site.id}`;
+        showDetail(site.id);
       });
       
       return pin;
