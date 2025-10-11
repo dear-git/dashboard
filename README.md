@@ -1,210 +1,181 @@
-# Battery Monitoring System - Thailand
+# Thailand Battery Monitoring Dashboard
 
-A comprehensive monitoring dashboard for battery assets across Thailand, featuring real-time status tracking, interactive mapping, and alert management.
+A comprehensive single-page battery monitoring system for 24 electrical substations across Thailand, optimized for GitHub Pages deployment. The application features real-time monitoring, interactive Thailand map, and comprehensive battery metrics for substations nationwide.
 
-## 🚀 Features
+## ✨ Features
 
-- **Real-time Battery Monitoring**: Track 24 battery sites across Thailand with detailed metrics
-- **Interactive Thailand Map**: CSS-based interactive map with province regions and filtering
-- **Status Management**: Visual indicators for Good (≥80%), Warning (60-79%), and Critical (<60%) battery states
-- **Alert System**: Automated failure detection and notifications with cooldown management
-- **Data Export**: CSV export functionality for analysis and reporting
-- **Responsive Design**: Mobile-friendly interface using Tailwind CSS
-
-## 🔋 Battery Specifications
-
-- **System Voltage**: 125V DC
-- **Battery Capacity**: 350Ah
-- **Cell Configuration**: 60 cells per string
-- **Voltage per Cell**: ~2.08V (125V ÷ 60 cells)
-- **Spec Source**: Derived in code from the `BATTERY_SPEC` constant (125 VDC, 350 Ah, 60 cells)
-- **Monitored Parameters**:
-  - State of Charge (SoC)
-  - State of Health (SoH)
-  - Voltage per Cell
-  - Internal Resistance
-  - Current per String
-  - Ambient Temperature
-
-## 🏭 Substations List
-
-The dashboard monitors 24 electrical substations across Thailand:
-
-### สถานีไฟฟ้า (Electrical Substations)
-
-- **เชียงราย 2** - Chiang Rai Substation 2
-- **ลำปาง 3** - Lampang Substation 3  
-- **พิษณุโลก 6** - Phitsanulok Substation 6
-- **น่าน 1** - Nan Substation 1
-- **ท่าวุ้ง** - Tha Wung Substation
-- **ชนแดน** - Chon Daen Substation
-- **ชัยนาท** - Chai Nat Substation
-- **อุดรธานี 3** - Udon Thani Substation 3
-- **ขอนแก่น 3** - Khon Kaen Substation 3
-- **โพนพิสัย** - Phon Phisai Substation
-- **บรบือ** - Bue Rue Substation
-- **วาปีปทุม** - Wapi Pathum Substation
-- **เขื่องใน** - Khueang Nai Substation
-- **โรจนะ 3** - Rotjana Substation 3
-- **โรจนะ 4** - Rotjana Substation 4
-- **บางพระครู** - Bang Phra Khru Substation
-- **สมุทรสาคร 7** - Samut Sakhon Substation 7
-- **สามพราน 4** - Sam Phran Substation 4
-- **ถลาง 2** - Thalang Substation 2
-- **ภูเก็ต 3** - Phuket Substation 3
-- **กระบี่ 1** - Krabi Substation 1
-- **หาดใหญ่ 2** - Hat Yai Substation 2
-
-## 🗺️ Map Regions
-
-The dashboard organizes sites by Thai geographic regions:
-
-- **ภาคเหนือ (North)**: สถานีไฟฟ้าเชียงราย 2, สถานีไฟฟ้าลำปาง 3, สถานีไฟฟ้าน่าน 1
-- **ภาคอีสาน (Northeast)**: สถานีไฟฟ้าอุดรธานี 3, สถานีไฟฟ้าขอนแก่น 3, สถานีไฟฟ้าโพนพิสัย, สถานีไฟฟ้าบรบือ, สถานีไฟฟ้าเขื่องใน, สถานีไฟฟ้าโรจนะ 3, สถานีไฟฟ้าโรจนะ 4, สถานีไฟฟ้าวาปีปทุม, สถานีไฟฟ้าบรบือ
-- **ภาคกลาง (Central)**: สถานีไฟฟ้าพิษณุโลก 6, สถานีไฟฟ้าชนแดน, สถานีไฟฟ้าชัยนาท, สถานีไฟฟ้าท่าวุ้ง, สถานีไฟฟ้าบางพระครู, สถานีไฟฟ้าสมุทรสาคร 7, สถานีไฟฟ้าสามพราน 4
-- **ภาคตะวันออก (East)**: Region support available
-- **ภาคตะวันตก (West)**: Region support available  
-- **ภาคใต้ (South)**: สถานีไฟฟ้าถลาง 2, สถานีไฟฟ้าภูเก็ต 3, สถานีไฟฟ้ากระบี่ 1, สถานีไฟฟ้าหาดใหญ่ 2, สถานีไฟฟ้าฉลุง, สถานีไฟฟ้าปัตตานี
-
-## 🛠️ Technical Implementation
-
-### Architecture
-- **Single Page Application**: All HTML, CSS, and JavaScript in `index.html`
-- **Styling**: Tailwind CSS with custom animations and glass morphism effects
-- **Mapping**: Pure CSS-based Thailand map (no external map dependencies)
-- **State Management**: Vanilla JavaScript with reactive rendering
-- **Data Structure**: Array of site objects with comprehensive battery metrics
-
-### Key Components
-- **Battery Pins**: Interactive map markers with hover tooltips and click interactions
-- **Province Filters**: Clickable region labels for filtered site views
-- **Alert System**: Notification system with customizable cooldown periods
-- **Export Module**: CSV generation with timestamp and complete metrics
-- **Asset Management**: Modal forms for adding new battery sites
-
-### Monitoring Logic
-```javascript
-// Alert thresholds
-- Critical: SoC < 30%
-- Warning: SoC < 50%, Temp > 40°C, SoH < 70%, Resistance > 500µΩ
-- Good: SoC ≥ 80%
-```
+- **Interactive Thailand Map**: Visualize battery sites across all regions of Thailand
+- **Real-time Monitoring**: Track SoC, SoH, voltage, current, temperature, and resistance
+- **Multi-page SPA**: Single-page application with virtual routing for all pages
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Modern UI**: Glass morphism design with animated elements
+- **Alert System**: Automatic failure detection and warnings
+- **Data Export**: Export all metrics to CSV format
+- **Asset Management**: Add new battery sites dynamically
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Modern web browser with JavaScript enabled
-- Local HTTP server (recommended for full functionality)
 
-### Installation
+- Node.js (optional, for local development tools)
+- Modern web browser
+
+### Local Development
+
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd dashboard
+cd thailand-battery-monitoring-dashboard
 
-# Serve locally (recommended)
-python3 -m http.server 8000
+# Install dependencies (optional, for local server)
+npm install
 
-# Or open directly in browser
-open index.html
+# Start local development server
+npm start
+# or for live reload
+npm run dev
 ```
 
-### Usage
-1. Open `http://localhost:8000` in your browser
-2. View all battery sites on the Thailand map
-3. Click on province labels to filter by region
-4. Click battery pins for detailed site information
-5. Use "Add Asset" button to add new battery sites
-6. Export data using the "Export Data" button
-7. Check alerts periodically with "Check Alerts" button
+Or simply open `index.html` directly in your browser.
 
-## 📊 Data Model
+### GitHub Pages Deployment
 
-Each battery site includes:
-```javascript
-{
-  id: number,                    // Unique identifier
-  name: string,                  // Site name (Thai)
-  province: string,              // Thai province
-  lat: number, lng: number,     // Coordinates (for future mapping)
-  status: 'good'|'warning'|'critical',
-  battery: number,               // Legacy field (SoC %)
-  temp: number,                  // Temperature (°C)
-  voltage: number,               // System voltage (125V)
-  current: number,               // Current (A)
-  power: number,                 // Power (W)
-  voltagePerCell: number,        // Cell voltage (~2.08V)
-  internalResistance: number,    // Resistance (µΩ)
-  currentPerString: number,      // String current (A)
-  voltagePerString: number,      // String voltage (125V)
-  stateOfCharge: number,         // SoC (%)
-  stateOfHealth: number,         // SoH (%)
-  ambientTemp: number           // Ambient temperature (°C)
-}
+1. Push your code to a GitHub repository
+2. Enable GitHub Pages in your repository settings
+3. Select the `main` branch as source
+4. Your site will be available at `https://<username>.github.io/<repository-name>/`
+
+## 📁 Project Structure
+
+```
+├── index.html         # Main SPA with all pages (home, detail, database)
+├── detail.html        # Original detail page (now virtual page in SPA)
+├── db_view.html       # Database view (now virtual page in SPA)
+├── sql/
+│   ├── bms.sql        # Database schema
+│   └── db_viewer.html # SQL-based viewer
+├── file/
+│   ├── thailand-map.png   # Map background
+│   └── thai.jpg           # Additional assets
+├── README.md
+├── QWEN.md
+├── DEPLOYMENT.md
+├── package.json
+└── .gitignore
 ```
 
-## 🔧 Development
+## 🛠️ Tech Stack
 
-### File Structure
-```
-dashboard/
-├── index.html          # Main application (HTML, CSS, JS)
-├── README.md          # This documentation
-├── AGENTS.md          # Development guidelines
-└── file/             # Asset directory (if needed)
-```
+- **HTML5**: Semantic markup and structure
+- **CSS3**: Modern styling with animations and glass morphism effects
+- **JavaScript (ES6+)**: Client-side logic and routing
+- **VanillaJS**: No frameworks - lightweight and performant
+- **Tailwind CSS**: Utility-first CSS framework
+- **SVG**: Scalable vector graphics for map visualization
+- **GitHub Pages**: Static site hosting
 
-### Adding New Sites
-1. Click "Add Asset" button in the UI
-2. Fill in site details and battery specifications
-3. Click "Add Asset" to save
+## 🗺️ Pages & Navigation
 
-### Customization
-- **Provinces**: Update `provinceRegions` object
-- **Positions**: Modify `getProvincePosition()` function
-- **Alert Thresholds**: Adjust values in `checkBatteryFailures()`
-- **Styling**: Modify CSS classes and Tailwind utilities
+The application features a single-page architecture with the following virtual pages:
 
-## 🐛 Troubleshooting
+- **Home Page** (`/`): Main dashboard with Thailand map and all battery sites
+- **Detail Page** (`?page=detail&id=5`): Individual battery site details
+- **Database View** (`?page=database`): All monitoring data in table format
 
-### Map Not Displaying
-- Ensure JavaScript is enabled
-- Check browser console for errors
-- Verify CSS animations are supported
+URL parameters control page state, enabling direct links to specific content.
 
-### Data Export Issues
-- Allow browser downloads if prompted
-- Check CSV file in Downloads folder
+## 📊 Battery Metrics
 
-### Alerts Not Working
-- Verify `ALERT_COOLDOWN_MS` setting
-- Check console for JavaScript errors
-- Ensure site status thresholds are met
+### Standard Configuration
+- **System Voltage**: 125 VDC
+- **Battery Capacity**: 350 Ah
+- **Cell Configuration**: 60 cells per string
+- **Nominal Cell Voltage**: 2.08 V
 
-## 📄 License
+### Monitored Parameters
+- **State of Charge (SoC)**: 0-100%
+- **State of Health (SoH)**: 0-100%
+- **Voltage per Cell**: 1.5-2.5V (±0.2% accuracy)
+- **Temperature**: 0-99.5°C (±1.0°C accuracy)
+- **Internal Resistance**: 100-60000 µΩ (±2.0% accuracy)
+- **Current per String**: 0-700A (±2.0% accuracy)
+- **Voltage per String**: 20-200V (±2.0% accuracy)
+- **Ambient Temperature**: 0-99.5°C (±1.0°C accuracy)
 
-[Add your license information here]
+## 🏭 Monitored Substations
+
+### Northern Region
+- สถานีไฟฟ้า เชียงราย 2 (Chiang Rai 2)
+- สถานีไฟฟ้า ลำปาง 3 (Lampang 3)
+- สถานีไฟฟ้า น่าน 1 (Nan 1)
+- สถานีไฟฟ้า พิษณุโลก 6 (Phitsanulok 6)
+
+### Northeastern Region
+- สถานีไฟฟ้า อุดรธานี 3 (Udon Thani 3)
+- สถานีไฟฟ้า ขอนแก่น 3 (Khon Kaen 3)
+- สถานีไฟฟ้า โพนพิสัย (Phon Phisai)
+- สถานีไฟฟ้า บรบือ (Borabue)
+- สถานีไฟฟ้า วาปีปทุม (Wapi Pathum)
+- สถานีไฟฟ้า เขื่องใน (Khueang Nai)
+
+### Central Region
+- สถานีไฟฟ้า ท่าวุ้ง (Tha Wung)
+- สถานีไฟฟ้า ชนแดน (Chon Daen)
+- สถานีไฟฟ้า ชัยนาท (Chai Nat)
+- สถานีไฟฟ้า โรจนะ 3 (Rojana 3)
+- สถานีไฟฟ้า โรจนะ 4 (Rojana 4)
+- สถานีไฟฟ้า บางพระครู (Bang Phra Khu)
+- สถานีไฟฟ้า สมุทรสาคร 7 (Samut Sakhon 7)
+- สถานีไฟฟ้า สามพราน 4 (Sam Phran 4)
+
+### Southern Region
+- สถานีไฟฟ้า ถลาง 2 (Thalang 2)
+- สถานีไฟฟ้า ภูเก็ต 3 (Phuket 3)
+- สถานีไฟฟ้า กระบี่ 1 (Krabi 1)
+- สถานีไฟฟ้า หาดใหญ่ 2 (Hat Yai 2)
+- สถานีไฟฟ้า ฉลุง (Chalung)
+- สถานีไฟฟ้า ปัตตานี 2 (Pattani 2)
+
+## 🚨 Alert System
+
+The dashboard features automatic monitoring and alerts:
+
+- **Critical**: SoC < 30%
+- **Warning**: SoC < 50%, Temp > 40°C, SoH < 70%, Resistance > 500µΩ
+- **Normal**: SoC ≥ 80%
+
+### Cooldown Period
+- 2-minute cooldown between identical alerts to prevent spam
+
+## 📅 Deployment
+
+### GitHub Pages Setup
+1. Push your code to the `main` branch
+2. Go to repository Settings → Pages
+3. Set source to "Deploy from a branch"
+4. Select "main" branch and "/ (root)" folder
+5. Your site will be available at `https://<username>.github.io/<repository-name>/`
+
+### Direct Links
+- Home: `https://<username>.github.io/<repository-name>/`
+- Detail: `https://<username>.github.io/<repository-name>/?page=detail&id=5`
+- Database: `https://<username>.github.io/<repository-name>/?page=database`
 
 ## 🤝 Contributing
 
-1. Follow the coding guidelines in `AGENTS.md`
-2. Maintain two-space indentation
-3. Use Thai province naming conventions
-4. Test alerts, exports, and filtering
-5. Update documentation for new features
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+If you encounter any issues, please open an issue in the GitHub repository.
 
 ---
-
-**Last Updated**: Automated documentation generation from current HTML implementation
-
-## 🌐 Static Site Generation & Deployment
-
-- Supported generators (static output): Hugo, Gatsby, Next.js (static export), Nuxt.js (static generate), Eleventy, Vite (static builds), SvelteKit (static adapter).
-- Front-end frameworks (when exported to static HTML/CSS/JS): React, Angular, Vue.js. CSS frameworks like Bootstrap are supported.
-- GitHub Pages publishing methods:
-  - Direct branch publishing: configure Pages to serve from `gh-pages`, `main` (root), or `docs/` in repository settings.
-  - Typical flow for generators: build to `dist/` or `out/`, then push build output to the publishing branch.
-- This repo (plain static site):
-  - No build required. Ensure `index.html`, `detail.html`, `db_view.html`, and `file/` are present at repo root (or in `docs/`).
-  - In GitHub → Settings → Pages: Source → Deploy from a branch → choose `main` and `/ (root)` (or `docs/`).
-  - Use relative paths like `./detail.html` and `./db_view.html` to work under the repository subpath on Pages.
+Built with ❤️ for Thailand's energy infrastructure monitoring

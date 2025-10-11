@@ -1,239 +1,206 @@
-# Deployment Guide - Battery Monitoring System
+# Deployment Guide for Thailand Battery Monitoring Dashboard
 
 ## GitHub Pages Deployment
 
-This project is configured for GitHub Pages deployment with zero build steps required.
+This single-page application is optimized for deployment to GitHub Pages and follows all modern static site requirements.
 
-### Current Deployment
+### Prerequisites
+- GitHub account
+- Repository for the project
+- Git installed locally
 
-- **Repository**: https://github.com/dear-git/dashboard
-- **GitHub Pages URL**: https://dear-git.github.io/dashboard/
-- **Branch**: main
-- **Directory**: / (root)
+### Step-by-Step Deployment
 
-### Files Structure
-
-```
-dashboard/
-├── index.html              # Main dashboard (entry point)
-├── detail.html             # Battery detail page
-├── db_view.html            # Database viewer page
-├── file/
-│   ├── thailand-map.png    # Thailand map image
-│   └── thai.jpg            # Alternative map
-├── sql/
-│   ├── bms.sql            # Database schema
-│   └── db_viewer.html     # SQL viewer
-├── CLAUDE.md              # Claude Code documentation
-├── AGENTS.md              # Development guidelines
-├── README.md              # Project overview
-└── DEPLOYMENT.md          # This file
-```
-
-### Navigation Flow
-
-1. **index.html** → Main dashboard with Thailand map
-   - Click battery pin → Opens detail.html in new tab
-   - Click "DB Viewer" → Opens internal database page
-   - Click "Export Data" → Downloads CSV
-
-2. **detail.html** → Individual battery site details
-   - Accepts URL parameter: `?id=1` through `?id=24`
-   - Supports sessionStorage data injection
-   - Back button returns to index.html
-
-3. **Database Pages**
-   - Internal viewer via "DB Viewer" button
-   - Standalone db_view.html
-   - SQL schema viewer in sql/db_viewer.html
-
-### GitHub Pages Configuration
-
-#### Enable GitHub Pages
-
-1. Go to repository settings: https://github.com/dear-git/dashboard/settings/pages
-2. Under "Source":
-   - Select: **Deploy from a branch**
-   - Branch: **main**
-   - Folder: **/ (root)**
-3. Click **Save**
-4. Wait 1-2 minutes for deployment
-
-#### Access Your Site
-
-- Main dashboard: https://dear-git.github.io/dashboard/
-- Direct site detail: https://dear-git.github.io/dashboard/detail.html?id=1
-- Database viewer: https://dear-git.github.io/dashboard/db_view.html
-
-### Features for GitHub Pages
-
-✅ **Static Files Only**: No build process required
-✅ **Relative Paths**: All links use relative paths
-✅ **Self-Contained**: CSS embedded in HTML
-✅ **No External APIs**: Pure CSS map (no Google Maps key needed)
-✅ **Mobile Friendly**: Responsive design works on all devices
-✅ **sessionStorage**: Data persists between page navigations
-
-### Testing Locally
-
-Before pushing to GitHub Pages, test locally:
-
+#### 1. Prepare Your Repository
 ```bash
-# Start local server
-python3 -m http.server 8000
+# Clone your repository (if starting fresh)
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
 
-# Visit in browser
-open http://localhost:8000
-```
+# Add your files
+cp -r /path/to/dashboard/* .
 
-Test these flows:
-1. Click battery pins → Detail page opens
-2. Navigate back from detail page
-3. Click "DB Viewer" → Database table shows
-4. Export CSV functionality
-5. Test on mobile viewport
-
-### Deployment Workflow
-
-```bash
-# 1. Make changes locally
-# 2. Test with local server
-python3 -m http.server 8000
-
-# 3. Commit changes
+# Initialize git if needed
+git init
 git add .
-git commit -m "Your commit message"
-
-# 4. Push to GitHub
-git push origin main
-
-# 5. GitHub Pages auto-deploys (1-2 minutes)
+git commit -m "Initial commit with battery monitoring dashboard"
 ```
 
-### URL Structure
-
-#### Main Dashboard
-```
-https://dear-git.github.io/dashboard/
-```
-
-#### Battery Detail Pages
-```
-https://dear-git.github.io/dashboard/detail.html?id=1   # เชียงราย 2
-https://dear-git.github.io/dashboard/detail.html?id=2   # ลำปาง 3
-https://dear-git.github.io/dashboard/detail.html?id=3   # พิษณุโลก 6
-...
-https://dear-git.github.io/dashboard/detail.html?id=24  # ปัตตานี 2
-```
-
-#### Database Viewer
-```
-https://dear-git.github.io/dashboard/db_view.html
-```
-
-### Troubleshooting
-
-#### Site Not Loading
-- Wait 1-2 minutes after first deployment
-- Check GitHub Pages settings are enabled
-- Verify branch is set to "main"
-- Clear browser cache (Cmd+Shift+R)
-
-#### Battery Pins Not Clickable
-- Issue was fixed in commit c079190
-- JavaScript bug with `selectedSite` variable resolved
-- All click handlers now properly navigate to detail.html
-
-#### Images Not Loading
-- All images use relative paths: `./file/thailand-map.png`
-- Ensure `file/` directory is committed to git
-- Check file names match exactly (case-sensitive)
-
-#### Navigation Issues
-- All links use relative paths (no leading `/`)
-- sessionStorage preserves data between pages
-- Back buttons use `window.location.href = 'index.html'`
-
-### Custom Domain (Optional)
-
-To use a custom domain:
-
-1. Add `CNAME` file to repository root:
-   ```
-   your-domain.com
+#### 2. Configure GitHub Pages
+1. Push your code to GitHub:
+   ```bash
+   git remote add origin https://github.com/your-username/your-repo-name.git
+   git branch -M main
+   git push -u origin main
    ```
 
-2. Configure DNS with your domain provider:
-   ```
-   Type: CNAME
-   Host: www
-   Value: dear-git.github.io
-   ```
+2. Navigate to your repository on GitHub
+3. Go to **Settings** tab
+4. Scroll down to **Pages** section
+5. Under **Source**, select:
+   - Branch: `main`
+   - Folder: `/ (root)`
+6. Click **Save**
 
-3. Enable HTTPS in GitHub Pages settings
+#### 3. Access Your Deployed Site
+Your site will be available at: `https://your-username.github.io/your-repo-name/`
 
-### Performance
+### GitHub Actions Deployment (Alternative)
 
-- **Load Time**: ~1-2 seconds (all assets embedded)
-- **File Sizes**:
-  - index.html: ~137 KB
-  - detail.html: ~47 KB
-  - thailand-map.png: ~153 KB
-- **Total**: ~340 KB (no external dependencies)
+For automated deployments with GitHub Actions, create `.github/workflows/deploy.yml`:
 
-### Browser Compatibility
+```yaml
+name: Deploy to GitHub Pages
 
-✅ Chrome 90+
-✅ Firefox 88+
-✅ Safari 14+
-✅ Edge 90+
-✅ Mobile browsers (iOS Safari, Chrome Mobile)
+on:
+  push:
+    branches: [ main ]
 
-### Monitoring
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-Check deployment status:
-- https://github.com/dear-git/dashboard/deployments
-- Click latest deployment to see status
-- View build logs if errors occur
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-### Updating Content
+      - name: Install dependencies
+        run: npm install
 
-#### Add New Battery Site
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+```
 
-1. Edit `index.html` - add to `sites` array (line ~1251)
-2. Site automatically appears in:
-   - Main dashboard map
-   - Database viewer
-   - Detail page (via URL parameter)
-3. Commit and push
+## Static Site Generation Compatibility
 
-#### Update Battery Specifications
+The application is compatible with all major static site generators and frameworks:
 
-1. Edit `BATTERY_SPEC` in `index.html` (line ~1710)
-2. All calculations auto-update
-3. Commit and push
+### Hugo
+```bash
+# Hugo can serve the static files directly
+hugo server --source=dashboard/
+```
 
-#### Modify Styling
+### Gatsby
+The static HTML/CSS/JS components can be integrated into a Gatsby project.
 
-1. Edit embedded CSS in `<style>` tags
-2. Test locally first
-3. Commit and push
+### Next.js (Static Export)
+The application can be embedded in a Next.js project and exported as static files.
 
-### Security Notes
+### Vite (Static Build)
+Can be served using Vite's static server capabilities.
 
-- No API keys required (pure CSS map)
-- No backend/database (static files only)
-- Safe to expose publicly
-- CSV exports contain site data (intentional)
-- No authentication required
+### Eleventy
+The HTML structure is compatible with Eleventy's template system.
 
-### Support
+## Local Development Server
 
-- Issues: https://github.com/dear-git/dashboard/issues
-- Documentation: See CLAUDE.md and README.md
-- Development: See AGENTS.md
+### Using Node.js
+```bash
+# Install development dependencies
+npm install
+
+# Start local server
+npm start
+# or with live reload
+npm run dev
+```
+
+### Using Python
+```bash
+# Python 3
+python -m http.server 8000
+
+# Python 2
+python -m SimpleHTTPServer 8000
+```
+
+### Using PHP
+```bash
+php -S localhost:8000
+```
+
+## URL Structure & Routing
+
+The application uses client-side routing compatible with GitHub Pages:
+
+- **Home Page**: `https://your-username.github.io/your-repo-name/`
+- **Detail View**: `https://your-username.github.io/your-repo-name/?page=detail&id=5`
+- **Database View**: `https://your-username.github.io/your-repo-name/?page=database`
+
+## Optimization for GitHub Pages
+
+### File Structure
+```
+├── index.html (main SPA application)
+├── detail.html (legacy - now virtual page)
+├── db_view.html (legacy - now virtual page)
+├── file/
+│   ├── thailand-map.png
+│   └── thai.jpg
+├── sql/
+│   ├── bms.sql
+│   └── db_viewer.html
+├── README.md
+├── QWEN.md
+├── DEPLOYMENT.md
+├── package.json
+└── .gitignore
+```
+
+### Performance Considerations
+- All JavaScript and CSS is inlined in `index.html` for minimal HTTP requests
+- SVG-based graphics for crisp rendering at any resolution
+- Optimized animations with CSS rather than JavaScript where possible
+- Lightweight implementation without heavy frameworks
+
+### Caching
+GitHub Pages automatically handles static asset caching. The application uses relative paths for all resources to ensure proper functionality under subdirectories.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Links not working after deployment**
+   - Ensure all paths are relative (e.g., `./detail.html`, `../file/image.png`)
+   - Verify client-side routing is working properly
+
+2. **Images or assets not loading**
+   - Check that file paths are correct relative to the HTML file
+   - Ensure files are in the correct subdirectories
+
+3. **URL parameters not working**
+   - GitHub Pages uses Jekyll by default; ensure `_config.yml` doesn't interfere
+   - Add this to your root to disable Jekyll if needed: `echo "" > .nojekyll`
+
+### Verifying Deployment
+
+1. Check the GitHub Pages status in your repository settings
+2. Verify all files are present in the deployed version
+3. Test navigation between different virtual pages
+4. Verify URL parameters work correctly
+
+## Environment-Specific Configuration
+
+The application doesn't require environment-specific configuration as it uses static assets only. All data is embedded in the JavaScript code.
+
+## CDN Integration
+
+For production use, consider adding CDN headers if needed, though GitHub Pages provides global CDN distribution by default.
+
+## Security Headers
+
+GitHub Pages automatically applies security headers. The application uses secure practices:
+- No external dependencies for core functionality
+- All data is statically defined
+- Client-side only processing
 
 ---
-
-**Last Updated**: October 2024
-**Deployment Status**: ✅ Active on GitHub Pages
+Deployed with GitHub Pages: https://pages.github.com/
