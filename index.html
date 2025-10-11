@@ -2307,6 +2307,50 @@
       return { x, y };
     }
 
+    // Function to return map position as percentages for CSS positioning
+    function getMapPositionAdjusted(lat, lng) {
+      // Convert lat/lng to percentage coordinates for CSS positioning
+      const lat_max = 20.5;   // Northern boundary
+      const lat_min = 5.5;    // Southern boundary  
+      const lon_max = 105.5;  // Eastern boundary
+      const lon_min = 97.0;   // Western boundary
+
+      // Validate inputs
+      if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+        console.error('Invalid lat/lng values:', lat, lng);
+        return { x: 0, y: 0 };
+      }
+
+      // Direct conversion to percentages
+      let x = ((lng - lon_min) / (lon_max - lon_min)) * 100;
+      let y = ((lat_max - lat) / (lat_max - lat_min)) * 100;
+
+      // Fine-tune pixel positioning for thailand-map.png (similar to getMapPosition but scaled)
+      if (lat > 18 && lng < 100) {           // Northwest
+        x = x * 0.85 + 6.67; y = y * 0.80 + 7.5; // Convert pixel adjustments to percentages
+      } else if (lat > 17 && lng >= 100) {     // Northeast
+        x = x * 0.90 + 8.33; y = y * 0.85 + 8.75;
+      } else if (lat >= 15.5 && lat <= 17.5) {  // Central
+        x = x * 0.87 + 7.5; y = y * 0.83 + 8.125;
+      } else if (lat < 13 && lng > 100) {      // South East
+        x = x * 0.88 + 9.17; y = y * 0.82 + 11.25;
+      } else if (lat < 13 && lng <= 100) {     // South West
+        x = x * 0.86 + 7.08; y = y * 0.81 + 10.625;
+      } else {                                // Other regions
+        x = x * 0.88 + 7.92; y = y * 0.84 + 9.375;
+      }
+
+      // Ensure values are valid numbers
+      x = isNaN(x) ? 0 : x;
+      y = isNaN(y) ? 0 : y;
+
+      // Keep within container bounds
+      x = Math.max(0, Math.min(100, x));
+      y = Math.max(0, Math.min(100, y));
+
+      return { x, y };
+    }
+
     // Advanced coordinate transformation with calibration points
     function getProvincePosition(site) {
       const lat_max = 21.5;
@@ -3392,16 +3436,6 @@ VALUES
       currentPage = 'database';
       updateUrl('database');
       render();
-    }
-
-    function render() {
-      const app = document.getElementById('app');
-      if (currentPage === 'home') {
-        app.innerHTML = renderHomePage();
-        renderBatteryPins();
-      } else if (currentPage === 'detail') {
-        app.innerHTML = renderDetailPage();
-      }
     }
 
     // Initialize by checking URL parameters
