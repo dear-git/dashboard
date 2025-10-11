@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Battery Site Detail - Thailand BMS</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #1e293b);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      color: white;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(to right, #3b82f6, #2563eb);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 16px;
+      transition: all 0.3s;
+    }
+
+    .back-button:hover {
+      background: linear-gradient(to right, #2563eb, #1d4ed8);
+      transform: translateX(-4px);
+    }
+
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .site-title {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    .status-badge {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .status-good { background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 2px solid #22c55e; }
+    .status-warning { background: rgba(234, 179, 8, 0.2); color: #eab308; border: 2px solid #eab308; }
+    .status-critical { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 2px solid #ef4444; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #94a3b8;
+    }
+
+    .metric {
+      margin-bottom: 16px;
+    }
+
+    .metric-label {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: white;
+    }
+
+    .metric-unit {
+      font-size: 1rem;
+      color: #94a3b8;
+      margin-left: 4px;
+    }
+
+    .chart-container {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 24px;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 12px;
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .battery-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .battery-icon {
+      width: 200px;
+      height: 300px;
+      border: 4px solid #64748b;
+      border-radius: 12px;
+      position: relative;
+      background: rgba(15, 23, 42, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+    }
+
+    .battery-icon::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 20px;
+      background: #64748b;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .battery-fill {
+      width: 100%;
+      transition: height 0.5s ease;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .battery-percentage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.5rem;
+      font-weight: bold;
+      z-index: 10;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    th {
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    td {
+      color: white;
+    }
+
+    .alert-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid #ef4444;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .alert-title {
+      color: #ef4444;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="index.html" class="back-button">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Dashboard
+      </a>
+      <div class="site-header">
+        <div>
+          <h1 class="site-title" id="siteName">Loading...</h1>
+          <p style="color: #94a3b8; margin-top: 8px;">
+            Site ID: <span id="siteId">-</span> | Province: <span id="province">-</span>
+          </p>
+        </div>
+        <div class="status-badge" id="statusBadge">Loading...</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2 class="card-title">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="5" y="6" width="14" height="12" rx="2" stroke-width="2"/>
+            <path d="M12 6V2M8 2h8" stroke-width="2"/>
+          </svg>
+          Battery Status
+        </h2>
+        <div class="battery-visual">
+          <div class="battery-icon">
+            <div class="battery-percentage" id="batteryPercentage">0%</div>
+            <div class="battery-fill" id="batteryFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Key Metrics
+        </h2>
+        <div class="metric">
+          <div class="metric-label">State of Charge (SoC)</div>
+          <div class="metric-value">
+            <span id="soc">0</span><span class="metric-unit">%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="socBar" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">State of Health (SoH)</div>
+          <div class="metric-value">
+            <span id="soh">0</span><span class="metric-unit">%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="sohBar" style="width: 0%; background: #10b981"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          Temperature
+        </h2>
+        <div class="metric">
+          <div class="metric-label">Ambient Temperature</div>
+          <div class="metric-value">
+            <span id="ambientTemp">0</span><span class="metric-unit">°C</span>
+          </div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Cell Temperature</div>
+          <div class="metric-value">
+            <span id="cellTemp">0</span><span class="metric-unit">°C</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2 class="card-title">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          Electrical Parameters
+        </h2>
+        <table>
+          <tr>
+            <th>Parameter</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>Voltage per Cell</td>
+            <td><span id="voltagePerCell">0</span> V</td>
+          </tr>
+          <tr>
+            <td>Voltage per String</td>
+            <td><span id="voltagePerString">0</span> V</td>
+          </tr>
+          <tr>
+            <td>Current per String</td>
+            <td><span id="currentPerString">0</span> A</td>
+          </tr>
+          <tr>
+            <td>Internal Resistance</td>
+            <td><span id="internalResistance">0</span> µΩ</td>
+          </tr>
+          <tr>
+            <td>Total Power</td>
+            <td><span id="power">0</span> kW</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Battery Specifications
+        </h2>
+        <table>
+          <tr>
+            <th>Specification</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>System Voltage</td>
+            <td>125 VDC</td>
+          </tr>
+          <tr>
+            <td>Battery Capacity</td>
+            <td>350 Ah</td>
+          </tr>
+          <tr>
+            <td>Cell Configuration</td>
+            <td>60 cells per string</td>
+          </tr>
+          <tr>
+            <td>Nominal Voltage per Cell</td>
+            <td>2.08 V</td>
+          </tr>
+          <tr>
+            <td>Battery Type</td>
+            <td>Li-ion</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Location Information
+        </h2>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>Province</td>
+            <td id="provinceDetail">-</td>
+          </tr>
+          <tr>
+            <td>Region</td>
+            <td id="region">-</td>
+          </tr>
+          <tr>
+            <td>Latitude</td>
+            <td id="latitude">-</td>
+          </tr>
+          <tr>
+            <td>Longitude</td>
+            <td id="longitude">-</td>
+          </tr>
+          <tr>
+            <td>Last Updated</td>
+            <td id="lastUpdated">-</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" id="alertSection" style="display: none;">
+      <h2 class="card-title">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        Active Alerts
+      </h2>
+      <div id="alertsList"></div>
+    </div>
+  </div>
+
+  <script>
+    // Mock data for all 24 sites
+    const sites = [
+      { id: 1, name: 'สถานีไฟฟ้า เชียงราย 2', lat: 19.91, lng: 99.84, status: 'good', stateOfCharge: 95, stateOfHealth: 98, ambientTemp: 28, voltagePerCell: 2.50, internalResistance: 2500, currentPerString: 332.5, voltagePerString: 125.0, province: 'เชียงราย', region: 'North' },
+      { id: 2, name: 'สถานีไฟฟ้า ลำปาง 3', lat: 18.29, lng: 99.49, status: 'critical', stateOfCharge: 45, stateOfHealth: 85, ambientTemp: 32, voltagePerCell: 2.50, internalResistance: 4800, currentPerString: 157.5, voltagePerString: 125.0, province: 'ลำปาง', region: 'North' },
+      { id: 3, name: 'สถานีไฟฟ้า พิษณุโลก 6', lat: 16.82, lng: 100.27, status: 'warning', stateOfCharge: 78, stateOfHealth: 85, ambientTemp: 32, voltagePerCell: 2.50, internalResistance: 4500, currentPerString: 273.0, voltagePerString: 125.0, province: 'พิษณุโลก', region: 'Central' },
+      { id: 4, name: 'สถานีไฟฟ้า น่าน 1', lat: 18.78, lng: 100.77, status: 'good', stateOfCharge: 90, stateOfHealth: 96, ambientTemp: 27, voltagePerCell: 2.50, internalResistance: 2200, currentPerString: 315.0, voltagePerString: 125.0, province: 'น่าน', region: 'North' },
+      { id: 5, name: 'สถานีไฟฟ้า ท่าวุ้ง', lat: 15.42, lng: 99.92, status: 'critical', stateOfCharge: 40, stateOfHealth: 75, ambientTemp: 35, voltagePerCell: 2.50, internalResistance: 5000, currentPerString: 140.0, voltagePerString: 125.0, province: 'ลพบุรี', region: 'Central' },
+      { id: 6, name: 'สถานีไฟฟ้า ชนแดน', lat: 15.68, lng: 100.15, status: 'good', stateOfCharge: 88, stateOfHealth: 95, ambientTemp: 30, voltagePerCell: 2.50, internalResistance: 2100, currentPerString: 308.0, voltagePerString: 125.0, province: 'เพชรบูรณ์', region: 'Central' },
+      { id: 7, name: 'สถานีไฟฟ้า ชัยนาท', lat: 15.18, lng: 100.12, status: 'good', stateOfCharge: 92, stateOfHealth: 97, ambientTemp: 29, voltagePerCell: 2.50, internalResistance: 2000, currentPerString: 322.0, voltagePerString: 125.0, province: 'ชัยนาท', region: 'Central' },
+      { id: 8, name: 'สถานีไฟฟ้า อุดรธานี 3', lat: 17.42, lng: 102.79, status: 'warning', stateOfCharge: 72, stateOfHealth: 82, ambientTemp: 33, voltagePerCell: 2.50, internalResistance: 4000, currentPerString: 252.0, voltagePerString: 125.0, province: 'อุดรธานี', region: 'Northeast' },
+      { id: 9, name: 'สถานีไฟฟ้า ขอนแก่น 3', lat: 16.43, lng: 102.83, status: 'critical', stateOfCharge: 45, stateOfHealth: 65, ambientTemp: 38, voltagePerCell: 2.50, internalResistance: 5000, currentPerString: 157.5, voltagePerString: 125.0, province: 'ขอนแก่น', region: 'Northeast' },
+      { id: 10, name: 'สถานีไฟฟ้า โพนพิสัย', lat: 17.38, lng: 103.02, status: 'good', stateOfCharge: 85, stateOfHealth: 94, ambientTemp: 31, voltagePerCell: 2.50, internalResistance: 2400, currentPerString: 297.5, voltagePerString: 125.0, province: 'หนองคาย', region: 'Northeast' },
+      { id: 11, name: 'สถานีไฟฟ้า บรบือ', lat: 15.61, lng: 103.06, status: 'good', stateOfCharge: 87, stateOfHealth: 93, ambientTemp: 32, voltagePerCell: 2.50, internalResistance: 2200, currentPerString: 304.5, voltagePerString: 125.0, province: 'มหาสารคาม', region: 'Northeast' },
+      { id: 12, name: 'สถานีไฟฟ้า วาปีปทุม', lat: 15.92, lng: 103.54, status: 'warning', stateOfCharge: 68, stateOfHealth: 80, ambientTemp: 34, voltagePerCell: 2.50, internalResistance: 4500, currentPerString: 238.0, voltagePerString: 125.0, province: 'มหาสารคาม', region: 'Northeast' },
+      { id: 13, name: 'สถานีไฟฟ้า เขื่องใน', lat: 16.73, lng: 104.27, status: 'good', stateOfCharge: 91, stateOfHealth: 96, ambientTemp: 30, voltagePerCell: 2.50, internalResistance: 2100, currentPerString: 318.5, voltagePerString: 125.0, province: 'อุบลราชธานี', region: 'Northeast' },
+      { id: 14, name: 'สถานีไฟฟ้า โรจนะ 3', lat: 13.92, lng: 100.57, status: 'good', stateOfCharge: 88, stateOfHealth: 94, ambientTemp: 29, voltagePerCell: 2.50, internalResistance: 2300, currentPerString: 308.0, voltagePerString: 125.0, province: 'พระนครศรีอยุธยา', region: 'Central' },
+      { id: 15, name: 'สถานีไฟฟ้า โรจนะ 4', lat: 13.94, lng: 100.60, status: 'critical', stateOfCharge: 42, stateOfHealth: 60, ambientTemp: 39, voltagePerCell: 2.50, internalResistance: 5500, currentPerString: 147.0, voltagePerString: 125.0, province: 'พระนครศรีอยุธยา', region: 'Central' },
+      { id: 16, name: 'สถานีไฟฟ้า บางพระครู', lat: 13.67, lng: 100.49, status: 'good', stateOfCharge: 90, stateOfHealth: 95, ambientTemp: 28, voltagePerCell: 2.50, internalResistance: 2000, currentPerString: 315.0, voltagePerString: 125.0, province: 'กรุงเทพมหานคร', region: 'Central' },
+      { id: 17, name: 'สถานีไฟฟ้า สมุทรสาคร 7', lat: 13.55, lng: 100.28, status: 'good', stateOfCharge: 86, stateOfHealth: 93, ambientTemp: 30, voltagePerCell: 2.50, internalResistance: 2200, currentPerString: 301.0, voltagePerString: 125.0, province: 'สมุทรสาคร', region: 'Central' },
+      { id: 18, name: 'สถานีไฟฟ้า สามพราน 4', lat: 13.72, lng: 100.21, status: 'warning', stateOfCharge: 75, stateOfHealth: 83, ambientTemp: 31, voltagePerCell: 2.50, internalResistance: 4200, currentPerString: 262.5, voltagePerString: 125.0, province: 'นครปฐม', region: 'Central' },
+      { id: 19, name: 'สถานีไฟฟ้า ถลาง 2', lat: 8.04, lng: 98.39, status: 'good', stateOfCharge: 89, stateOfHealth: 94, ambientTemp: 32, voltagePerCell: 2.50, internalResistance: 2100, currentPerString: 311.5, voltagePerString: 125.0, province: 'ภูเก็ต', region: 'South' },
+      { id: 20, name: 'สถานีไฟฟ้า ภูเก็ต 3', lat: 7.88, lng: 98.39, status: 'warning', stateOfCharge: 68, stateOfHealth: 82, ambientTemp: 34, voltagePerCell: 2.50, internalResistance: 4500, currentPerString: 238.0, voltagePerString: 125.0, province: 'ภูเก็ต', region: 'South' },
+      { id: 21, name: 'สถานีไฟฟ้า กระบี่ 1', lat: 8.06, lng: 98.91, status: 'good', stateOfCharge: 92, stateOfHealth: 96, ambientTemp: 30, voltagePerCell: 2.50, internalResistance: 2000, currentPerString: 322.0, voltagePerString: 125.0, province: 'กระบี่', region: 'South' },
+      { id: 22, name: 'สถานีไฟฟ้า หาดใหญ่ 2', lat: 7.01, lng: 100.47, status: 'warning', stateOfCharge: 70, stateOfHealth: 81, ambientTemp: 35, voltagePerCell: 2.50, internalResistance: 4100, currentPerString: 245.0, voltagePerString: 125.0, province: 'สงขลา', region: 'South' },
+      { id: 23, name: 'สถานีไฟฟ้า ฉลุง', lat: 7.24, lng: 100.64, status: 'good', stateOfCharge: 88, stateOfHealth: 95, ambientTemp: 29, voltagePerCell: 2.50, internalResistance: 2100, currentPerString: 308.0, voltagePerString: 125.0, province: 'สตูล', region: 'South' },
+      { id: 24, name: 'สถานีไฟฟ้า ปัตตานี 2', lat: 6.86, lng: 101.25, status: 'warning', stateOfCharge: 73, stateOfHealth: 88, ambientTemp: 33, voltagePerCell: 2.50, internalResistance: 3900, currentPerString: 255.5, voltagePerString: 125.0, province: 'ปัตตานี', region: 'South' }
+    ];
+
+    // Get site ID from URL parameter
+    function getSiteIdFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return parseInt(urlParams.get('id')) || 1;
+    }
+
+    // Load site data
+    function loadSiteData() {
+      const siteId = getSiteIdFromUrl();
+      const site = sites.find(s => s.id === siteId);
+
+      if (!site) {
+        alert('Site not found');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Update page title
+      document.title = `${site.name} - Battery Detail`;
+
+      // Update header
+      document.getElementById('siteName').textContent = site.name;
+      document.getElementById('siteId').textContent = site.id;
+      document.getElementById('province').textContent = site.province;
+
+      const statusBadge = document.getElementById('statusBadge');
+      statusBadge.textContent = site.status.toUpperCase();
+      statusBadge.className = `status-badge status-${site.status}`;
+
+      // Update battery visual
+      const batteryPercentage = document.getElementById('batteryPercentage');
+      const batteryFill = document.getElementById('batteryFill');
+      batteryPercentage.textContent = `${site.stateOfCharge}%`;
+      batteryFill.style.height = `${site.stateOfCharge}%`;
+
+      if (site.status === 'good') {
+        batteryFill.style.background = 'linear-gradient(to top, #22c55e, #10b981)';
+      } else if (site.status === 'warning') {
+        batteryFill.style.background = 'linear-gradient(to top, #eab308, #f59e0b)';
+      } else {
+        batteryFill.style.background = 'linear-gradient(to top, #ef4444, #dc2626)';
+      }
+
+      // Update metrics
+      document.getElementById('soc').textContent = site.stateOfCharge;
+      document.getElementById('soh').textContent = site.stateOfHealth;
+      document.getElementById('ambientTemp').textContent = site.ambientTemp;
+      document.getElementById('cellTemp').textContent = site.ambientTemp;
+      document.getElementById('voltagePerCell').textContent = site.voltagePerCell.toFixed(2);
+      document.getElementById('voltagePerString').textContent = site.voltagePerString.toFixed(1);
+      document.getElementById('currentPerString').textContent = site.currentPerString.toFixed(1);
+      document.getElementById('internalResistance').textContent = site.internalResistance;
+
+      const power = (site.voltagePerString * site.currentPerString / 1000).toFixed(1);
+      document.getElementById('power').textContent = power;
+
+      // Update progress bars
+      const socBar = document.getElementById('socBar');
+      socBar.style.width = `${site.stateOfCharge}%`;
+      if (site.stateOfCharge >= 80) {
+        socBar.style.background = '#22c55e';
+      } else if (site.stateOfCharge >= 60) {
+        socBar.style.background = '#eab308';
+      } else {
+        socBar.style.background = '#ef4444';
+      }
+      socBar.textContent = `${site.stateOfCharge}%`;
+
+      const sohBar = document.getElementById('sohBar');
+      sohBar.style.width = `${site.stateOfHealth}%`;
+      sohBar.textContent = `${site.stateOfHealth}%`;
+
+      // Update location info
+      document.getElementById('provinceDetail').textContent = site.province;
+      document.getElementById('region').textContent = site.region;
+      document.getElementById('latitude').textContent = site.lat.toFixed(4);
+      document.getElementById('longitude').textContent = site.lng.toFixed(4);
+      document.getElementById('lastUpdated').textContent = new Date().toLocaleString('th-TH');
+
+      // Check for alerts
+      const alerts = [];
+      if (site.stateOfCharge < 30) {
+        alerts.push('Critical: Battery charge is critically low');
+      } else if (site.stateOfCharge < 50) {
+        alerts.push('Warning: Battery charge is low');
+      }
+
+      if (site.ambientTemp > 40) {
+        alerts.push('Warning: High ambient temperature detected');
+      }
+
+      if (site.stateOfHealth < 70) {
+        alerts.push('Warning: Battery health is degraded');
+      }
+
+      if (site.internalResistance > 500) {
+        alerts.push('Warning: High internal resistance detected');
+      }
+
+      if (alerts.length > 0) {
+        const alertSection = document.getElementById('alertSection');
+        const alertsList = document.getElementById('alertsList');
+        alertSection.style.display = 'block';
+        alertsList.innerHTML = alerts.map(alert => `
+          <div class="alert-box">
+            <div class="alert-title">⚠️ ${alert}</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Load data when page loads
+    window.addEventListener('DOMContentLoaded', loadSiteData);
+  </script>
+</body>
+</html>

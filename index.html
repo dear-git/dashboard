@@ -2373,9 +2373,12 @@
             pinGroup.style.filter = 'brightness(1)';
             pinGroup.style.boxShadow = '';
 
-            // Navigate to detail page
+            // Navigate to detail page (use detail.html for standalone page)
             console.log('📍 Navigate to details:', site.name, '| SoC:', site.stateOfCharge + '%');
-            showDetail(siteId);
+            // Option 1: Open detail.html in same window
+            window.location.href = `detail.html?id=${siteId}`;
+            // Option 2: Use internal detail page (uncomment below and comment above)
+            // showDetail(siteId);
           }, 300);
         });
         
@@ -2390,7 +2393,7 @@
           e.stopPropagation();
           console.log('Battery touched - ID:', siteId, 'Name:', site.name);
           pinGroup.style.transform = 'scale(1)';
-          showDetail(siteId);
+          window.location.href = `detail.html?id=${siteId}`;
         });
         
         // Add keyboard support
@@ -2402,7 +2405,7 @@
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             console.log('Battery keyboard activated - ID:', siteId);
-            showDetail(siteId);
+            window.location.href = `detail.html?id=${siteId}`;
           }
         });
         
@@ -2422,10 +2425,10 @@
             setTimeout(() => {
               element.style.filter = 'brightness(1.5)';
               element.style.transform = 'scale(1)';
-              
+
               setTimeout(() => {
                 element.style.filter = 'brightness(1)';
-                showDetail(siteId);
+                window.location.href = `detail.html?id=${siteId}`;
               }, 50);
             }, 150);
           });

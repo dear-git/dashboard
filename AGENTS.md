@@ -1,20 +1,31 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-The dashboard ships as a static single-page app. All markup, Tailwind-driven styling, and vanilla JS live in `index.html`, while image assets sit in `file/`. Keep new data fixtures and UI helpers close to their existing counterparts in the script block, and document major structures with brief inline comments. Store large media or downloadable exports alongside the existing images and reference them with relative paths.
+- Single-page dashboard: all markup, Tailwind utility styling, and vanilla JS live in `index.html`. Images/assets in `file/`.
+- Keep new data fixtures and UI helpers near existing ones inside the `<script>` block in `index.html` with brief inline comments.
+- Store large media or downloadable exports alongside images in `file/` and reference via relative paths.
 
 ## Build, Test, and Development Commands
-Install-free preview works by opening `index.html` directly in a browser. For a realistic environment that mirrors production headers, run `python3 -m http.server 8000` (from this directory) and visit `http://localhost:8000`. Ensure an active network connection so the Tailwind CDN and Google Maps API load correctly; when offline, use browser dev-tools overrides or local stubs before committing.
+- Local preview (no install): open `index.html` directly in a browser.
+- Serve with headers mirroring prod: `python3 -m http.server 8000` then visit `http://localhost:8000`.
+- CDN dependencies: ensure network is active; when offline, use dev-tools overrides or local stubs before committing.
 
 ## Coding Style & Naming Conventions
-Use two-space indentation for HTML, CSS, and JavaScript, matching the current formatting. Favor Tailwind utility classes over bespoke CSS unless a style is reused extensively. Declare immutable values in `UPPER_SNAKE_CASE`, runtime objects in `camelCase`, and string-literal statuses as lowercase (`good`, `warning`, `critical`). Group related helper functions and keep site metadata alphabetized by `id` to ease diff reviews.
-Centralize pack characteristics in `BATTERY_SPEC` (125 VDC, 350 Ah, 60 cells) and derive voltage/current/power values from that helper rather than sprinkling literals.
+- Indentation: 2 spaces for HTML, CSS, and JS.
+- Prefer Tailwind utilities over custom CSS; only add bespoke CSS for widely reused patterns.
+- Naming: constants `UPPER_SNAKE_CASE`, runtime objects `camelCase`, status strings lowercase (`good`, `warning`, `critical`).
+- Centralize battery math in `BATTERY_SPEC` (125 VDC, 350 Ah, 60 cells); derive voltage/current/power from it—avoid magic numbers.
+- Alphabetize site metadata by `id` to simplify diffs; group related helpers together.
 
 ## Testing Guidelines
-Automated tests are not yet wired up, so rely on targeted manual passes. Before opening a pull request, load the dashboard, clear the console, interact with at least three site pins (one per status), verify alert toasts animate, and export a CSV to confirm data integrity. Re-run the local server in an incognito window when tweaking CDN dependencies to catch caching issues.
+- No automated tests yet; do targeted manual passes.
+- Before PRs: load the dashboard, clear console, interact with at least three site pins (one per status), verify alert toasts animate, and export a CSV to confirm data integrity.
+- When tweaking CDN deps, re-run the local server in an incognito window to avoid cache surprises.
 
 ## Commit & Pull Request Guidelines
-Follow the repo norm: short, imperative summaries such as “Refine alert animations” or “Add Chiang Mai asset data.” Squash incidental assets into the same commit only when they directly support the feature. Pull requests should outline the problem, the solution, expected impact on battery metrics, and include screenshots or screen recordings for UI shifts. Link tracker issues when available and call out any manual verification steps you skipped.
+- Commit messages: short, imperative (e.g., "Refine alert animations", "Add Chiang Mai asset data"). Squash incidental assets if they directly support the change.
+- PRs: describe problem, solution, expected impact on battery metrics; include screenshots/screen recordings for UI changes; link tracker issues; note any manual checks skipped.
 
 ## Security & Configuration Tips
-Never commit production Google Maps keys; treat the checked-in key as a placeholder and rotate it if you expose the repo publicly. When sharing exports or screenshots, scrub sensitive site identifiers that extend beyond the anonymized Thai province naming used in `sites`.
+- Do not commit production Google Maps keys. The checked-in key is a placeholder—rotate if exposed.
+- Scrub sensitive site identifiers in exports/screenshots; keep anonymized Thai province naming consistent in `sites`.
