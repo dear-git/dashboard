@@ -2375,12 +2375,9 @@
             pinGroup.style.filter = 'brightness(1)';
             pinGroup.style.boxShadow = '';
 
-            // Navigate to detail page (use detail.html for standalone page)
+            // Use internal routing for GitHub Pages compatibility
             console.log('📍 Navigate to details:', site.name, '| SoC:', site.stateOfCharge + '%');
-            // Persist selection and navigate in same tab (GitHub Pages friendly)
-            sessionStorage.setItem('bmsSelectedSiteId', String(siteId));
-            sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-            window.location.href = `./detail.html?id=${siteId}`;
+            showDetail(siteId);
           }, 300);
         });
         
