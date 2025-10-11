@@ -2630,83 +2630,7 @@
       return data;
     }
 
-    function renderDbViewerPage() {
-      return `
-        <div class="header-bg p-4">
-          <div class="max-w-7xl mx-auto">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-lg shadow-lg">
-                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V7c0-2.21-1.79-4-4-4H8c-2.21 0-4 1.79-4 4z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 7h12M6 11h12M6 15h12" />
-                  </svg>
-                </div>
-                <div>
-                  <h1 class="text-3xl font-bold">Battery Monitoring System - Database View</h1>
-                  <p class="text-gray-400">Read-only view of all monitoring data</p>
-                </div>
-              </div>
-              <button onclick="showHome()" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span>Back to Dashboard</span>
-              </button>
-            </div>
-          </div>
-        </div>
 
-        <div class="max-w-7xl mx-auto p-6">
-          <div class="glass-card rounded-xl p-6 overflow-x-auto">
-            <h2 class="text-2xl font-bold mb-4">Database Records</h2>
-            <table class="min-w-full text-sm">
-              <thead class="text-gray-400 uppercase tracking-wide text-xs border-b border-slate-700">
-                <tr>
-                  <th class="py-2 text-left">ID</th>
-                  <th class="py-2 text-left">Site Name</th>
-                  <th class="py-2 text-left">Province</th>
-                  <th class="py-2 text-left">Status</th>
-                  <th class="py-2 text-left">SoC (%)</th>
-                  <th class="py-2 text-left">SoH (%)</th>
-                  <th class="py-2 text-left">Voltage/Cell (V)</th>
-                  <th class="py-2 text-left">Resistance (µΩ)</th>
-                  <th class="py-2 text-left">Current/String (A)</th>
-                  <th class="py-2 text-left">Voltage/String (V)</th>
-                  <th class="py-2 text-left">Ambient Temp (°C)</th>
-                  <th class="py-2 text-left">Latitude</th>
-                  <th class="py-2 text-left">Longitude</th>
-                </tr>
-              </thead>
-              <tbody id="dbTableBody">
-                ${sites.map(site => `
-                  <tr class="${getStatusClass(site.status)} group cursor-pointer border-b border-slate-800/70 last:border-none hover:bg-slate-800/40 transition-colors" onclick="showDetail(${site.id})">
-                    <td class="py-3 pr-6 font-semibold">${site.id}</td>
-                    <td class="py-3 pr-6 font-semibold">${site.name}</td>
-                    <td class="py-3 pr-6 font-semibold">${site.province}</td>
-                    <td class="py-3 pr-6">
-                      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(site.status)}">
-                        <span class="w-2.5 h-2.5 rounded-full ${site.status === 'good' ? 'bg-green-500' : site.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}"></span>
-                        <span class="capitalize">${site.status}</span>
-                      </span>
-                    </td>
-                    <td class="py-3 pr-6 font-semibold">${site.stateOfCharge}%</td>
-                    <td class="py-3 pr-6 font-semibold">${site.stateOfHealth}%</td>
-                    <td class="py-3 pr-6 font-semibold">${site.voltagePerCell} V</td>
-                    <td class="py-3 pr-6 font-semibold">${site.internalResistance} µΩ</td>
-                    <td class="py-3 pr-6 font-semibold">${site.currentPerString} A</td>
-                    <td class="py-3 pr-6 font-semibold">${site.voltagePerString} V</td>
-                    <td class="py-3 pr-6 font-semibold">${site.ambientTemp}°C</td>
-                    <td class="py-3 pr-6 font-semibold">${site.lat.toFixed(4)}</td>
-                    <td class="py-3 pr-6 font-semibold">${site.lng.toFixed(4)}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
 
     function renderHomePage() {
       const filteredSites = getFilteredSites();
@@ -3315,67 +3239,76 @@
     function renderDatabasePage() {
       return `
         <div class="header-bg p-4">
-          <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <button onclick="showHome()" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 px-4 py-2 rounded-lg transition-all">
+          <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-lg shadow-lg">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V7c0-2.21-1.79-4-4-4H8c-2.21 0-4 1.79-4 4z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 7h12M6 11h12M6 15h12" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 class="text-3xl font-bold">Battery Monitoring System - Database View</h1>
+                  <p class="text-gray-400">Read-only view of all monitoring data</p>
+                </div>
+              </div>
+              <button onclick="showHome()" class="btn-enhanced flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-5 py-2 rounded-lg transition-all shadow-lg hover:shadow-xl">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 <span>Back to Dashboard</span>
               </button>
-              <div>
-                <h1 class="text-2xl font-bold">Database Viewer</h1>
-                <p class="text-sm text-gray-400">Battery Management System - Read Only View</p>
-              </div>
             </div>
           </div>
         </div>
+
         <div class="max-w-7xl mx-auto p-6">
-          <div class="glass-card rounded-xl p-6">
-            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-              <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 1.1.9 2 2 2h12a2 2 0 002-2V7M9 21h6M12 17V7"/>
-              </svg>
-              Battery Management System Data
-            </h2>
-            <div class="overflow-x-auto">
-              <table class="min-w-full text-sm">
-                <thead class="text-gray-400 uppercase tracking-wide text-xs border-b border-slate-700">
-                  <tr>
-                    <th class="py-3 text-left">ID</th>
-                    <th class="py-3 text-left">Substation</th>
-                    <th class="py-3 text-left">Code</th>
-                    <th class="py-3 text-left">Area</th>
-                    <th class="py-3 text-left">Voltage/Cell</th>
-                    <th class="py-3 text-left">Temp/Cell</th>
-                    <th class="py-3 text-left">Resistance/Cell</th>
-                    <th class="py-3 text-left">Current/String</th>
-                    <th class="py-3 text-left">Voltage/String</th>
-                    <th class="py-3 text-left">SoC (%)</th>
-                    <th class="py-3 text-left">SoH (%)</th>
-                    <th class="py-3 text-left">Ambient Temp</th>
+          <div class="glass-card rounded-xl p-6 overflow-x-auto">
+            <h2 class="text-2xl font-bold mb-4">Database Records</h2>
+            <table class="min-w-full text-sm">
+              <thead class="text-gray-400 uppercase tracking-wide text-xs border-b border-slate-700">
+                <tr>
+                  <th class="py-2 text-left">ID</th>
+                  <th class="py-2 text-left">Site Name</th>
+                  <th class="py-2 text-left">Province</th>
+                  <th class="py-2 text-left">Status</th>
+                  <th class="py-2 text-left">SoC (%)</th>
+                  <th class="py-2 text-left">SoH (%)</th>
+                  <th class="py-2 text-left">Voltage/Cell (V)</th>
+                  <th class="py-2 text-left">Resistance (µΩ)</th>
+                  <th class="py-2 text-left">Current/String (A)</th>
+                  <th class="py-2 text-left">Voltage/String (V)</th>
+                  <th class="py-2 text-left">Ambient Temp (°C)</th>
+                  <th class="py-2 text-left">Latitude</th>
+                  <th class="py-2 text-left">Longitude</th>
+                </tr>
+              </thead>
+              <tbody id="dbTableBody">
+                ${sites.map(site => `
+                  <tr class="${getStatusClass(site.status)} group cursor-pointer border-b border-slate-800/70 last:border-none hover:bg-slate-800/40 transition-colors" onclick="showDetail(${site.id})">
+                    <td class="py-3 pr-6 font-semibold">${site.id}</td>
+                    <td class="py-3 pr-6 font-semibold">${site.name}</td>
+                    <td class="py-3 pr-6 font-semibold">${site.province}</td>
+                    <td class="py-3 pr-6">
+                      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(site.status)}">
+                        <span class="w-2.5 h-2.5 rounded-full ${site.status === 'good' ? 'bg-green-500' : site.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}"></span>
+                        <span class="capitalize">${site.status}</span>
+                      </span>
+                    </td>
+                    <td class="py-3 pr-6 font-semibold">${site.stateOfCharge}%</td>
+                    <td class="py-3 pr-6 font-semibold">${site.stateOfHealth}%</td>
+                    <td class="py-3 pr-6 font-semibold">${site.voltagePerCell} V</td>
+                    <td class="py-3 pr-6 font-semibold">${site.internalResistance} µΩ</td>
+                    <td class="py-3 pr-6 font-semibold">${site.currentPerString} A</td>
+                    <td class="py-3 pr-6 font-semibold">${site.voltagePerString} V</td>
+                    <td class="py-3 pr-6 font-semibold">${site.ambientTemp}°C</td>
+                    <td class="py-3 pr-6 font-semibold">${site.lat.toFixed(4)}</td>
+                    <td class="py-3 pr-6 font-semibold">${site.lng.toFixed(4)}</td>
                   </tr>
-                </thead>
-                <tbody class="text-white">
-                  ${sites.map((site, index) => `
-                    <tr class="${index % 2 === 0 ? 'bg-slate-800/30' : ''}">
-                      <td class="py-3 pr-6">${site.id}</td>
-                      <td class="py-3 pr-6">${site.name}</td>
-                      <td class="py-3 pr-6">${site.id.toString().padStart(3, '0')}</td>
-                      <td class="py-3 pr-6">${getSiteRegion(site)}</td>
-                      <td class="py-3 pr-6">${site.voltagePerCell}</td>
-                      <td class="py-3 pr-6">${site.temp || site.ambientTemp}</td>
-                      <td class="py-3 pr-6">${site.internalResistance}</td>
-                      <td class="py-3 pr-6">${site.currentPerString || site.current}</td>
-                      <td class="py-3 pr-6">${site.voltagePerString || site.voltage}</td>
-                      <td class="py-3 pr-6">${site.stateOfCharge}</td>
-                      <td class="py-3 pr-6">${site.stateOfHealth || 98}</td>
-                      <td class="py-3 pr-6">${site.ambientTemp || site.temp}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
+                `).join('')}
+              </tbody>
+            </table>
           </div>
         </div>
       `;
