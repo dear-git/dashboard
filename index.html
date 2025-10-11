@@ -1239,34 +1239,6 @@
     .gap-x-96 { column-gap: 24rem; }
     .gap-y-96 { row-gap: 24rem; }
   </style>
-  <script>
-    // GitHub Pages compatibility: redirect legacy SPA detail route to standalone page
-    (function() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const page = params.get('page');
-        const id = params.get('id');
-        if (page === 'detail' && id) {
-          // Persist selection and sites (if available later in boot)
-          // Defer until sites array exists, else redirect immediately with just the id
-          const redirect = () => {
-            try {
-              if (typeof sites !== 'undefined' && Array.isArray(sites) && sites.length) {
-                sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
-              }
-            } catch (e) { /* ignore */ }
-            sessionStorage.setItem('bmsSelectedSiteId', String(id));
-            // Use SPA routing instead of separate file
-            showDetail(id);
-          };
-          // Run after current tick to allow any inline data to load
-          setTimeout(redirect, 0);
-        }
-      } catch (e) {
-        // If anything fails, continue normal load
-      }
-    })();
-  </script>
 </head>
 <body class="text-white min-h-screen">
   <div id="app"></div>
@@ -1806,6 +1778,7 @@
     const ALERT_COOLDOWN_MS = 120000;
     const alertHistory = {};
     let currentFilter = 'all';
+    let processingShowDetail = false; // Prevent recursion in showDetail
 
     // Check URL parameters on load to determine initial page
     function checkUrlParams() {
@@ -3384,30 +3357,38 @@
     }
 
     function showDetail(siteId) {
-      // Guard against recursive re-entry
-      if (currentPage === 'detail' && selectedSite && String(selectedSite.id) === String(siteId)) {
+      console.log('showDetail called with siteId:', siteId);
+      // Prevent recursive calls
+      if (processingShowDetail) {
+        console.log('showDetail already processing, skipping');
         return;
       }
-      const id = parseInt(siteId);
-      if (Number.isNaN(id)) {
-        console.error('Invalid siteId passed to showDetail:', siteId);
-        return;
-      }
-      const found = sites.find(s => parseInt(s.id) === id);
-      if (!found) {
-        console.error('Site not found with ID:', siteId);
-        return;
-      }
-      selectedSite = found;
-      currentPage = 'detail';
-      // Only update URL if it actually changes to avoid popstate loops
-      const params = new URLSearchParams(window.location.search);
-      const curPage = params.get('page');
-      const curId = params.get('id');
-      if (!(curPage === 'detail' && String(curId) === String(found.id))) {
+      
+      processingShowDetail = true;
+      
+      try {
+        const id = parseInt(siteId);
+        if (Number.isNaN(id)) {
+          console.error('Invalid siteId passed to showDetail:', siteId);
+          return;
+        }
+        
+        const found = sites.find(s => parseInt(s.id) === id);
+        if (!found) {
+          console.error('Site not found with ID:', siteId);
+          return;
+        }
+        
+        selectedSite = found;
+        currentPage = 'detail';
         updateUrl('detail', found.id);
+        render();
+      } finally {
+        // Reset the flag after a short delay to prevent rapid successive calls
+        setTimeout(() => {
+          processingShowDetail = false;
+        }, 100);
       }
-      render();
     }
 
     function showDatabase() {
@@ -3425,6 +3406,32 @@
     // Initialize by checking URL parameters
     checkUrlParams();
     render();
+    
+    // Handle GitHub Pages compatibility for legacy routes
+    (function() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const page = params.get('page');
+        const id = params.get('id');
+        if (page === 'detail' && id) {
+          // Handle legacy detail page routing
+          setTimeout(() => {
+            try {
+              if (typeof sites !== 'undefined' && Array.isArray(sites) && sites.length) {
+                sessionStorage.setItem('bmsSitesData', JSON.stringify(sites));
+              }
+            } catch (e) { /* ignore */ }
+            sessionStorage.setItem('bmsSelectedSiteId', String(id));
+            // Only call showDetail if we're actually on the detail page and it's not already loaded
+            if (currentPage !== 'detail') {
+              showDetail(id);
+            }
+          }, 100);
+        }
+      } catch (e) {
+        // If anything fails, continue normal operation
+      }
+    })();
     
     // Listen for browser back/forward navigation
     window.addEventListener('popstate', function(event) {
