@@ -17,7 +17,7 @@ A comprehensive single-page battery monitoring system for 24 electrical substati
 
 ### Prerequisites
 
-- Node.js (optional, for local development tools)
+- Node.js (optional, for local development tools) 
 - Modern web browser
 
 ### Local Development
